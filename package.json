@@ -1,0 +1,31 @@
+{
+  "name": "utilities",
+  "version": "1.0.0",
+  "description": "Various utilities for JavaScript ES6",
+  "main": "utilities.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "^7.0.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Oaphi/Utilities.git"
+  },
+  "keywords": [
+    "utilities",
+    "javascript",
+    "es6"
+  ],
+  "author": "Oleg Valter",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Oaphi/Utilities/issues"
+  },
+  "homepage": "https://github.com/Oaphi/Utilities#readme"
+}
