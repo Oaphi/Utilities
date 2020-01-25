@@ -90,7 +90,7 @@ const getDeepLastIndex = (arr, elem) => {
     const aIndex = arr.length-1;
 
     for(let index = aIndex; index>=0; index--) {
-        const same = this.compare(arr[index],elem);
+        const same = compare(arr[index],elem);
         if(same) {
             lidx = index;
             break;
