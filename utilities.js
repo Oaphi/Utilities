@@ -32,6 +32,76 @@ const getEntries = (object) => Object.keys(object).map(key => object[key]);
 //Extracts key name by its value;
 const keysByValue = (object) => (value) => Object.keys(object).filter(key => object[key] === value);
 
+//performs deep Object comparison;
+const compare = (...args) => {
+    return args.every((arg, a) => {
+        if (a) {
+            const previous = args[a - 1];
+
+            if (typeof arg !== typeof previous && !(arg instanceof RegExp) && !(previous instanceof RegExp))
+                return false;
+
+            switch (typeof arg) {
+                case 'function':
+                    return Function.prototype.toString.call(arg) === Function.prototype.toString.call(previous);
+                case 'object':
+                    //test against null;
+                    if (arg === null || previous === null)
+                        return arg === previous;
+
+                    //test against RegExp (backwards);
+                    if (arg instanceof RegExp && (typeof previous === 'string' || typeof previous === 'number'))
+                        return arg.test(previous.toString());
+
+                    let isOK = true;
+
+                    //check current element;
+                    for (const key in arg) {
+                        isOK = previous.hasOwnProperty(key) && compare(arg[key], previous[key]);
+                        if (!isOK)
+                            return false;
+                    }
+
+                    //check previous element;
+                    for (const key in previous) {
+                        isOK = arg.hasOwnProperty(key) && compare(arg[key], previous[key]);
+                        if (!isOK)
+                            return false;
+                    }
+
+                    return isOK;
+                default:
+                    //test against RegExp (forwards);
+                    if ((typeof arg === 'string' || typeof arg === 'number') && previous instanceof RegExp)
+                        return previous.test(arg.toString());
+
+                    return arg === previous;
+            }
+        } else {
+            return true;
+        }
+    });
+}
+
+//finds latest element deeply equal to a given one;
+const getDeepLastIndex = (arr, elem) => {
+    let lidx = -1;
+
+    const aIndex = arr.length-1;
+
+    for(let index = aIndex; index>=0; index--) {
+        const same = this.compare(arr[index],elem);
+        if(same) {
+            lidx = index;
+            break;
+        }
+    }
+
+    return lidx;
+}
+
+
+
 /**
  * Array Utilities
  */
@@ -41,6 +111,9 @@ const arrayify = (data) => data instanceof Array ? data : [data];
 
 //Allocates an Array (avoids using loops);
 const allocArray = (numElems) => new Array(numElems || 0).fill(1);
+
+//Gets an object satisfying value
+const byKeyVal = (array) => (key) => (value) => array.filter(obj => obj[key]===value);
 
 //Gets last element of an Array (regardless of length);
 const getLastElem = (array) => array[array.length - 1];
@@ -119,5 +192,9 @@ const toggleClassIfNot = (name) => (element) => void (element.classList.contains
 
 module.exports = {
     trimAndRemoveSep,
-    keysByValue
+    keysByValue,
+    getEntries,
+    compare,
+    getOtherElems,
+    getDeepLastIndex
 };
