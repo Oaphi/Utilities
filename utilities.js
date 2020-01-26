@@ -17,7 +17,7 @@ const sentenceCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 //trims whitespaces and removes non-word characters
 //example: orange, apple (!); --juice => 
-const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g,'');
+const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g, '');
 
 /**
  * Object Utilities
@@ -87,11 +87,11 @@ const compare = (...args) => {
 const getDeepLastIndex = (arr, elem) => {
     let lidx = -1;
 
-    const aIndex = arr.length-1;
+    const aIndex = arr.length - 1;
 
-    for(let index = aIndex; index>=0; index--) {
-        const same = compare(arr[index],elem);
-        if(same) {
+    for (let index = aIndex; index >= 0; index--) {
+        const same = compare(arr[index], elem);
+        if (same) {
             lidx = index;
             break;
         }
@@ -113,16 +113,16 @@ const arrayify = (data) => data instanceof Array ? data : [data];
 const allocArray = (numElems) => new Array(numElems || 0).fill(1);
 
 //Gets an object satisfying value
-const byKeyVal = (array) => (key) => (value) => array.filter(obj => obj[key]===value);
+const byKeyVal = (array) => (key) => (value) => array.filter(obj => obj[key] === value);
 
 //Gets last element of an Array (regardless of length);
 const getLastElem = (array) => array[array.length - 1];
 
 //Gets every Nth element of an Array (optional offset);
-const getEveryNthElem = (pos) => (array,offset) => array.slice(offset||0).filter((elem, e) => !((e + 1) % pos));
+const getEveryNthElem = (pos) => (array, offset) => array.slice(offset || 0).filter((elem, e) => !((e + 1) % pos));
 
 //Gets all elements of an Array except for one at position (composable);
-const getOtherElems = (pos) => (array) => array.filter((elem,e) => e !== pos);
+const getOtherElems = (pos) => (array) => array.filter((elem, e) => e !== pos);
 
 //Gets elements of an Array at even positions;
 const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
@@ -131,17 +131,22 @@ const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
 const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 
 //Maps elements of an Array and returns only elements that are defined;
-const mapExisting = (callback) => (array) => array.map(callback).filter(e => e!==undefined);
+const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
+
+//Maps relative growth Array into actual values using [0] element as base
+const relativeGrowth = (array) => array.reduce((acc, elem) => {
+    return acc.concat([elem + (acc[acc.length - 1] || 0)]);
+}, []);
 
 //Removes elements from start to end and returns modified Array (no mutation);
-const simpleSplice = (array) => (start,end) => array.filter((e,pos) => pos<start || pos>end);
+const simpleSplice = (array) => (start, end) => array.filter((e, pos) => pos < start || pos > end);
 
 //Splits an Array on every Nth element;
 //[1,2,3,4] on second elem returns [ [1,2], [3,4] ];
 //0 as position results in an empty Array;
 const splitOnNthElem = (pos) => (array) => array
-.map((e,i,a) => !(i % pos) ? a.slice(i,i+pos) : 0)
-.filter(e => e.length);
+    .map((e, i, a) => !(i % pos) ? a.slice(i, i + pos) : 0)
+    .filter(e => e.length);
 
 /**
  * Date Utilities
@@ -151,8 +156,11 @@ const splitOnNthElem = (pos) => (array) => array
 const addDays = (days) => (date) => new Date(date.valueOf() + (days || 0) * 86400000);
 
 //splits date into ISO standard date or time string;
-const isoDate = (date) => date.toISOString().slice(0,10);
-const isoTime = (date) => date.toISOString().slice(11,19);
+const isoDate = (date) => date.toISOString().slice(0, 10);
+const isoTime = (date) => date.toISOString().slice(11, 19);
+
+//gets current year and offsets it;
+const thisYear = (offset = 0) => new Date().getFullYear() + offset;
 
 /**
  * Logging Utilities
@@ -196,5 +204,6 @@ module.exports = {
     getEntries,
     compare,
     getOtherElems,
-    getDeepLastIndex
+    getDeepLastIndex,
+    relativeGrowth
 };
