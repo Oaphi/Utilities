@@ -11,7 +11,8 @@
     "mocha": "^7.0.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "push-all": "npm run test && git add . && git commit -m $MSG && git push"
   },
   "repository": {
     "type": "git",

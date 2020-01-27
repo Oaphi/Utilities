@@ -3,7 +3,7 @@
  */
 
 //delays callback for a specified number of milliseconds;
-const delay = (time) => (callback) => setTimeout(callback, time || 100);
+const delay = (time) => (callback) => (...args) => setTimeout(() => callback(...args), time || 100);
 
 //explicit no ops;
 const doNothing = (value) => value;
@@ -106,13 +106,16 @@ const getDeepLastIndex = (arr, elem) => {
  * Array Utilities
  */
 
-//Wraps non-Array data into an Array;
-const arrayify = (data) => data instanceof Array ? data : [data];
-
 //Allocates an Array (avoids using loops);
 const allocArray = (numElems) => new Array(numElems || 0).fill(1);
 
-//Gets an object satisfying value
+//Wraps non-Array data into an Array;
+const arrayify = (data) => data instanceof Array ? data : [data];
+
+//Resolves with the result of async mapping over an Array;
+const asyncMap = (array) => async (callback) => await Promise.all(array.map(callback));
+
+//Gets an object satisfying value;
 const byKeyVal = (array) => (key) => (value) => array.filter(obj => obj[key] === value);
 
 //Gets last element of an Array (regardless of length);
@@ -199,11 +202,13 @@ const toggleClassIfSet = (name) => (element) => void (!element.classList.contain
 const toggleClassIfNot = (name) => (element) => void (element.classList.contains(name) || element.classList.toggle(name));
 
 module.exports = {
+    delay,
     trimAndRemoveSep,
     keysByValue,
     getEntries,
     compare,
     getOtherElems,
     getDeepLastIndex,
-    relativeGrowth
+    relativeGrowth,
+    asyncMap
 };
