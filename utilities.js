@@ -3,7 +3,7 @@
  */
 
 //delays callback for a specified number of milliseconds;
-const delay = (time) => (callback) => setTimeout(callback, time || 100);
+const delay = (time) => (callback) => (...args) => setTimeout(() => callback(...args), time || 100);
 
 //explicit no ops;
 const doNothing = (value) => value;
@@ -17,7 +17,7 @@ const sentenceCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 //trims whitespaces and removes non-word characters
 //example: orange, apple (!); --juice => 
-const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g, '');
+const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g,'');
 
 /**
  * Object Utilities
@@ -87,11 +87,11 @@ const compare = (...args) => {
 const getDeepLastIndex = (arr, elem) => {
     let lidx = -1;
 
-    const aIndex = arr.length - 1;
+    const aIndex = arr.length-1;
 
-    for (let index = aIndex; index >= 0; index--) {
-        const same = compare(arr[index], elem);
-        if (same) {
+    for(let index = aIndex; index>=0; index--) {
+        const same = compare(arr[index],elem);
+        if(same) {
             lidx = index;
             break;
         }
@@ -100,29 +100,30 @@ const getDeepLastIndex = (arr, elem) => {
     return lidx;
 }
 
-
-
 /**
  * Array Utilities
  */
 
-//Wraps non-Array data into an Array;
-const arrayify = (data) => data instanceof Array ? data : [data];
-
 //Allocates an Array (avoids using loops);
 const allocArray = (numElems) => new Array(numElems || 0).fill(1);
 
-//Gets an object satisfying value
+//Wraps non-Array data into an Array;
+const arrayify = (data) => data instanceof Array ? data : [data];
+
+//Resolves with the result of async mapping over an Array;
+const asyncMap = (array) => async (callback) => await Promise.all(array.map(callback));
+
+//Gets an object satisfying value;
 const byKeyVal = (array) => (key) => (value) => array.filter(obj => obj[key] === value);
 
 //Gets last element of an Array (regardless of length);
 const getLastElem = (array) => array[array.length - 1];
 
 //Gets every Nth element of an Array (optional offset);
-const getEveryNthElem = (pos) => (array, offset) => array.slice(offset || 0).filter((elem, e) => !((e + 1) % pos));
+const getEveryNthElem = (pos) => (array,offset) => array.slice(offset||0).filter((elem, e) => !((e + 1) % pos));
 
 //Gets all elements of an Array except for one at position (composable);
-const getOtherElems = (pos) => (array) => array.filter((elem, e) => e !== pos);
+const getOtherElems = (pos) => (array) => array.filter((elem,e) => e !== pos);
 
 //Gets elements of an Array at even positions;
 const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
@@ -131,7 +132,7 @@ const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
 const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 
 //Maps elements of an Array and returns only elements that are defined;
-const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
+const mapExisting = (callback) => (array) => array.map(callback).filter(e => e!==undefined);
 
 //Maps relative growth Array into actual values using [0] element as base
 const relativeGrowth = (array) => array.reduce((acc, elem) => {
@@ -139,14 +140,14 @@ const relativeGrowth = (array) => array.reduce((acc, elem) => {
 }, []);
 
 //Removes elements from start to end and returns modified Array (no mutation);
-const simpleSplice = (array) => (start, end) => array.filter((e, pos) => pos < start || pos > end);
+const simpleSplice = (array) => (start,end) => array.filter((e,pos) => pos<start || pos>end);
 
 //Splits an Array on every Nth element;
 //[1,2,3,4] on second elem returns [ [1,2], [3,4] ];
 //0 as position results in an empty Array;
 const splitOnNthElem = (pos) => (array) => array
-    .map((e, i, a) => !(i % pos) ? a.slice(i, i + pos) : 0)
-    .filter(e => e.length);
+.map((e,i,a) => !(i % pos) ? a.slice(i,i+pos) : 0)
+.filter(e => e.length);
 
 /**
  * Date Utilities
@@ -156,11 +157,8 @@ const splitOnNthElem = (pos) => (array) => array
 const addDays = (days) => (date) => new Date(date.valueOf() + (days || 0) * 86400000);
 
 //splits date into ISO standard date or time string;
-const isoDate = (date) => date.toISOString().slice(0, 10);
-const isoTime = (date) => date.toISOString().slice(11, 19);
-
-//gets current year and offsets it;
-const thisYear = (offset = 0) => new Date().getFullYear() + offset;
+const isoDate = (date) => date.toISOString().slice(0,10);
+const isoTime = (date) => date.toISOString().slice(11,19);
 
 /**
  * Logging Utilities
@@ -199,11 +197,13 @@ const toggleClassIfSet = (name) => (element) => void (!element.classList.contain
 const toggleClassIfNot = (name) => (element) => void (element.classList.contains(name) || element.classList.toggle(name));
 
 module.exports = {
+    delay,
     trimAndRemoveSep,
     keysByValue,
     getEntries,
     compare,
     getOtherElems,
     getDeepLastIndex,
-    relativeGrowth
+    relativeGrowth,
+    asyncMap
 };
