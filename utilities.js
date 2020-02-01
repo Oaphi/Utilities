@@ -160,6 +160,9 @@ const addDays = (days) => (date) => new Date(date.valueOf() + (days || 0) * 8640
 const isoDate = (date) => date.toISOString().slice(0,10);
 const isoTime = (date) => date.toISOString().slice(11,19);
 
+//counts number of nights between two date instances;
+const nights = (start,end) => (end.valueOf() - start.valueOf()) / 86400000;
+
 /**
  * Logging Utilities
  */
