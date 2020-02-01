@@ -17,7 +17,7 @@ const sentenceCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 //trims whitespaces and removes non-word characters
 //example: orange, apple (!); --juice => 
-const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g,'');
+const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g, '');
 
 /**
  * Object Utilities
@@ -87,11 +87,11 @@ const compare = (...args) => {
 const getDeepLastIndex = (arr, elem) => {
     let lidx = -1;
 
-    const aIndex = arr.length-1;
+    const aIndex = arr.length - 1;
 
-    for(let index = aIndex; index>=0; index--) {
-        const same = compare(arr[index],elem);
-        if(same) {
+    for (let index = aIndex; index >= 0; index--) {
+        const same = compare(arr[index], elem);
+        if (same) {
             lidx = index;
             break;
         }
@@ -103,6 +103,16 @@ const getDeepLastIndex = (arr, elem) => {
 /**
  * Array Utilities
  */
+
+/**
+ * Converts bits list to decimal number
+ * @param {Number[]} bits
+ * @returns {Number}
+ */
+ const toDecimal = (bits) => {
+    const len = bits.length - 1;
+    return bits.reduce((acc, bit, pos) => acc + bit * 2 ** (len - pos), 0);
+};
 
 //Allocates an Array (avoids using loops);
 const allocArray = (numElems) => new Array(numElems || 0).fill(1);
@@ -120,10 +130,10 @@ const byKeyVal = (array) => (key) => (value) => array.filter(obj => obj[key] ===
 const getLastElem = (array) => array[array.length - 1];
 
 //Gets every Nth element of an Array (optional offset);
-const getEveryNthElem = (pos) => (array,offset) => array.slice(offset||0).filter((elem, e) => !((e + 1) % pos));
+const getEveryNthElem = (pos) => (array, offset) => array.slice(offset || 0).filter((elem, e) => !((e + 1) % pos));
 
 //Gets all elements of an Array except for one at position (composable);
-const getOtherElems = (pos) => (array) => array.filter((elem,e) => e !== pos);
+const getOtherElems = (pos) => (array) => array.filter((elem, e) => e !== pos);
 
 //Gets elements of an Array at even positions;
 const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
@@ -132,7 +142,7 @@ const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
 const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 
 //Maps elements of an Array and returns only elements that are defined;
-const mapExisting = (callback) => (array) => array.map(callback).filter(e => e!==undefined);
+const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
 
 //Maps relative growth Array into actual values using [0] element as base
 const relativeGrowth = (array) => array.reduce((acc, elem) => {
@@ -140,14 +150,14 @@ const relativeGrowth = (array) => array.reduce((acc, elem) => {
 }, []);
 
 //Removes elements from start to end and returns modified Array (no mutation);
-const simpleSplice = (array) => (start,end) => array.filter((e,pos) => pos<start || pos>end);
+const simpleSplice = (array) => (start, end) => array.filter((e, pos) => pos < start || pos > end);
 
 //Splits an Array on every Nth element;
 //[1,2,3,4] on second elem returns [ [1,2], [3,4] ];
 //0 as position results in an empty Array;
 const splitOnNthElem = (pos) => (array) => array
-.map((e,i,a) => !(i % pos) ? a.slice(i,i+pos) : 0)
-.filter(e => e.length);
+    .map((e, i, a) => !(i % pos) ? a.slice(i, i + pos) : 0)
+    .filter(e => e.length);
 
 /**
  * Date Utilities
@@ -157,11 +167,11 @@ const splitOnNthElem = (pos) => (array) => array
 const addDays = (days) => (date) => new Date(date.valueOf() + (days || 0) * 86400000);
 
 //splits date into ISO standard date or time string;
-const isoDate = (date) => date.toISOString().slice(0,10);
-const isoTime = (date) => date.toISOString().slice(11,19);
+const isoDate = (date) => date.toISOString().slice(0, 10);
+const isoTime = (date) => date.toISOString().slice(11, 19);
 
 //counts number of nights between two date instances;
-const nights = (start,end) => (end.valueOf() - start.valueOf()) / 86400000;
+const nights = (start, end) => (end.valueOf() - start.valueOf()) / 86400000;
 
 /**
  * Logging Utilities
@@ -208,5 +218,6 @@ module.exports = {
     getOtherElems,
     getDeepLastIndex,
     relativeGrowth,
-    asyncMap
+    asyncMap,
+    toDecimal
 };
