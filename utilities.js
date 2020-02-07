@@ -109,7 +109,7 @@ const getDeepLastIndex = (arr, elem) => {
  * @param {Number[]} bits
  * @returns {Number}
  */
- const toDecimal = (bits) => {
+const toDecimal = (bits) => {
     const len = bits.length - 1;
     return bits.reduce((acc, bit, pos) => acc + bit * 2 ** (len - pos), 0);
 };
@@ -148,6 +148,15 @@ const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !
 const relativeGrowth = (array) => array.reduce((acc, elem) => {
     return acc.concat([elem + (acc[acc.length - 1] || 0)]);
 }, []);
+
+//Reorders a 2D Array by provided ordering criteria 
+//and filters out indices not present in criteria
+const filterAndReorder = (source, order) => source
+    .map(
+        (row, r) => row
+            .map((cell, c) => source[r][order[c]])
+            .filter((cell, c) => cell !== undefined)
+    );
 
 //Removes elements from start to end and returns modified Array (no mutation);
 const simpleSplice = (array) => (start, end) => array.filter((e, pos) => pos < start || pos > end);
@@ -219,5 +228,6 @@ module.exports = {
     getDeepLastIndex,
     relativeGrowth,
     asyncMap,
-    toDecimal
+    toDecimal,
+    filterAndReorder
 };
