@@ -245,5 +245,7 @@ module.exports = {
     asyncMap,
     toDecimal,
     filterAndReorder,
-    uniqueOccurrences
+    uniqueOccurrences,
+    isoDate,
+    isoTime
 };

@@ -13,7 +13,7 @@
   "scripts": {
     "test": "mocha",
     "undo-last": "git reset --soft HEAD^",
-    "push-all": "npm run test && git add . && git commit -m $MSG && git push",
+    "push-all": "npm run test && git add . && git commit -m $MSG && push-authed",
     "push-authed": "bash ./git-auth.sh",
     "push-staged": "git push || npm run push-authed"
   },
