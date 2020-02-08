@@ -144,6 +144,18 @@ const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 //Maps elements of an Array and returns only elements that are defined;
 const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
 
+/**
+ * Counts number of permutations given the 
+ * set of entities and repetitions number
+ * @param {*[]} set 
+ * @param {Number} repeat
+ * @returns {Number}
+ */
+const numCombinations = (set,repeat) => {
+    const len = set.length;
+    return repeat ? len ** repeat : 0;
+}
+
 //Maps relative growth Array into actual values using [0] element as base
 const relativeGrowth = (array) => array.reduce((acc, elem) => {
     return acc.concat([elem + (acc[acc.length - 1] || 0)]);
@@ -167,6 +179,21 @@ const simpleSplice = (array) => (start, end) => array.filter((e, pos) => pos < s
 const splitOnNthElem = (pos) => (array) => array
     .map((e, i, a) => !(i % pos) ? a.slice(i, i + pos) : 0)
     .filter(e => e.length);
+
+//Returns whether number of occurencies of each element is unique
+const uniqueOccurrences = (arr) => {
+    const copy = arr.map(e => e).sort();
+
+    const occurs = copy
+        .reduce((a, c, i) => {
+            return c !== copy[i - 1] ?
+                a.concat([copy.slice(i, copy.lastIndexOf(c) + 1).length]) :
+                a;
+        }, []);
+
+    return !occurs
+        .some((e, i) => occurs.lastIndexOf(e) > i);
+};
 
 /**
  * Date Utilities
@@ -229,5 +256,9 @@ module.exports = {
     relativeGrowth,
     asyncMap,
     toDecimal,
-    filterAndReorder
+    filterAndReorder,
+    uniqueOccurrences,
+    isoDate,
+    isoTime,
+    numCombinations
 };
