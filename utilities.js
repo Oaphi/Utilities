@@ -168,6 +168,21 @@ const splitOnNthElem = (pos) => (array) => array
     .map((e, i, a) => !(i % pos) ? a.slice(i, i + pos) : 0)
     .filter(e => e.length);
 
+//Returns whether number of occurencies of each element is unique
+const uniqueOccurrences = (arr) => {
+    const copy = arr.map(e => e).sort();
+
+    const occurs = copy
+        .reduce((a, c, i) => {
+            return c !== copy[i - 1] ?
+                a.concat([copy.slice(i, copy.lastIndexOf(c) + 1).length]) :
+                a;
+        }, []);
+
+    return !occurs
+        .some((e, i) => occurs.lastIndexOf(e) > i);
+};
+
 /**
  * Date Utilities
  */
@@ -229,5 +244,6 @@ module.exports = {
     relativeGrowth,
     asyncMap,
     toDecimal,
-    filterAndReorder
+    filterAndReorder,
+    uniqueOccurrences
 };
