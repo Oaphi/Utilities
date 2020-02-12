@@ -144,6 +144,18 @@ const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 //Maps elements of an Array and returns only elements that are defined;
 const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
 
+/**
+ * Counts number of permutations given the 
+ * set of entities and repetitions number
+ * @param {*[]} set 
+ * @param {Number} repeat
+ * @returns {Number}
+ */
+const numCombinations = (set,repeat) => {
+    const len = set.length;
+    return repeat ? len ** repeat : 0;
+}
+
 //Maps relative growth Array into actual values using [0] element as base
 const relativeGrowth = (array) => array.reduce((acc, elem) => {
     return acc.concat([elem + (acc[acc.length - 1] || 0)]);
@@ -247,5 +259,6 @@ module.exports = {
     filterAndReorder,
     uniqueOccurrences,
     isoDate,
-    isoTime
+    isoTime,
+    numCombinations
 };
