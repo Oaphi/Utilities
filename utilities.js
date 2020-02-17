@@ -9,6 +9,29 @@ const delay = (time) => (callback) => (...args) => setTimeout(() => callback(...
 const doNothing = (value) => value;
 
 /**
+ * Number utilities
+ */
+
+/**
+ * Calculates bias offset (offset-K) 
+ * for a given number of bits
+ * @param {BigInt|Number} bits 
+ */
+const offsetK = (bits) => {
+    const offset = 2 ** (bits - 1);
+
+    return (
+        offset > Number.MAX_SAFE_INTEGER ?
+            BigInt(offset) - 1n :
+            offset - 1
+    );
+};
+
+//partially applied utils;
+const exp32 = offsetK(32);
+const exp64 = offsetK(64);
+
+/**
  * String Utilities
  */
 
@@ -81,7 +104,7 @@ const compare = (...args) => {
             return true;
         }
     });
-}
+};
 
 //finds latest element deeply equal to a given one;
 const getDeepLastIndex = (arr, elem) => {
@@ -98,7 +121,7 @@ const getDeepLastIndex = (arr, elem) => {
     }
 
     return lidx;
-}
+};
 
 /**
  * Array Utilities
@@ -141,6 +164,25 @@ const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
 //Gets elements of an Array at odd positions;
 const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 
+/**
+ * Filters and maps an Array
+ * @param {Function} filter
+ * @param {Function} mapper
+ * @returns {Array}
+ */
+const filterMap = (array) => (filter) => (mapper) => {
+    const mappedArr = [];
+
+    for (const elem of array) {
+        (filter ? filter(elem) : true) && mappedArr.push(
+            mapper ? mapper(elem) : elem
+        );
+    }
+
+    return mappedArr;
+};
+
+
 //Maps elements of an Array and returns only elements that are defined;
 const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
 
@@ -151,10 +193,10 @@ const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !
  * @param {Number} repeat
  * @returns {Number}
  */
-const numCombinations = (set,repeat) => {
+const numCombinations = (set, repeat) => {
     const len = set.length;
     return repeat ? len ** repeat : 0;
-}
+};
 
 //Maps relative growth Array into actual values using [0] element as base
 const relativeGrowth = (array) => array.reduce((acc, elem) => {
@@ -251,6 +293,7 @@ module.exports = {
     keysByValue,
     getEntries,
     compare,
+    filterMap,
     getOtherElems,
     getDeepLastIndex,
     relativeGrowth,
@@ -260,5 +303,6 @@ module.exports = {
     uniqueOccurrences,
     isoDate,
     isoTime,
-    numCombinations
+    numCombinations,
+    offsetK
 };
