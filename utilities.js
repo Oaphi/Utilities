@@ -269,6 +269,29 @@ const byClass = (cls) => document.querySelector(`.${cls}`);
 //clears element of children (chainable);
 const clearElem = (elem) => Array.from(elem.children).forEach(child => child.remove()) || elem;
 
+/**
+ * Stringifies JSON into DOMString
+ * @param {Object} [json] 
+ * @returns {DOMString}
+ */
+const jsonToDOMString = (json = {}) => {
+    const keyErrMsg = `DOMString key should be set`;
+    const valueErrMsg = `DOMString value should be set`;
+
+    const errors = new Map()
+        .set('key', (value) => { throw new SyntaxError(`${keyErrMsg}: ${value}`); })
+        .set('value', (key) => { throw new SyntaxError(`${valueErrMsg}: ${key}`); });
+
+    return Object.entries(json).map(entry =>{ 
+        const [key, value] = entry;
+
+        value === '' && errors.get('value')(key);
+        key === '' && errors.get('key')(value);
+
+        return `${key}=${value}`;
+    }).join(',');
+};
+
 //removes first child from element if it has any (non-leaking);
 const removeFirstChild = (element) => void !element.firstChild || element.firstChild.remove();
 
@@ -304,5 +327,6 @@ module.exports = {
     isoDate,
     isoTime,
     numCombinations,
-    offsetK
+    offsetK,
+    jsonToDOMString
 };
