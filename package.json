@@ -13,8 +13,9 @@
   "scripts": {
     "test": "mocha",
     "undo-last": "git reset --soft HEAD^",
-    "push-all": "bash ./push-all.sh",
-    "push-authed": "bash ./git-auth.sh",
+    "push": "bash ./add-commit-push.sh -f $1",
+    "push-skip-test": "npm run push -- -nt",
+    "push-authed": "bash ./git-auth.sh && git push -f",
     "push-staged": "git push || npm run push-authed"
   },
   "repository": {
