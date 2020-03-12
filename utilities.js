@@ -270,6 +270,18 @@ const byClass = (cls) => document.querySelector(`.${cls}`);
 const clearElem = (elem) => Array.from(elem.children).forEach(child => child.remove()) || elem;
 
 /**
+ * Transforms json to key : value; string
+ * @param {Object} [json]
+ * @returns {String}
+ */
+const jsonToFormatString = (json = {}) => {
+    return Object.entries(json).map(entry => {
+        const [key, value] = entry;
+        return `${key}: ${value}`;
+    }).join('; ');
+};
+
+/**
  * Stringifies JSON into DOMString
  * @param {Object} [json] 
  * @returns {DOMString}
@@ -282,7 +294,7 @@ const jsonToDOMString = (json = {}) => {
         .set('key', (value) => { throw new SyntaxError(`${keyErrMsg}: ${value}`); })
         .set('value', (key) => { throw new SyntaxError(`${valueErrMsg}: ${key}`); });
 
-    return Object.entries(json).map(entry =>{ 
+    return Object.entries(json).map(entry => {
         const [key, value] = entry;
 
         value === '' && errors.get('value')(key);
@@ -328,5 +340,6 @@ module.exports = {
     isoTime,
     numCombinations,
     offsetK,
-    jsonToDOMString
+    jsonToDOMString,
+    jsonToFormatString
 };
