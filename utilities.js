@@ -137,6 +137,24 @@ const toDecimal = (bits) => {
     return bits.reduce((acc, bit, pos) => acc + bit * 2 ** (len - pos), 0);
 };
 
+
+const subsplit = (n = 1) => (array) => {
+    const { length } = array;
+
+    const maxSplitLength = Math.floor(length / n);
+
+    const output = [];
+
+    for (let i = 0; i < n; i++) {
+        const start = i * maxSplitLength;
+        output.push(array.slice(start, start + maxSplitLength));
+    }
+
+    return output;
+};
+
+
+
 //Allocates an Array (avoids using loops);
 const allocArray = (numElems) => new Array(numElems || 0).fill(1);
 
@@ -166,22 +184,19 @@ const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 
 /**
  * Filters and maps an Array
- * @param {Function} filter
- * @param {Function} mapper
- * @returns {Array}
+ * @param {Function} [filter]
+ * @param {Function} [mapper]
+ * @returns {*[]}
  */
-const filterMap = (array) => (filter) => (mapper) => {
+const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
     const mappedArr = [];
 
     for (const elem of array) {
-        (filter ? filter(elem) : true) && mappedArr.push(
-            mapper ? mapper(elem) : elem
-        );
+        filter(elem) && mappedArr.push(mapper(elem));
     }
 
     return mappedArr;
 };
-
 
 //Maps elements of an Array and returns only elements that are defined;
 const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
@@ -323,23 +338,24 @@ const toggleClassIfSet = (name) => (element) => void (!element.classList.contain
 const toggleClassIfNot = (name) => (element) => void (element.classList.contains(name) || element.classList.toggle(name));
 
 module.exports = {
-    delay,
-    trimAndRemoveSep,
-    keysByValue,
-    getEntries,
+    asyncMap,
     compare,
+    delay,
+    filterAndReorder,
     filterMap,
+    getEntries,
     getOtherElems,
     getDeepLastIndex,
-    relativeGrowth,
-    asyncMap,
-    toDecimal,
-    filterAndReorder,
-    uniqueOccurrences,
     isoDate,
     isoTime,
+    jsonToDOMString,
+    jsonToFormatString,
+    keysByValue,
     numCombinations,
     offsetK,
-    jsonToDOMString,
-    jsonToFormatString
+    relativeGrowth,
+    subsplit,
+    toDecimal,
+    trimAndRemoveSep,
+    uniqueOccurrences
 };
