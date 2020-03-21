@@ -1,4 +1,11 @@
 /**
+ * @fileoverview JavaScript Utilities
+ * @author Oleg Valter
+ * @version 0.0.1
+ */
+
+
+/**
  * General Utilities
  */
 
@@ -137,7 +144,11 @@ const toDecimal = (bits) => {
     return bits.reduce((acc, bit, pos) => acc + bit * 2 ** (len - pos), 0);
 };
 
-
+/**
+ * Subsplits an Array into several parts
+ * @param {number} [n] 
+ * @returns {function(Array): *[][]}
+ */
 const subsplit = (n = 1) => (array) => {
     const { length } = array;
 
