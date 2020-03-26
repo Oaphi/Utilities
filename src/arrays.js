@@ -6,8 +6,11 @@
 const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
     const mappedArr = [];
 
+    let initialIndex = 0, filteredIndex = 0;
+
     for (const elem of array) {
-        filter(elem) && mappedArr.push(mapper(elem));
+        filter(elem, initialIndex++) &&
+            mappedArr.push(mapper(elem, filteredIndex++));
     }
 
     return mappedArr;
