@@ -193,39 +193,6 @@ const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
 //Gets elements of an Array at odd positions;
 const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
 
-/**
- * Filters and maps an Array
- * @param {Function} [filter]
- * @param {Function} [mapper]
- * @returns {*[]}
- */
-const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
-    const mappedArr = [];
-
-    for (const elem of array) {
-        filter(elem) && mappedArr.push(mapper(elem));
-    }
-
-    return mappedArr;
-};
-
-/**
- * Executes a callback for each element
- * (same as forEach, but in FP style + faster)
- * @param {*[]} array
- * @returns {function(function):void} 
- */
-const forAll = (array) => (callback) => {
-
-    let index = 0;
-
-    for (const elem of array) {
-       callback(elem, index++);
-    }
-
-    return;
-};
-
 //Maps elements of an Array and returns only elements that are defined;
 const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
 
@@ -370,8 +337,6 @@ module.exports = {
     compare,
     delay,
     filterAndReorder,
-    filterMap,
-    forAll,
     getEntries,
     getOtherElems,
     getDeepLastIndex,
