@@ -217,8 +217,10 @@ const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
  */
 const forAll = (array) => (callback) => {
 
+    let index = 0;
+
     for (const elem of array) {
-       callback(elem);
+       callback(elem, index++);
     }
 
     return;
