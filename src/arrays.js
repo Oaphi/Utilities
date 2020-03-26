@@ -17,6 +17,26 @@ const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
 };
 
 /**
+ * Combines filter() and map() in reverse in O(n)
+ * @param {*[]} array 
+ * @returns {function(function):function(function):*[]}
+ */
+const filterMapped = (array) => (mapper = e => e) => (filter = e => true) => {
+    const filteredArr = [];
+
+    let initialIndex = 0, filteredIndex = 0;
+
+    for (const elem of array) {
+        const mappedElem = mapper(elem, initialIndex++);
+
+        filter(mappedElem, filteredIndex++) &&
+            filteredArr.push(mappedElem);
+    }
+
+    return filteredArr;
+};
+
+/**
  * Executes a callback for each element
  * (same as forEach, but in FP style + faster)
  * @param {*[]} array
@@ -35,5 +55,6 @@ const forAll = (array) => (callback) => {
 
 module.exports = {
     filterMap,
+    filterMapped,
     forAll
 };
