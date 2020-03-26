@@ -209,6 +209,21 @@ const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
     return mappedArr;
 };
 
+/**
+ * Executes a callback for each element
+ * (same as forEach, but in FP style + faster)
+ * @param {*[]} array
+ * @returns {function(function):void} 
+ */
+const forAll = (array) => (callback) => {
+
+    for (const elem of array) {
+       callback(elem);
+    }
+
+    return;
+};
+
 //Maps elements of an Array and returns only elements that are defined;
 const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
 
@@ -354,6 +369,7 @@ module.exports = {
     delay,
     filterAndReorder,
     filterMap,
+    forAll,
     getEntries,
     getOtherElems,
     getDeepLastIndex,
