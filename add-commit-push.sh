@@ -90,7 +90,7 @@ yes | no)
             { [[ -n $1 ]] && DEF_MSG="Updated $(count_changes) file(s)" || MSG=$1; } &&
             read -p "Use default commit message ($DEF_MSG) [yes|no]? " USE_DEF &&
             { [[ $USE_DEF != "yes" ]] && prompt_until_set MSG || MSG=$DEF_MSG; } &&
-            add_commit $ADD "$(trim_control "$MSG")"
+            add_commit "$ADD" "$(trim_control "$MSG")"
     }
     ;;
 *)
