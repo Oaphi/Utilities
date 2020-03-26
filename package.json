@@ -8,11 +8,14 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "benchmark": "^2.1.4",
     "chai": "^4.2.0",
-    "mocha": "^7.0.0"
+    "jsdoc": "^3.6.3",
+    "mocha": "^7.1.1"
   },
   "scripts": {
-    "test": "mocha",
+    "document": "jsdoc",
+    "test": "mocha --reporter min",
     "undo-last": "git reset --soft HEAD^",
     "push": "bash ./add-commit-push.sh -f",
     "push-skip-test": "npm run push -nt",
@@ -34,7 +37,8 @@
     "url": "https://github.com/Oaphi/Utilities/issues"
   },
   "mocha": {
-    "watch": true
+    "watch": true,
+    "fullTrace": false
   },
   "chai": {
     "config": {
