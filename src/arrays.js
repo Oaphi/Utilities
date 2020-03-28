@@ -53,8 +53,19 @@ const forAll = (array) => (callback) => {
     return;
 };
 
+/**
+ * Maps array to values of 
+ * property by key
+ * @param {*[]} [array] 
+ * @returns {function(string):*[]}
+ */
+const keyMap = (array = []) => (key) => {
+    return !key ? array : array.map(elem => elem[key]);
+};
+
 module.exports = {
     filterMap,
     filterMapped,
-    forAll
+    forAll,
+    keyMap
 };
