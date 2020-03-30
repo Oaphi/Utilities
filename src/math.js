@@ -1,28 +1,29 @@
 /**
- * Mathematical utilities
+ * @fileoverview Math utilities
+ * @author Oleg Valter
  * @module
  */
 
 /**
- * @typedef {Function} OperationApplier
- * @param {...Number} args
- * @returns {Number}
+ * @typedef {function} OperationApplier
+ * @param {...number} args
+ * @returns {number}
  */
 
 /**
  * Abstract binary (here: operator(A,B)) operation
- * @param {Function} operation 
+ * @param {function} operation 
  * @returns {OperationApplier}
  */
 const binaryOp = (operation) => (...args) => args.length ? args.reduce((total, arg) => operation(total, arg)) : 0;
 
 /**
  * Divides all arguments
- * @param  {...Number} args
- * @returns {Number}
+ * @param  {...number} args
+ * @returns {number}
  */
 const divide = (...args) => binaryOp((a, b) => {
-    if(b === 0) {
+    if (b === 0) {
         throw new RangeError('Cannot divide by 0');
     }
     return a / b;
@@ -30,22 +31,22 @@ const divide = (...args) => binaryOp((a, b) => {
 
 /**
  * Multiplies all arguments
- * @param  {...Number} args
- * @return {Number}
+ * @param  {...number} args
+ * @return {number}
  */
 const multiply = (...args) => binaryOp((a, b) => a * b)(...args);
 
 /**
  * Substracts all arguments
- * @param  {...Number} args 
- * @returns {Number}
+ * @param  {...number} args 
+ * @returns {number}
  */
 const substract = (...args) => binaryOp((a, b) => a - b)(...args);
 
 /**
  * Sums all arguments
- * @param  {...Number} args
- * @returns {Number}
+ * @param  {...number} args
+ * @returns {number}
  */
 const sum = (...args) => binaryOp((a, b) => a + b)(...args);
 
@@ -55,29 +56,74 @@ const sum = (...args) => binaryOp((a, b) => a + b)(...args);
 
 /**
  * Simple average of all arguments
- * @param  {...Number} args
- * @returns {Number}
+ * @param  {...number} args
+ * @returns {number}
  */
 const average = (...args) => sum(...args) / (args.length || 1);
 
 /**
  * Abstraction for M / (A + ... + Z)
- * @param {Number} divisor 
- * @returns {Function}
+ * @param {number} divisor 
+ * @returns {function}
  */
 const divSum = (divisor) => (...args) => divide(sum(...args), divisor);
 
 /**
  * Abstraction for M * (A + ... + Z)
- * @param {Number} multiplier 
- * @returns {Function}
+ * @param {number} multiplier 
+ * @returns {function}
  */
 const multSum = (multiplier) => (...args) => multiply(sum(...args), multiplier);
+
+
+/**
+ * @summary Finds greatest common divisor
+ * @param  {...number} args
+ * @returns {number}
+ */
+const GCD = (...args) => {
+    const { length } = args;
+
+    if (!length) {
+        throw new RangeError(`Can't compute GCD of no args`);
+    }
+
+    if (length === 1) {
+        return args[0];
+    }
+
+    const gcd = (a, b) => !a ? b : gcd(b % a, a);
+
+    return args.reduce((out, arg) => gcd(out, arg), 0);
+};
+
+/**
+ * @summary Finds least common multiplier
+ * @param  {...number} args
+ * @returns {number}
+ */
+const LCM = (...args) => {
+    const { length } = args;
+
+    if (!args.length) {
+        throw new RangeError(`Can't compute LCM of no args`);
+    }
+
+    if (length === 1) {
+        return args[0];
+    }
+
+    return args.reduce((out, arg) => arg * out / GCD(arg, out));
+};
+
 
 module.exports = {
     average,
     divide,
     divSum,
+    GCD,
+    HCF: GCD,
+    LCM,
     multiply,
     multSum,
     substract,
