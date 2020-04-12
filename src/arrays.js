@@ -1,9 +1,15 @@
 /**
- * Combines filter() and map() in O(n)
- * @param {*[]} array
- * @returns {function(function):function(function):*[]}
+ * @fileoverview Array utilities
+ * @author Oleg Valter
+ * @module
  */
-const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
+
+/**
+ * Combines filter() and map() in O(n)
+ * @param {any[]} [array]
+ * @returns {function(function):function(function):any[]}
+ */
+const filterMap = (array = []) => (filter = e => true) => (mapper = e => e) => {
     const mappedArr = [];
 
     let initialIndex = 0, filteredIndex = 0;
@@ -18,10 +24,10 @@ const filterMap = (array) => (filter = e => true) => (mapper = e => e) => {
 
 /**
  * Combines filter() and map() in reverse in O(n)
- * @param {*[]} array 
- * @returns {function(function):function(function):*[]}
+ * @param {any[]} [array] 
+ * @returns {function(function):function(function):any[]}
  */
-const filterMapped = (array) => (mapper = e => e) => (filter = e => true) => {
+const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) => {
     const filteredArr = [];
 
     let initialIndex = 0, filteredIndex = 0;
@@ -39,10 +45,10 @@ const filterMapped = (array) => (mapper = e => e) => (filter = e => true) => {
 /**
  * Executes a callback for each element
  * (same as forEach, but in FP style + faster)
- * @param {*[]} array
+ * @param {any[]} [array]
  * @returns {function(function):void} 
  */
-const forAll = (array) => (callback) => {
+const forAll = (array = []) => (callback) => {
 
     let index = 0;
 
@@ -56,8 +62,8 @@ const forAll = (array) => (callback) => {
 /**
  * Maps array to values of 
  * property by key
- * @param {*[]} [array] 
- * @returns {function(string):*[]}
+ * @param {any[]} [array] 
+ * @returns {function(string):any[]}
  */
 const keyMap = (array = []) => (key) => {
     return !key ? array : array.map(elem => elem[key]);

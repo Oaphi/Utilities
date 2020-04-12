@@ -1,0 +1,5 @@
+{
+    "ignore": [
+        "(trees|bitwise|promises|sorting)"
+    ]
+}

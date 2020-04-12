@@ -1,3 +1,262 @@
+
+/**
+ * @fileoverview Array utilities
+ * @author Oleg Valter
+ * @module
+ */
+
+/**
+ * Combines filter() and map() in O(n)
+ * @param {any[]} [array]
+ * @returns {function(function):function(function):any[]}
+ */
+const filterMap = (array = []) => (filter = e => true) => (mapper = e => e) => {
+    const mappedArr = [];
+
+    let initialIndex = 0, filteredIndex = 0;
+
+    for (const elem of array) {
+        filter(elem, initialIndex++) &&
+            mappedArr.push(mapper(elem, filteredIndex++));
+    }
+
+    return mappedArr;
+};
+
+/**
+ * Combines filter() and map() in reverse in O(n)
+ * @param {any[]} [array] 
+ * @returns {function(function):function(function):any[]}
+ */
+const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) => {
+    const filteredArr = [];
+
+    let initialIndex = 0, filteredIndex = 0;
+
+    for (const elem of array) {
+        const mappedElem = mapper(elem, initialIndex++);
+
+        filter(mappedElem, filteredIndex++) &&
+            filteredArr.push(mappedElem);
+    }
+
+    return filteredArr;
+};
+
+/**
+ * Executes a callback for each element
+ * (same as forEach, but in FP style + faster)
+ * @param {any[]} [array]
+ * @returns {function(function):void} 
+ */
+const forAll = (array = []) => (callback) => {
+
+    let index = 0;
+
+    for (const elem of array) {
+        callback(elem, index++);
+    }
+
+    return;
+};
+
+/**
+ * Maps array to values of 
+ * property by key
+ * @param {any[]} [array] 
+ * @returns {function(string):any[]}
+ */
+const keyMap = (array = []) => (key) => {
+    return !key ? array : array.map(elem => elem[key]);
+};
+
+module.exports = {
+    filterMap,
+    filterMapped,
+    forAll,
+    keyMap
+};
+/**
+ * ANDs lists of boolean values
+ * @param  {...boolean} [args]
+ * @returns {boolean}
+ */
+const AND = (...args) => !args.length ? false : args.reduce((ok, arg) => ok && arg);
+
+/**
+ * ORs lists of boolean values
+ * @param  {...boolean} [args]
+ * @returns {boolean}
+ */
+const OR = (...args) => args.reduce((ok, arg) => ok || arg, false);
+
+/**
+ * XORs lists of boolean values
+ * @param  {...boolean} [args]
+ * @returns {boolean}
+ */
+const XOR = (...args) => args.reduce((ok, arg, idx, arr) => arg === arr[idx - 1] ? false : ok, true);
+
+module.exports = {
+    AND,
+    OR,
+    XOR
+};
+/**
+ * @fileoverview Math utilities
+ * @author Oleg Valter
+ * @module
+ */
+
+/**
+ * @typedef {function} OperationApplier
+ * @param {...number} args
+ * @returns {number}
+ */
+
+/**
+ * Abstract binary (here: operator(A,B)) operation
+ * @param {function} operation 
+ * @returns {OperationApplier}
+ */
+const binaryOp = (operation) => (...args) => args.length ? args.reduce((total, arg) => operation(total, arg)) : 0;
+
+/**
+ * Divides all arguments
+ * @param  {...number} args
+ * @returns {number}
+ */
+const divide = (...args) => binaryOp((a, b) => {
+    if (b === 0) {
+        throw new RangeError('Cannot divide by 0');
+    }
+    return a / b;
+})(...args);
+
+/**
+ * Multiplies all arguments
+ * @param  {...number} args
+ * @return {number}
+ */
+const multiply = (...args) => binaryOp((a, b) => a * b)(...args);
+
+/**
+ * Substracts all arguments
+ * @param  {...number} args 
+ * @returns {number}
+ */
+const substract = (...args) => binaryOp((a, b) => a - b)(...args);
+
+/**
+ * Sums all arguments
+ * @param  {...number} args
+ * @returns {number}
+ */
+const sum = (...args) => binaryOp((a, b) => a + b)(...args);
+
+/**
+ * Complex utilities (based on base ops)
+ */
+
+/**
+ * Simple average of all arguments
+ * @param  {...number} args
+ * @returns {number}
+ */
+const average = (...args) => sum(...args) / (args.length || 1);
+
+/**
+ * Abstraction for M / (A + ... + Z)
+ * @param {number} divisor 
+ * @returns {function}
+ */
+const divSum = (divisor) => (...args) => divide(sum(...args), divisor);
+
+/**
+ * Abstraction for M * (A + ... + Z)
+ * @param {number} multiplier 
+ * @returns {function}
+ */
+const multSum = (multiplier) => (...args) => multiply(sum(...args), multiplier);
+
+
+/**
+ * @summary Finds greatest common divisor
+ * @param  {...number} args
+ * @returns {number}
+ */
+const GCD = (...args) => {
+    const { length } = args;
+
+    if (!length) {
+        throw new RangeError(`Can't compute GCD of no args`);
+    }
+
+    if (length === 1) {
+        return args[0];
+    }
+
+    const gcd = (a, b) => !a ? b : gcd(b % a, a);
+
+    return args.reduce((out, arg) => gcd(out, arg), 0);
+};
+
+/**
+ * @summary Finds least common multiplier
+ * @param  {...number} args
+ * @returns {number}
+ */
+const LCM = (...args) => {
+    const { length } = args;
+
+    if (!args.length) {
+        throw new RangeError(`Can't compute LCM of no args`);
+    }
+
+    if (length === 1) {
+        return args[0];
+    }
+
+    return args.reduce((out, arg) => arg * out / GCD(arg, out));
+};
+
+
+module.exports = {
+    average,
+    divide,
+    divSum,
+    GCD,
+    HCF: GCD,
+    LCM,
+    multiply,
+    multSum,
+    substract,
+    sum
+};
+
+/**
+ * Generates pseudo-random int[]
+ * @param {number} len 
+ * @param {number} [seed]
+ * @returns {number[]} 
+ */
+const randomArray = (len, seed = 1) => {
+    const output = [];
+
+    let i = 0;
+
+    while (i < len) {
+        const val = Math.floor(Math.random() * seed);
+        output[i] = val;
+        i++;
+    }
+
+    return output;
+};
+
+module.exports = {
+    randomArray
+};
 /**
  * @fileoverview JavaScript Utilities
  * @author Oleg Valter
@@ -144,7 +403,7 @@ const toDecimal = (bits) => {
 /**
  * Subsplits an Array into several parts
  * @param {number} [n] 
- * @returns {function(Array): any[][]}
+ * @returns {function(Array): *[][]}
  */
 const subsplit = (n = 1) => (array) => {
     const { length } = array;
@@ -196,7 +455,7 @@ const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !
 /**
  * Counts number of permutations given the 
  * set of entities and repetitions number
- * @param {any[]} set 
+ * @param {*[]} set 
  * @param {Number} repeat
  * @returns {Number}
  */
