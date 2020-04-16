@@ -1,26 +1,29 @@
 {
-  "name": "js-utilities",
-  "version": "1.0.0",
+  "name": "@oaphi/utilities",
+  "version": "0.5.0",
   "description": "Various utilities for JavaScript ES6",
   "main": "utilities.js",
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@oaphi/distributor": "^1.2.3",
+    "yargs": "^15.3.1"
+  },
   "devDependencies": {
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
+    "chalk": "^4.0.0",
     "jsdoc": "^3.6.3",
     "mocha": "^7.1.1"
   },
   "scripts": {
-    "document": "jsdoc",
+    "dist": "distribute -s",
+    "dist-watch": "npm run dist -- -w",
+    "document": "jsdoc -c configs/jsdoc.js",
     "test": "mocha --reporter min",
-    "undo-last": "git reset --soft HEAD^",
     "push": "bash ./add-commit-push.sh -f",
-    "push-skip-test": "npm run push -nt",
-    "push-authed": "bash ./git-auth.sh && git push -f",
-    "push-staged": "git push || npm run push-authed"
+    "push-skip-test": "npm run push -nt"
   },
   "repository": {
     "type": "git",

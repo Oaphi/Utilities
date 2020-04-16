@@ -33,10 +33,9 @@ prompt_until_set() {
     done
 }
 
-#pushes upstream [force-pushing]
+#pushes upstream
 push_upstream() {
-    git push $1 || . ./git-auth.sh &&
-        git push $1 && echo "Push successful, exiting"
+    git push $1 && echo "Push successful, exiting"
 }
 
 display_menu() {
