@@ -11,7 +11,8 @@ class ExtendedPromise extends Promise {
         const privates = {
             fulfilled: false,
             pending: true,
-            rejected: false
+            rejected: false,
+            value: undefined
         };
 
         super((resolve, reject) => {
@@ -19,11 +20,13 @@ class ExtendedPromise extends Promise {
                 res => {
                     privates.fulfilled = true;
                     privates.pending = false;
+                    privates.value = res;
                     resolve(res);
                 },
                 err => {
                     privates.rejected = true;
                     privates.pending = false;
+                    privates.value = err;
                     reject(err);
                 }
             );
@@ -32,6 +35,7 @@ class ExtendedPromise extends Promise {
         Object.defineProperties(this, {
             fulfilled: {
                 configurable: false,
+
                 get () {
                     return privates.fulfilled;
                 }
@@ -46,6 +50,18 @@ class ExtendedPromise extends Promise {
                 configurable: false,
                 get () {
                     return privates.rejected;
+                }
+            },
+            settled: {
+                configurable: false,
+                get () {
+                    return !privates.pending && !(privates.value instanceof Promise);
+                }
+            },
+            value: {
+                configurable: false,
+                get () {
+                    return privates.value;
                 }
             }
         });
