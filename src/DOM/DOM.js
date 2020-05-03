@@ -32,17 +32,17 @@ function elementsRightUntil(root, offset, comparator, callback, fallback, strict
 
     let current = root.children[offset] || (strict ? null : root);
 
-    let matchedOnce = 0;
+    let matchedOnce = comparator(current) ? 1 : 0;
 
-    while (current.nextElementSibling) {
-        if (!comparator(current)) {
+    if (!matchedOnce) {
+        while (current.nextElementSibling) {
             current = current.nextElementSibling;
-            continue;
+            if (comparator(current)) {
+                matchedOnce |= 1;
+                break;
+            }
         }
-        matchedOnce |= 1;
-        break;
     }
-
 
     const use = matchedOnce ? callback : fallback;
     return use ? use(current) : current;
@@ -78,15 +78,16 @@ function elementsLeftUntil(root, offset, comparator, callback, fallback, strict 
 
     let current = root.children[root.children.length - 1 - offset] || (strict ? null : root);
 
-    let matchedOnce = 0;
+    let matchedOnce = comparator(current) ? 1 : 0;
 
-    while (current.previousElementSibling) {
-        if (!comparator(current)) {
+    if (!matchedOnce) {
+        while (current.previousElementSibling) {
             current = current.previousElementSibling;
-            continue;
+            if (comparator(current)) {
+                matchedOnce |= 1;
+                break;
+            }
         }
-        matchedOnce |= 1;
-        break;
     }
 
     const use = matchedOnce ? callback : fallback;
