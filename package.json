@@ -17,6 +17,7 @@
     "chai-as-promised": "^7.1.1",
     "chalk": "^4.0.0",
     "jsdoc": "^3.6.3",
+    "jsdom": "^16.2.2",
     "mocha": "^7.1.1"
   },
   "scripts": {
