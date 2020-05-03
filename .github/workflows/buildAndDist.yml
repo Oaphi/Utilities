@@ -36,4 +36,4 @@ jobs:
     
     steps:
       - name: Creating dist file
-      - run: npm run dist
+        run: npm run dist

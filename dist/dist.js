@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Array utilities
  * @author Oleg Valter
@@ -76,6 +75,7 @@ module.exports = {
     forAll,
     keyMap
 };
+
 /**
  * ANDs lists of boolean values
  * @param  {...boolean} [args]
@@ -102,6 +102,240 @@ module.exports = {
     OR,
     XOR
 };
+
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        root.returnExports = factory();
+    }
+}(
+    typeof self !== 'undefined' ? self : this,
+    function () {
+
+        /**
+         * @description traverses children left to right, calling comparator on each one
+         * until it evaluates to true, then calls the callback with first element passing 
+         * the condition or with root itself if none
+         * @param {HTMLElement} root 
+         * @param {number} [offset]
+         * @param {function(HTMLElement): boolean} comparator 
+         * @param {function(HTMLElement)} [callback] 
+         * @param {function(HTMLElement)} [fallback]
+         * @param {boolean} [strict]
+         */
+        function elementsRightUntil(root, offset, comparator, callback, fallback, strict = false) {
+
+            if (typeof offset === "function") {
+                fallback = callback;
+                callback = comparator;
+                comparator = offset;
+                offset = 0;
+            }
+
+            if (typeof callback === "boolean") {
+                strict = callback;
+                callback = null;
+            }
+
+            if (typeof fallback === "boolean") {
+                strict = fallback;
+                fallback = null;
+            }
+
+            let current = root.children[offset] || (strict ? null : root);
+
+            let matchedOnce = comparator(current) ? 1 : 0;
+
+            let index = offset;
+
+            if (!matchedOnce) {
+                while (current.nextElementSibling) {
+                    index++;
+
+                    current = current.nextElementSibling;
+                    if (comparator(current)) {
+                        matchedOnce |= 1;
+                        break;
+                    }
+                }
+            }
+
+            const use = matchedOnce ? callback : fallback;
+            return use ? use(current, index) : current;
+        }
+
+        /**
+         * @summary inverse of elementsRightUntil
+         * @param {HTMLElement} root
+         * @param {number} [offset]
+         * @param {function(HTMLElement): boolean} comparator
+         * @param {function(HTMLElement)} [callback]
+         * @param {function(HTMLElement)} [fallback]
+         * @param {boolean} [strict]
+         */
+        function elementsLeftUntil(root, offset, comparator, callback, fallback, strict = false) {
+
+            if (typeof offset === "function") {
+                fallback = callback;
+                callback = comparator;
+                comparator = offset;
+                offset = 0;
+            }
+
+            if (typeof callback === "boolean") {
+                strict = callback;
+                callback = null;
+            }
+
+            if (typeof fallback === "boolean") {
+                strict = fallback;
+                fallback = null;
+            }
+
+            const { children } = root;
+
+            const lastIndex = children.length - 1 - offset;
+
+            let current = children[lastIndex] || (strict ? null : root);
+
+            let matchedOnce = comparator(current) ? 1 : 0;
+
+            let index = lastIndex;
+
+            if (!matchedOnce) {
+                while (current.previousElementSibling) {
+                    index--;
+
+                    current = current.previousElementSibling;
+                    if (comparator(current)) {
+                        matchedOnce |= 1;
+                        break;
+                    }
+                }
+            }
+
+            const use = matchedOnce ? callback : fallback;
+            return use ? use(current, index) : current;
+        }
+
+        return {
+            elementsRightUntil,
+            elementsLeftUntil
+        };
+
+    }));
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        root.returnExports = factory();
+    }
+}(typeof self !== 'undefined' ? self : this, function () {
+
+    /**
+     * @summary defines a non-changeable property
+     * @param {object} obj 
+     * @param {string} key 
+     * @param {any} val 
+     * @param {boolean} [enumerable=true]
+     * @returns {object}
+     */
+    const defineConstant = (obj, key, val, enumerable = true) => {
+        return Object.defineProperty(obj, key, {
+            enumerable,
+            configurable: false,
+            writable: false,
+            value: val
+        });
+    };
+
+    /**
+     * @summary makes a Enum
+     * @param {string[]} choices
+     * @param {any[]} [values]
+     * @returns {object}
+     */
+    const makeEnum = (choices,values = []) => {
+        const { length } = choices;
+
+        const enumerator = Object.create(null);
+
+        let increment = 1, index = 0;
+
+        for (const choice of choices) {
+            defineConstant(enumerator, index, choice, false);
+            defineConstant(enumerator, choice, increment);
+
+            increment = increment << 1;
+            index++;
+        }
+
+        defineConstant(enumerator, "length", length, false);
+        defineConstant(enumerator, "toString", () => `[object Enum]`, false);
+
+        enumerator[Symbol.iterator] = () => {
+            let i = 0;
+
+            return {
+                next: () => ({
+                    done: i >= length,
+                    value: enumerator[i++]
+                })
+            };
+        };
+
+        const frozen = Object.freeze(enumerator);
+
+        return new Proxy(frozen, {
+            get: (target, key) => {
+
+                if (!Reflect.has(target, key)) {
+                    throw new RangeError(`Invalid enum property: ${key}`);
+                }
+
+                return target[key];
+            }
+        });
+    };
+    
+    return {
+        defineConstant,
+        makeEnum
+    };
+
+}));
+
+
+
+/**
+ * @summary runs a function several times
+ * @param {number} [num] 
+ */
+const runUntil = (num = 1) =>
+
+	/**
+	 * @param {function} callback
+	 */
+    (callback, ...args) => {
+
+        let i = 0;
+        while (i < num) {
+            callback(i, ...args);
+            i++;
+        }
+    };
+
+module.exports = {
+    runUntil
+};
+
 /**
  * @fileoverview Math utilities
  * @author Oleg Valter
@@ -257,6 +491,7 @@ const randomArray = (len, seed = 1) => {
 module.exports = {
     randomArray
 };
+
 /**
  * @fileoverview JavaScript Utilities
  * @author Oleg Valter
@@ -403,7 +638,7 @@ const toDecimal = (bits) => {
 /**
  * Subsplits an Array into several parts
  * @param {number} [n] 
- * @returns {function(Array): *[][]}
+ * @returns {function(Array): any[][]}
  */
 const subsplit = (n = 1) => (array) => {
     const { length } = array;
@@ -455,7 +690,7 @@ const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !
 /**
  * Counts number of permutations given the 
  * set of entities and repetitions number
- * @param {*[]} set 
+ * @param {any[]} set 
  * @param {Number} repeat
  * @returns {Number}
  */
@@ -609,3 +844,4 @@ module.exports = {
     trimAndRemoveSep,
     uniqueOccurrences
 };
+
