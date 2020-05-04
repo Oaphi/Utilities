@@ -19,11 +19,20 @@ jobs:
         node-version: [10.x, 12.x]
 
     steps:
-    - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+
+    - name: Install @oaphi/distributor
+      run: |
+        npm i chalk@^4.0.0 lodash@^4.17.15 yargs@^15.3.1
+        echo //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }} > .npmrc
+        npm i @oaphi/distributor --registry="https://npm.pkg.github.com"
+        unlink .npmrc
+
+    - uses: actions/checkout@v2
+
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
