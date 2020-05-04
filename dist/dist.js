@@ -1,107 +1,138 @@
-/**
- * @fileoverview Array utilities
- * @author Oleg Valter
- * @module
- */
-
-/**
- * Combines filter() and map() in O(n)
- * @param {any[]} [array]
- * @returns {function(function):function(function):any[]}
- */
-const filterMap = (array = []) => (filter = e => true) => (mapper = e => e) => {
-    const mappedArr = [];
-
-    let initialIndex = 0, filteredIndex = 0;
-
-    for (const elem of array) {
-        filter(elem, initialIndex++) &&
-            mappedArr.push(mapper(elem, filteredIndex++));
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        root.AppendQueue = factory();
     }
+}(
+    typeof self !== 'undefined' ? self : this,
+    function () {
 
-    return mappedArr;
-};
+        /**
+         * @summary wrapper around promise of HTMLElement
+         * @class
+         */
+        class AsyncAppendable {
 
-/**
- * Combines filter() and map() in reverse in O(n)
- * @param {any[]} [array] 
- * @returns {function(function):function(function):any[]}
- */
-const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) => {
-    const filteredArr = [];
+			/**
+			 * @param {Promise<HTMLElement>} promise
+             * @param {AsyncAppendQueue} queue
+             * @param {function} callback
+			 * @param {number} [index]
+			 */
+            constructor(promise, queue, callback, index = 0) {
+                this.promise = promise;
+                this.index = index;
+                this.queue = queue;
 
-    let initialIndex = 0, filteredIndex = 0;
+                this.callback = callback;
 
-    for (const elem of array) {
-        const mappedElem = mapper(elem, initialIndex++);
+                promise
+                    .then(res => {
 
-        filter(mappedElem, filteredIndex++) &&
-            filteredArr.push(mappedElem);
-    }
+                        const { callback, index } = this;
 
-    return filteredArr;
-};
+                        res.weight = index;
 
-/**
- * Executes a callback for each element
- * (same as forEach, but in FP style + faster)
- * @param {any[]} [array]
- * @returns {function(function):void} 
- */
-const forAll = (array = []) => (callback) => {
+                        const { root } = queue;
+                        const { children } = root;
+                        const { length } = children;
 
-    let index = 0;
+                        if (!length) {
+                            root.append(res);
+                            callback && callback(res);
+                            return res;
+                        }
 
-    for (const elem of array) {
-        callback(elem, index++);
-    }
+                        elementsLeftUntil(
+                            root,
+                            (elem) => elem.weight < index,
 
-    return;
-};
+                            (matched, idx) => elementsRightUntil(
+                                root,
+                                idx,
+                                (elem) => elem.weight > index,
+                                elem => elem.before(res),
+                                () => matched.after(res)
+                            ),
 
-/**
- * Maps array to values of 
- * property by key
- * @param {any[]} [array] 
- * @returns {function(string):any[]}
- */
-const keyMap = (array = []) => (key) => {
-    return !key ? array : array.map(elem => elem[key]);
-};
+                            () => elementsRightUntil(
+                                root,
 
-module.exports = {
-    filterMap,
-    filterMapped,
-    forAll,
-    keyMap
-};
+                                elem => elem.weight > index,
 
-/**
- * ANDs lists of boolean values
- * @param  {...boolean} [args]
- * @returns {boolean}
- */
-const AND = (...args) => !args.length ? false : args.reduce((ok, arg) => ok && arg);
+                                (matched, idx) => elementsLeftUntil(
+                                    root,
+                                    idx,
+                                    elem => elem.weight < index,
+                                    elem => elem.after(res),
+                                    () => matched.before(res)
+                                )
 
-/**
- * ORs lists of boolean values
- * @param  {...boolean} [args]
- * @returns {boolean}
- */
-const OR = (...args) => args.reduce((ok, arg) => ok || arg, false);
+                            )
 
-/**
- * XORs lists of boolean values
- * @param  {...boolean} [args]
- * @returns {boolean}
- */
-const XOR = (...args) => args.reduce((ok, arg, idx, arr) => arg === arr[idx - 1] ? false : ok, true);
+                        );
 
-module.exports = {
-    AND,
-    OR,
-    XOR
-};
+                        callback && callback(res);
+                        return res;
+                    });
+
+            }
+
+        }
+
+
+        /**
+         * @summary queue controller
+         * @class
+         */
+        class AsyncAppendQueue {
+
+            /**
+             * @param {HTMLElement} root 
+             */
+            constructor(root) {
+
+                /** @type {AsyncAppendable[]} */
+                this.promises = [];
+
+                this.root = root;
+            }
+
+            /**
+             * @summary enqueues promise of HTMLElement
+             * @param {Promise<HTMLElement>} promise 
+             * @param {function} callback
+             * @returns {AsyncAppendQueue}
+             */
+            enqueue(promise, callback) {
+                const { promises } = this;
+
+                const { length } = promises;
+
+                const prepared = new AsyncAppendable(promise, this, callback, length);
+
+                promises.push(prepared);
+                return this;
+            }
+
+            /**
+             * @summary clears promise queue
+             * @returns {AsyncAppendQueue}
+             */
+            clear() {
+                const { promises } = this;
+                promises.length = 0;
+                return this;
+            }
+
+        }
+
+        return AsyncAppendQueue;
+
+    }));
 
 
 (function (root, factory) {
@@ -229,6 +260,111 @@ module.exports = {
 
     }));
 
+/**
+ * @fileoverview Array utilities
+ * @author Oleg Valter
+ * @module
+ */
+
+/**
+ * Combines filter() and map() in O(n)
+ * @param {any[]} [array]
+ * @returns {function(function):function(function):any[]}
+ */
+const filterMap = (array = []) => (filter = e => true) => (mapper = e => e) => {
+    const mappedArr = [];
+
+    let initialIndex = 0, filteredIndex = 0;
+
+    for (const elem of array) {
+        filter(elem, initialIndex++) &&
+            mappedArr.push(mapper(elem, filteredIndex++));
+    }
+
+    return mappedArr;
+};
+
+/**
+ * Combines filter() and map() in reverse in O(n)
+ * @param {any[]} [array] 
+ * @returns {function(function):function(function):any[]}
+ */
+const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) => {
+    const filteredArr = [];
+
+    let initialIndex = 0, filteredIndex = 0;
+
+    for (const elem of array) {
+        const mappedElem = mapper(elem, initialIndex++);
+
+        filter(mappedElem, filteredIndex++) &&
+            filteredArr.push(mappedElem);
+    }
+
+    return filteredArr;
+};
+
+/**
+ * Executes a callback for each element
+ * (same as forEach, but in FP style + faster)
+ * @param {any[]} [array]
+ * @returns {function(function):void} 
+ */
+const forAll = (array = []) => (callback) => {
+
+    let index = 0;
+
+    for (const elem of array) {
+        callback(elem, index++);
+    }
+
+    return;
+};
+
+/**
+ * Maps array to values of 
+ * property by key
+ * @param {any[]} [array] 
+ * @returns {function(string):any[]}
+ */
+const keyMap = (array = []) => (key) => {
+    return !key ? array : array.map(elem => elem[key]);
+};
+
+module.exports = {
+    filterMap,
+    filterMapped,
+    forAll,
+    keyMap
+};
+
+/**
+ * ANDs lists of boolean values
+ * @param  {...boolean} [args]
+ * @returns {boolean}
+ */
+const AND = (...args) => !args.length ? false : args.reduce((ok, arg) => ok && arg);
+
+/**
+ * ORs lists of boolean values
+ * @param  {...boolean} [args]
+ * @returns {boolean}
+ */
+const OR = (...args) => args.reduce((ok, arg) => ok || arg, false);
+
+/**
+ * XORs lists of boolean values
+ * @param  {...boolean} [args]
+ * @returns {boolean}
+ */
+const XOR = (...args) => args.reduce((ok, arg, idx, arr) => arg === arr[idx - 1] ? false : ok, true);
+
+module.exports = {
+    AND,
+    OR,
+    XOR
+};
+
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define([], factory);
@@ -312,6 +448,66 @@ module.exports = {
 
 }));
 
+
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        root.Headers = factory();
+    }
+}(typeof self !== 'undefined' ? self : this, function () {
+
+    /**
+     * @summary maps headers to headers object
+     * @param {string} [headers]
+     * @returns {Object.<string, string>}
+     */
+    const mapResponseHeaders = (headers = "") => {
+
+        const split = headers.split(/[\r\n]+/);
+
+        const headerMap = {};
+
+        if (!headers) {
+            return headerMap;
+        }
+
+        for (const header of split) {
+            const data = header.trim().split(': ');
+
+            const name = data.shift();
+
+            if(name) {
+                const value = data.join(': ');
+                headerMap[name] = value;
+
+                if (/\-/.test(name)) {
+                    const snakeCase = name
+                        .split("-")
+                        .map((part) => {
+                            const fchar = part[0];
+
+                            return part.length > 1 ? fchar.toUpperCase() + part.slice(1) : part;
+                        })
+                        .join("");
+
+                    headerMap[snakeCase] = value;
+                }
+            }
+
+        }
+
+        return headerMap;
+    };
+
+    return {
+        mapResponseHeaders
+    };
+
+}));
 
 
 /**
@@ -491,6 +687,40 @@ const randomArray = (len, seed = 1) => {
 module.exports = {
     randomArray
 };
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        root.Strings = factory();
+    }
+}(typeof self !== 'undefined' ? self : this, function () {
+
+    /**
+     * @summary checks if string is lowcase
+     * @param {string} [str] 
+     * @returns {boolean}
+     */
+    const isLcase = (str = "") => {
+
+        if (!str) {
+            return false;
+        }
+
+        return Array.prototype.every
+            .call(str, char => {
+                const code = char.codePointAt(0);
+                return code < 65 && code > 90;
+            });
+    };
+
+    return {
+        isLcase
+    };
+
+}));
 
 /**
  * @fileoverview JavaScript Utilities

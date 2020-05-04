@@ -24,9 +24,8 @@
     "dist": "distribute -s",
     "dist-watch": "npm run dist -- -w",
     "document": "jsdoc -c configs/jsdoc.js",
-    "test": "mocha --reporter min",
-    "push": "bash ./add-commit-push.sh -f",
-    "push-skip-test": "npm run push -nt"
+    "test": "mocha --reporter min --watch",
+    "test-ci": "mocha"
   },
   "repository": {
     "type": "git",
@@ -43,7 +42,6 @@
     "url": "https://github.com/Oaphi/Utilities/issues"
   },
   "mocha": {
-    "watch": true,
     "fullTrace": false
   },
   "chai": {
