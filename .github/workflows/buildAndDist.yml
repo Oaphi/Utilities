@@ -41,7 +41,9 @@ jobs:
         git config --local user.email dist@repo.org
         git config --local user.name $GITHUB_ACTOR
 
-        git status -s && git add *dist* && git commit --fixup HEAD && GIT_SEQUENCE_EDITOR=: git rebase -i
+        [[ -n $(git status -s) ]] && git add *dist* && git commit --fixup HEAD && \
+        
+        GIT_SEQUENCE_EDITOR=: git rebase -i $( git log --pretty=format:"$h" --skip 1 -n 1 )
         
         git push --repo="https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
 

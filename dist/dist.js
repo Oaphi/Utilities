@@ -712,12 +712,32 @@ module.exports = {
         return Array.prototype.every
             .call(str, char => {
                 const code = char.codePointAt(0);
-                return code < 65 && code > 90;
+                return code < 65 || code > 90;
             });
     };
 
+    /**
+     * @summary checks if string is uppercase
+     * @param {string} [str]
+     * @returns {boolean}
+     */
+    const isUcase = (str = "") => {
+
+        if(!str) {
+            return false;
+        }
+
+        return Array.prototype.every
+            .call(str, char => {
+                const code = char.codePointAt(0);
+                return /\W/.test(char) || code > 64 && code < 91;
+            });
+
+    };
+
     return {
-        isLcase
+        isLcase,
+        isUcase
     };
 
 }));
