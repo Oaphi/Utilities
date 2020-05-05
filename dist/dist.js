@@ -1,139 +1,3 @@
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.AppendQueue = factory();
-    }
-}(
-    typeof self !== 'undefined' ? self : this,
-    function () {
-
-        /**
-         * @summary wrapper around promise of HTMLElement
-         * @class
-         */
-        class AsyncAppendable {
-
-			/**
-			 * @param {Promise<HTMLElement>} promise
-             * @param {AsyncAppendQueue} queue
-             * @param {function} callback
-			 * @param {number} [index]
-			 */
-            constructor(promise, queue, callback, index = 0) {
-                this.promise = promise;
-                this.index = index;
-                this.queue = queue;
-
-                this.callback = callback;
-
-                promise
-                    .then(res => {
-
-                        const { callback, index } = this;
-
-                        res.weight = index;
-
-                        const { root } = queue;
-                        const { children } = root;
-                        const { length } = children;
-
-                        if (!length) {
-                            root.append(res);
-                            callback && callback(res);
-                            return res;
-                        }
-
-                        elementsLeftUntil(
-                            root,
-                            (elem) => elem.weight < index,
-
-                            (matched, idx) => elementsRightUntil(
-                                root,
-                                idx,
-                                (elem) => elem.weight > index,
-                                elem => elem.before(res),
-                                () => matched.after(res)
-                            ),
-
-                            () => elementsRightUntil(
-                                root,
-
-                                elem => elem.weight > index,
-
-                                (matched, idx) => elementsLeftUntil(
-                                    root,
-                                    idx,
-                                    elem => elem.weight < index,
-                                    elem => elem.after(res),
-                                    () => matched.before(res)
-                                )
-
-                            )
-
-                        );
-
-                        callback && callback(res);
-                        return res;
-                    });
-
-            }
-
-        }
-
-
-        /**
-         * @summary queue controller
-         * @class
-         */
-        class AsyncAppendQueue {
-
-            /**
-             * @param {HTMLElement} root 
-             */
-            constructor(root) {
-
-                /** @type {AsyncAppendable[]} */
-                this.promises = [];
-
-                this.root = root;
-            }
-
-            /**
-             * @summary enqueues promise of HTMLElement
-             * @param {Promise<HTMLElement>} promise 
-             * @param {function} callback
-             * @returns {AsyncAppendQueue}
-             */
-            enqueue(promise, callback) {
-                const { promises } = this;
-
-                const { length } = promises;
-
-                const prepared = new AsyncAppendable(promise, this, callback, length);
-
-                promises.push(prepared);
-                return this;
-            }
-
-            /**
-             * @summary clears promise queue
-             * @returns {AsyncAppendQueue}
-             */
-            clear() {
-                const { promises } = this;
-                promises.length = 0;
-                return this;
-            }
-
-        }
-
-        return AsyncAppendQueue;
-
-    }));
-
 
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -141,7 +5,7 @@
     } else if (typeof module === 'object' && module.exports) {
         module.exports = factory();
     } else {
-        root.returnExports = factory();
+        root.utilsDOM = factory();
     }
 }(
     typeof self !== 'undefined' ? self : this,
@@ -253,9 +117,17 @@
             return use ? use(current, index) : current;
         }
 
+        /**
+         * @summary removes last child of Element
+         * @param {Element} element
+         * @returns {void}
+         */
+        const removeLastChild = (element) => element.lastChild && element.lastChild.remove();
+
         return {
             elementsRightUntil,
-            elementsLeftUntil
+            elementsLeftUntil,
+            removeLastChild
         };
 
     }));
@@ -395,10 +267,9 @@ module.exports = {
     /**
      * @summary makes a Enum
      * @param {string[]} choices
-     * @param {any[]} [values]
      * @returns {object}
      */
-    const makeEnum = (choices,values = []) => {
+    const makeEnum = (choices) => {
         const { length } = choices;
 
         const enumerator = Object.create(null);
@@ -447,8 +318,6 @@ module.exports = {
     };
 
 }));
-
-
 
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -732,12 +601,23 @@ module.exports = {
                 const code = char.codePointAt(0);
                 return /\W/.test(char) || code > 64 && code < 91;
             });
-
     };
+
+    /**
+     * @summary trims string and removes non-word chars
+     * 
+     * @example
+     *    "pineapple, apple (!); --juice" => "pineapple apple juice"
+     * 
+     * @param {string} [input] 
+     * @returns {string}
+     */
+    const trimAndRemoveSep = (input = "") => input.trim().replace(/[^\s\w]|_/g, '');
 
     return {
         isLcase,
-        isUcase
+        isUcase,
+        trimAndRemoveSep
     };
 
 }));
@@ -785,10 +665,6 @@ const exp64 = offsetK(64);
 
 //Applies sentence case to a string
 const sentenceCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
-
-//trims whitespaces and removes non-word characters
-//example: orange, apple (!); --juice => 
-const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g, '');
 
 /**
  * Object Utilities
@@ -1058,9 +934,6 @@ const jsonToDOMString = (json = {}) => {
 //removes first child from element if it has any (non-leaking);
 const removeFirstChild = (element) => void !element.firstChild || element.firstChild.remove();
 
-//removes last child from element if it has any (non-leaking);
-const removeLastChild = (element) => void !element.lastChild || element.lastChild.remove();
-
 //removes N last children from element if it has any (non-leaking);
 const removeLastChildren = (num) => (element) => void Array.from(element.children).slice(-num).forEach(child => child.remove());
 
@@ -1091,7 +964,6 @@ module.exports = {
     relativeGrowth,
     subsplit,
     toDecimal,
-    trimAndRemoveSep,
     uniqueOccurrences
 };
 
