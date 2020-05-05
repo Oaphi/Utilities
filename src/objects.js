@@ -40,8 +40,35 @@
             });
         };
 
+        /**
+         * @summary returns one of the object props equal
+         * @param {object} [target] first object to compare
+         * @param {string} propName property name
+         */
+        const switchIfDiffProp = (target, propName) =>
+
+            /**
+             * @param {object} [source] second object to compare
+             * @returns {object}
+             */
+            (source) => {
+
+                if(!target) {
+                    return source || {};
+                }
+
+                if(!source) {
+                    return target || {};
+                }
+
+                return target[propName] === source[propName] ?
+                target :
+                source;
+            }
+
         return {
             isObject,
-            smartGetter
+            smartGetter,
+            switchIfDiffProp
         };
     }));
