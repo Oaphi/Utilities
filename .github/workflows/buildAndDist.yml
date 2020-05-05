@@ -39,11 +39,9 @@ jobs:
     - name: Configure git for push
       run: |
         git config --local user.email dist@repo.org
-        git config --local user.name Distribute Action
+        git config --local user.name "Distribute Action"
 
-        [[ -n $(git status -s) ]] && git add *dist* && git commit -m "Auto distribute"
-        
-        GIT_SEQUENCE_EDITOR=: git rebase -i $( git log --pretty=format:"$h" --skip 2 -n 1 )
+        [[ -n $(git status -s) ]] && git add *dist* && git commit -m "GitHub Action: distribute"
         
         git push --repo="https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
 

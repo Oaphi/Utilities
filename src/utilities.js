@@ -310,9 +310,6 @@ const jsonToDOMString = (json = {}) => {
 //removes first child from element if it has any (non-leaking);
 const removeFirstChild = (element) => void !element.firstChild || element.firstChild.remove();
 
-//removes last child from element if it has any (non-leaking);
-const removeLastChild = (element) => void !element.lastChild || element.lastChild.remove();
-
 //removes N last children from element if it has any (non-leaking);
 const removeLastChildren = (num) => (element) => void Array.from(element.children).slice(-num).forEach(child => child.remove());
 

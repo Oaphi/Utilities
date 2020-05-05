@@ -117,9 +117,17 @@
             return use ? use(current, index) : current;
         }
 
+        /**
+         * @summary removes last child of Element
+         * @param {Element} element
+         * @returns {void}
+         */
+        const removeLastChild = (element) => element.lastChild && element.lastChild.remove();
+
         return {
             elementsRightUntil,
-            elementsLeftUntil
+            elementsLeftUntil,
+            removeLastChild
         };
 
     }));
