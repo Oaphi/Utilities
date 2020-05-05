@@ -46,9 +46,6 @@ const sentenceCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
  * Object Utilities
  */
 
-//Checks if object is a valid object (not null);
-const isObject = (obj) => typeof obj === 'object' && obj !== null;
-
 //Extracts entries from an object;
 const getEntries = (object) => Object.keys(object).map(key => object[key]);
 
