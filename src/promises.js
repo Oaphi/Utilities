@@ -35,7 +35,6 @@ class ExtendedPromise extends Promise {
         Object.defineProperties(this, {
             fulfilled: {
                 configurable: false,
-
                 get () {
                     return privates.fulfilled;
                 }

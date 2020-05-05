@@ -343,6 +343,5 @@ module.exports = {
     relativeGrowth,
     subsplit,
     toDecimal,
-    trimAndRemoveSep,
     uniqueOccurrences
 };

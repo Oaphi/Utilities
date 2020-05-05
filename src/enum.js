@@ -28,10 +28,9 @@
     /**
      * @summary makes a Enum
      * @param {string[]} choices
-     * @param {any[]} [values]
      * @returns {object}
      */
-    const makeEnum = (choices,values = []) => {
+    const makeEnum = (choices) => {
         const { length } = choices;
 
         const enumerator = Object.create(null);
@@ -80,4 +79,3 @@
     };
 
 }));
-

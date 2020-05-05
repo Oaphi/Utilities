@@ -3,9 +3,9 @@ const assert = require('assert');
 const { expect } = require('chai');
 
 const {
-    trimAndRemoveSep, keysByValue,
+    keysByValue,
     getEntries, compare, getOtherElems,
-    relativeGrowth, asyncMap, delay,
+    relativeGrowth, asyncMap,
     toDecimal, filterAndReorder,
     uniqueOccurrences, numCombinations,
     offsetK, subsplit
@@ -71,18 +71,6 @@ describe('compare()', function () {
             .every((entry, k) => compare(entry, getOtherElems(k)(entries)));
         assert.deepStrictEqual(diffs, false);
         console.timeEnd('compare() on diff');
-    });
-
-});
-
-
-
-describe('trimAndRemoveSep()', function () {
-
-    it('should trim whitespaces and replace non-word chars', function () {
-        const withSpaces = '  white spaced  ';
-        const trimmed = trimAndRemoveSep(withSpaces);
-        assert.equal(trimmed, 'white spaced');
     });
 
 });

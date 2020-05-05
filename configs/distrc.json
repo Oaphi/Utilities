@@ -1,6 +1,6 @@
 {
     "ignore": [
-        "(trees|bitwise|promises|sorting)"
+        "(trees|bitwise|promises|sorting|AppendQueue)"
     ],
     "start": true
 }

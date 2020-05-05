@@ -24,7 +24,7 @@ jobs:
       run: |
         npm i chalk@^4.0.0 lodash@^4.17.15 yargs@^15.3.1
         echo //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }} > .npmrc
-        npm i @oaphi/distributor --registry="https://npm.pkg.github.com"
+        npm i @oaphi/distributor -D --registry="https://npm.pkg.github.com"
         unlink .npmrc
 
     - uses: actions/checkout@v2
@@ -39,11 +39,11 @@ jobs:
     - name: Configure git for push
       run: |
         git config --local user.email dist@repo.org
-        git config --local user.name $GITHUB_ACTOR
+        git config --local user.name Distribute Action
 
-        [[ -n $(git status -s) ]] && git add *dist* && git commit --fixup HEAD && \
+        [[ -n $(git status -s) ]] && git add *dist* && git commit -m "Auto distribute"
         
-        GIT_SEQUENCE_EDITOR=: git rebase -i $( git log --pretty=format:"$h" --skip 1 -n 1 )
+        GIT_SEQUENCE_EDITOR=: git rebase -i $( git log --pretty=format:"$h" --skip 2 -n 1 )
         
         git push --repo="https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
 
