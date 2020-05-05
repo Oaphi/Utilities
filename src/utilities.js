@@ -42,10 +42,6 @@ const exp64 = offsetK(64);
 //Applies sentence case to a string
 const sentenceCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
-//trims whitespaces and removes non-word characters
-//example: orange, apple (!); --juice => 
-const trimAndRemoveSep = (input) => input.trim().replace(/[^\s\w]|_/g, '');
-
 /**
  * Object Utilities
  */

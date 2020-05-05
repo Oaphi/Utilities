@@ -42,12 +42,23 @@
                 const code = char.codePointAt(0);
                 return /\W/.test(char) || code > 64 && code < 91;
             });
-
     };
+
+    /**
+     * @summary trims string and removes non-word chars
+     * 
+     * @example
+     *    "pineapple, apple (!); --juice" => "pineapple apple juice"
+     * 
+     * @param {string} [input] 
+     * @returns {string}
+     */
+    const trimAndRemoveSep = (input = "") => input.trim().replace(/[^\s\w]|_/g, '');
 
     return {
         isLcase,
-        isUcase
+        isUcase,
+        trimAndRemoveSep
     };
 
 }));
