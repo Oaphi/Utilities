@@ -118,6 +118,21 @@
         }
 
         /**
+         * @summary checks if some tokens are contained
+         * @param {DOMTokenList} list
+         */
+        const listContainsSome = (list) =>
+
+            /**
+             * @param {...string} [tokens]
+             * @returns {boolean}
+             */
+            (...tokens) => {
+                const boundContains = list.contains.bind(list);
+                return tokens.some(boundContains);
+            };
+
+        /**
          * @summary removes last child of Element
          * @param {Element} element
          * @returns {void}
@@ -127,6 +142,7 @@
         return {
             elementsRightUntil,
             elementsLeftUntil,
+            listContainsSome,
             removeLastChild
         };
 

@@ -15,7 +15,7 @@ function getMockDom(html) {
     };
 }
 
-const { elementsLeftUntil, elementsRightUntil } = require("../src/DOM/DOM.js");
+const { elementsLeftUntil, elementsRightUntil, listContainsSome } = require("../src/DOM/DOM.js");
 
 describe('DOM Utilities', function () {
 
@@ -246,6 +246,33 @@ describe('DOM Utilities', function () {
                 "": "no_key",
                 "no_val": ""
             }));
+        });
+
+    });
+
+    describe('listContainsSome', function () {
+
+        const { document } = getMockDom();
+        
+        it('should return true if some tokens contained', function () {
+            const img = document.createElement("img");
+
+            img.classList.add("A","B","C");
+
+            const checked = listContainsSome(img.classList)("B","D");
+            expect(checked).to.be.true;
+        });
+
+        it('should return false if no tokens contained', function () {
+            const par = document.createElement("p");
+            const checked = listContainsSome(par.classList)("A","N");
+            expect(checked).to.be.false;
+        });
+
+        it('should return false on no tokens', function () {
+            const label = document.createElement("label");
+            const checked = listContainsSome(label.classList)();
+            expect(checked).to.be.false;
         });
 
     });
