@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-const { isObject, smartGetter, switchIfDiffProp } = require('../src/objects.js');
+const { isObject, smartGetter, switchIfDiffProp, setIf } = require('../src/objects.js');
 
 describe('isObject', function () {
 
@@ -63,7 +63,6 @@ describe('switchIfSameProp', function () {
     it('should correctly treat one object in', function () {
         const in1 = { test: 1 };
         const in2 = { Id: "abcd" };
-        const in3 = { Id: "efgh" };
 
         const out1 = switchIfDiffProp(in1)();
         const out2 = switchIfDiffProp(in2, "Id")();
@@ -98,6 +97,38 @@ describe('switchIfSameProp', function () {
 
         const defused = minefield.map(switchIfDiffProp({ bomb: true, defused: true }, "bomb"));
         expect(defused).to.not.deep.include({ bomb: true, defused: false });
+    });
+
+});
+
+describe('setIf', function () {
+
+    it('should return target object on no key', function () {
+        const out = setIf({},null,{ output: 42 });
+        expect(out.output).to.equal(42);
+    });
+    
+    it('should construct new object if no target', function () {
+        const out = setIf({ answer: 42 }, "answer");
+        expect(out).to.be.an.instanceOf(Object);
+        expect(out.answer).to.equal(42);
+    });
+
+    it('should not set non-defined properties', function () {
+        const out = setIf({}, "none", {});
+        expect(out).to.not.haveOwnProperty("none");
+    });
+
+    it('should set properties defined on prototype', function () {
+        const proto = { answer: 42 };
+        const child = Object.create(proto);
+        const out = setIf(child, "answer", {});
+        expect(out.answer).to.equal(42);
+    });
+
+    it('should correctly set falsy properties', function () {
+        const out = setIf({ found: false }, "found");
+        expect(out.found).to.be.false;
     });
 
 });

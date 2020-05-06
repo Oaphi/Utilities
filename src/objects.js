@@ -18,6 +18,26 @@
         const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 
         /**
+         * @summary copies property if it exists
+         * @param {object} source
+         * @param {string} key 
+         * @param {object} [target]
+         * @returns {object}
+         */
+        const setIf = (source, key, target = {}) => {
+
+            if(typeof key !== "string") {
+                return target;
+            }
+
+            if(key in source) {
+                target[key] = source[key];
+            }
+
+            return target;
+        };
+
+        /**
          * @summary defines a smart (memoizable) getter
          * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get}
          * @param {object} context 
@@ -68,6 +88,7 @@
 
         return {
             isObject,
+            setIf,
             smartGetter,
             switchIfDiffProp
         };
