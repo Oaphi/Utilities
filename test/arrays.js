@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const { expect } = require('chai');
 
-const { filterMap, filterMapped, forAll, keyMap } = require('../src/arrays.js');
+const { filterMap, filterMapped, forAll, keyMap, mergeOnto } = require('../src/arrays.js');
 
 const bench = require('benchmark');
 
@@ -172,6 +172,32 @@ describe('keyMap()', function () {
         const res = keyMap(toMap)();
 
         expect(res).to.deep.equal(toMap);
+    });
+
+});
+
+describe('mergeOnto', function () {
+    
+    it('should return original if no targets', function () {
+        const source = [1, , 2, , 3];
+        const out = mergeOnto(source);
+        expect(out).to.deep.equal(source);
+    });
+
+    it('should replace undefined indices from target', function () {
+        const source = [1, , 2, , 3];
+        const target = [4,1.5,5,2.5,6];
+        const out = mergeOnto(source,target);
+        expect(out).to.deep.equal([1,1.5,2,2.5,3]);
+    });
+
+    it('should prefer last specified target', function () {
+        const source  = ["A", undefined, "B", undefined, "C"];
+        const target1 = [null,"D","F","E","G"];
+        const target2 = [ "M", 1, "B", 2, "N" ];
+
+        const out = mergeOnto(source,target1,target2);
+        expect(out).to.deep.equal(["A",1,"B",2,"C"]);
     });
 
 });
