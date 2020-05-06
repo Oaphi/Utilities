@@ -2,7 +2,14 @@ const fs = require('fs');
 
 const { expect } = require('chai');
 
-const { filterMap, filterMapped, forAll, keyMap, mergeOnto } = require('../src/arrays.js');
+const { 
+    filterMap, 
+    filterMapped, 
+    forAll, 
+    keyMap, 
+    mergeOnto, 
+    spliceInto 
+} = require('../src/arrays.js');
 
 const bench = require('benchmark');
 
@@ -198,6 +205,37 @@ describe('mergeOnto', function () {
 
         const out = mergeOnto(source,target1,target2);
         expect(out).to.deep.equal(["A",1,"B",2,"C"]);
+    });
+
+});
+
+describe('spliceInto', function () {
+    
+    it('should insert target items at correct indices', function () {
+        const source = ["A","B","C","D"];
+        const target = ["insert",undefined,"insert"];
+
+        const out = spliceInto(source,target);
+
+        expect(out[0]).to.equal("insert");
+        expect(out[2]).to.equal("insert");
+        expect(out).to.have.lengthOf(6);
+    });
+
+    it('should splice values in for multiple targets', function () {
+        const source = ["A", "B", "C", "D"];
+        const target1 = ["insert",undefined];
+        const target2 = ["reinsert","reinsert"];
+
+        const out = spliceInto(source,target1, target2);
+
+        expect(out).to.deep.equal(["reinsert","reinsert","insert","A","B","C","D"]);
+    });
+
+    it('should insert nothing if no target', function () {
+        const source = ["A", "B", "C", "D"];
+        const out = spliceInto(source);
+        expect(out).to.deep.equal(source);
     });
 
 });
