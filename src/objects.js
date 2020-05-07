@@ -26,11 +26,11 @@
          */
         const setIf = (source, key, target = {}) => {
 
-            if(typeof key !== "string") {
+            if (typeof key !== "string") {
                 return target;
             }
 
-            if(key in source) {
+            if (key in source) {
                 target[key] = source[key];
             }
 
@@ -53,8 +53,8 @@
 
                     Object.defineProperty(context, propName, {
                         value: temp
-                    } )
-                    
+                    });
+
                     return temp;
                 }
             });
@@ -73,23 +73,48 @@
              */
             (source) => {
 
-                if(!target) {
+                if (!target) {
                     return source || {};
                 }
 
-                if(!source) {
+                if (!source) {
                     return target || {};
                 }
 
                 return target[propName] === source[propName] ?
-                target :
-                source;
+                    target :
+                    source;
+            };
+
+        /**
+         * @summary makes a union of object
+         * @param {object} target 
+         * @param  {...object} sources 
+         * @returns {object}
+         */
+        const union = (target, ...sources) => {
+
+            const union = Object.assign({}, target);
+
+            const assignedKeys = {};
+
+            for (const source of sources) {
+                for (const key in source) {
+                    if (!assignedKeys[key] && !(key in union)) {
+                        assignedKeys[key] |= 1;
+                        union[key] = source[key];
+                    }
+                }
             }
+
+            return union;
+        };
 
         return {
             isObject,
             setIf,
             smartGetter,
-            switchIfDiffProp
+            switchIfDiffProp,
+            union
         };
     }));

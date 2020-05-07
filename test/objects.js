@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-const { isObject, smartGetter, switchIfDiffProp, setIf } = require('../src/objects.js');
+const { isObject, smartGetter, switchIfDiffProp, setIf, union } = require('../src/objects.js');
 
 describe('isObject', function () {
 
@@ -129,6 +129,30 @@ describe('setIf', function () {
     it('should correctly set falsy properties', function () {
         const out = setIf({ found: false }, "found");
         expect(out.found).to.be.false;
+    });
+
+});
+
+describe('union', function () {
+    
+    it('should not override target fields', function () {
+        const out = union({ alpha: 1 }, { alpha: 2 });
+        expect(out.alpha).to.equal(1);
+    });
+
+    it('should correctly transfer properties', function () {
+        const out = union({ alpha: 1 }, { beta : 2 }, { gamma : 3 });
+        expect(out.beta).to.equal(2);
+        expect(out.gamma).to.equal(3);
+    });
+
+    it('should decouple union from target (shallow)', function () {
+        const init = { theta: 4 };
+
+        const out = union(init);
+        init.theta = 42;
+        
+        expect(out.theta).to.equal(4);
     });
 
 });
