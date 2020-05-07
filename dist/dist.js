@@ -262,12 +262,35 @@
             return output;
         };
 
+        /**
+         * 
+         * @param {any[]} source 
+         * @param {...any[]} targets
+         * @returns {any[]}
+         */
+        const spliceInto = (source, ...targets) => {
+
+            const output = source.map(item => item); //shallow copy;
+
+            for(const target of targets) {
+                target.forEach((item, index) => {
+                    if (typeof item !== "undefined") {
+                        output.splice(index, 0, item);
+                    }
+                });
+            }
+
+            return output;
+        }
+
+
         return {
             filterMap,
             filterMapped,
             forAll,
             keyMap,
-            mergeOnto
+            mergeOnto,
+            spliceInto
         };
 
     }));
