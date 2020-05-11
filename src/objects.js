@@ -18,20 +18,44 @@
         const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 
         /**
+         * @typedef {object} SetOptions
+         * @property {string} [coerce]
+         * 
+         * 
          * @summary copies property if it exists
          * @param {object} source
          * @param {string} key 
          * @param {object} [target]
+         * @param {SetOptions} [options]
          * @returns {object}
          */
-        const setIf = (source, key, target = {}) => {
+        const setIf = (source, key, target = {}, options = {}) => {
 
             if (typeof key !== "string") {
                 return target;
             }
 
+            /** @type {Map<string, function>} */
+            const coercionMap = new Map()
+                .set("string", val => {
+
+                    if(typeof val === "string") {
+                        return val;
+                    }
+
+                    if(typeof val === "number") {
+                        return Number.prototype.toString.call(val);
+                    }
+
+                    return val;
+                });
+
+            const { coerce } = options;
+
             if (key in source) {
-                target[key] = source[key];
+                const value = source[key];
+                
+                target[key] = coerce ? (coercionMap.get(coerce))(value) : value;
             }
 
             return target;

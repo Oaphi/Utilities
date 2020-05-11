@@ -131,9 +131,42 @@ describe('setIf', function () {
         expect(out.found).to.be.false;
     });
 
+    describe('Options', function () {
+        
+        describe('coerce', function () {
+            
+            it('should convert to string correctly', function () {
+                const source = {
+                    str: "question",
+                    num: 12.5
+                };
+
+                const output = {};
+                
+                setIf(source, "num", output, { coerce: "string" });
+                setIf(source, "str", output, { coerce: "string" });
+
+                expect(output).to.have.property("num").that.is.equal("12.5");
+                expect(output).to.have.property("str").that.equals("question");
+            });
+
+        });
+
+    });
+
 });
 
 describe('union', function () {
+
+    it('should not fail on undefined as source', function () {
+        const out = union(undefined, { delta: 4 });
+        expect(out.delta).to.equal(4);
+    });
+
+    it('should not fail on null as source', function () {
+        const out = union(null, { epsilon: 5 });
+        expect(out.epsilon).to.equal(5);
+    });
     
     it('should not override target fields', function () {
         const out = union({ alpha: 1 }, { alpha: 2 });
@@ -151,7 +184,7 @@ describe('union', function () {
 
         const out = union(init);
         init.theta = 42;
-        
+
         expect(out.theta).to.equal(4);
     });
 
