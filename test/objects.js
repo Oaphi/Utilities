@@ -1,6 +1,13 @@
 const { expect } = require('chai');
 
-const { isObject, smartGetter, switchIfDiffProp, setIf, union } = require('../src/objects.js');
+const {
+    isObject,
+    pushOrInitProp,
+    smartGetter,
+    switchIfDiffProp,
+    setIf,
+    union
+} = require('../src/objects.js');
 
 describe('isObject', function () {
 
@@ -27,6 +34,25 @@ describe('isObject', function () {
     it('should return true on non-empty obj', function () {
         const obj = isObject({ keys: "values" });
         expect(obj).to.be.true;
+    });
+
+});
+
+describe('pushOrInitProp', function () {
+
+    it('should init property to array with value', function () {
+        const output = pushOrInitProp({}, "chapter", 24);
+        expect(output).to.have.property("chapter").that.deep.equals([24]);
+    });
+
+    it('should push to property if already set', function () {
+        const output = pushOrInitProp({ "volumes": [1,2] }, "volumes", 3);
+        expect(output).to.haveOwnProperty("volumes").that.deep.equals([1,2,3]);
+    });
+
+    it('should wrap non-array props in array first', function () {
+        const output = pushOrInitProp({ "par": "introduction" }, "par", "foreword");
+        expect(output).to.have.property("par").deep.equal(["introduction", "foreword"]);
     });
 
 });
@@ -90,8 +116,8 @@ describe('switchIfSameProp', function () {
 
     it('should be usable functional-style', function () {
         const minefield = [
-            { bomb: true, defused: false }, 
-            { bomb: false }, 
+            { bomb: true, defused: false },
+            { bomb: false },
             { bomb: true, defused: false }
         ];
 
@@ -104,10 +130,10 @@ describe('switchIfSameProp', function () {
 describe('setIf', function () {
 
     it('should return target object on no key', function () {
-        const out = setIf({},null,{ output: 42 });
+        const out = setIf({}, null, { output: 42 });
         expect(out.output).to.equal(42);
     });
-    
+
     it('should construct new object if no target', function () {
         const out = setIf({ answer: 42 }, "answer");
         expect(out).to.be.an.instanceOf(Object);
@@ -132,9 +158,9 @@ describe('setIf', function () {
     });
 
     describe('Options', function () {
-        
+
         describe('coerce', function () {
-            
+
             it('should convert to string correctly', function () {
                 const source = {
                     str: "question",
@@ -142,7 +168,7 @@ describe('setIf', function () {
                 };
 
                 const output = {};
-                
+
                 setIf(source, "num", output, { coerce: "string" });
                 setIf(source, "str", output, { coerce: "string" });
 
@@ -167,14 +193,14 @@ describe('union', function () {
         const out = union(null, { epsilon: 5 });
         expect(out.epsilon).to.equal(5);
     });
-    
+
     it('should not override target fields', function () {
         const out = union({ alpha: 1 }, { alpha: 2 });
         expect(out.alpha).to.equal(1);
     });
 
     it('should correctly transfer properties', function () {
-        const out = union({ alpha: 1 }, { beta : 2 }, { gamma : 3 });
+        const out = union({ alpha: 1 }, { beta: 2 }, { gamma: 3 });
         expect(out.beta).to.equal(2);
         expect(out.gamma).to.equal(3);
     });

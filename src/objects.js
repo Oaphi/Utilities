@@ -18,6 +18,32 @@
         const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 
         /**
+         * @summary pushes value in or inits array with value
+         * @param {object} obj 
+         * @param {string} key 
+         * @param {*} value 
+         * @returns {object}
+         */
+        const pushOrInitProp = (obj, key, value) => {
+
+            if(key in obj) {
+                const temp = obj[key];
+
+                if(Array.isArray(temp)) {
+                    temp.push(value);
+                    return obj;
+                }
+
+                obj[key] = [ temp, value ];
+                return obj;
+            }
+
+            obj[key] = [value];
+
+            return obj;
+        };
+
+        /**
          * @typedef {object} SetOptions
          * @property {string} [coerce]
          * 
@@ -54,7 +80,7 @@
 
             if (key in source) {
                 const value = source[key];
-                
+
                 target[key] = coerce ? (coercionMap.get(coerce))(value) : value;
             }
 
@@ -136,6 +162,7 @@
 
         return {
             isObject,
+            pushOrInitProp,
             setIf,
             smartGetter,
             switchIfDiffProp,
