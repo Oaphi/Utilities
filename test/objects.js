@@ -6,8 +6,35 @@ const {
     smartGetter,
     switchIfDiffProp,
     setIf,
-    union
+    union,
+    whichKeysAreSet
 } = require('../src/objects.js');
+
+describe('whichKeysAreSet', function () {
+    
+    it('should return empty array on no keys', function () {
+        
+        const source = {
+            apha: 1,
+            beta: 2
+        };
+
+        const result = whichKeysAreSet(source);
+        expect(result).to.be.empty;
+    });
+
+    it('should correctly filter keys', function () {
+        
+        const source = {
+            gamma: 3,
+            delta: 4
+        };
+
+        const result = whichKeysAreSet(source,"delta");
+        expect(result).to.deep.equal(["delta"]);
+    });
+
+});
 
 describe('isObject', function () {
 
