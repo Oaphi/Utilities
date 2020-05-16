@@ -780,13 +780,24 @@ module.exports = {
             return union;
         };
 
+        /**
+         * @summary checks which key is set on object
+         * @param {object} obj 
+         * @param  {...string} keys 
+         * @returns {string[]}
+         */
+        const whichKeysAreSet = (obj, ...keys) => {
+            return keys.filter(key => obj.hasOwnProperty(key));
+        };
+
         return {
             isObject,
             pushOrInitProp,
             setIf,
             smartGetter,
             switchIfDiffProp,
-            union
+            union,
+            whichKeysAreSet
         };
     }));
 
