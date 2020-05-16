@@ -7,8 +7,50 @@ const {
     switchIfDiffProp,
     setIf,
     union,
+    whichKeyIsSet,
     whichKeysAreSet
 } = require('../src/objects.js');
+
+describe('whichKeyIsSet', function () {
+
+    it('should return null on no keys', function () {
+        const obj = {
+            some: "value"
+        };
+
+        const result = whichKeyIsSet(obj);
+        expect(result).to.be.null;
+    });
+
+    it('should return null on no match', function () {
+        const obj = {
+            another: 42
+        };
+
+        const result = whichKeyIsSet(obj,"other");
+        expect(result).to.equal(null);
+    });
+
+    it('should correctly match key', function () {
+        const obj = {
+            and_another: 1024
+        };
+
+        const result = whichKeyIsSet(obj,"and_another","and_even_more","that");
+        expect(result).to.equal("and_another");
+    });
+
+    it('should throw RangeError on 2 and more matches', function () {
+        const obj = {
+            that: "will",
+            indeed: "fail"
+        };
+
+        const makeResult = () => whichKeyIsSet(obj,"that","indeed");
+        expect(makeResult).to.throw(RangeError);
+    });
+
+});
 
 describe('whichKeysAreSet', function () {
     
