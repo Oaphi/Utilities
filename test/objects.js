@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 
 const {
+    complement,
     isObject,
     pushOrInitProp,
     smartGetter,
@@ -10,6 +11,54 @@ const {
     whichKeyIsSet,
     whichKeysAreSet
 } = require('../src/objects.js');
+
+describe('complement', function () {
+
+    it('should return empty object if no sources', function () {
+        const output = complement();
+        expect(output).to.be.instanceof(Object).and.be.empty;
+    });
+
+    it('should return object itself if no sources', function () {
+        const output = complement({ answer: 42 });
+        expect(output).to.be.deep.equal({ answer: 42 });
+    });
+
+    it('should not mutate original', function () {
+        const target = {
+            question: "life, universe and everything",
+            answer: 42
+        };
+
+        complement(target, {
+            invader: "space"
+        });
+
+        expect(target).to.not.have.property("invader");
+    });
+
+    it('should return only unique values', function () {
+        const target = {
+            numbers: [2,3,5,7],
+            string: "aloha",
+            bool: true
+        };
+
+        const source = {
+            string: "hola",
+            drink: "cocoa"
+        };
+
+        const output = complement(target, source);
+
+        expect(output).to.be.deep.equal({
+            numbers: [2,3,5,7],
+            bool: true,
+            drink: "cocoa"
+        });
+    });
+
+});
 
 describe('whichKeyIsSet', function () {
 

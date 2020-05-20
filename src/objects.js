@@ -10,6 +10,35 @@
     typeof self !== 'undefined' ? self : this,
     function () {
 
+
+        /**
+         * @summary returns a complement of objects
+         * @param  {...object} sources 
+         * @returns {object}
+         */
+        const complement = (...sources) => {
+
+            const tracked = [];
+
+            return sources.reduce((acc, curr) => {
+
+                for(const key in curr) {
+
+                    if(tracked.includes(key)) {
+                        delete acc[key];
+                        continue;
+                    }
+
+                    acc[key] = curr[key];
+
+                    tracked.push(key);
+                }
+
+                return acc;
+            }, {});
+        };
+
+
         /**
          * @summary checks if an object is a valid object
          * @param {object} obj
@@ -26,15 +55,15 @@
          */
         const pushOrInitProp = (obj, key, value) => {
 
-            if(key in obj) {
+            if (key in obj) {
                 const temp = obj[key];
 
-                if(Array.isArray(temp)) {
+                if (Array.isArray(temp)) {
                     temp.push(value);
                     return obj;
                 }
 
-                obj[key] = [ temp, value ];
+                obj[key] = [temp, value];
                 return obj;
             }
 
@@ -65,11 +94,11 @@
             const coercionMap = new Map()
                 .set("string", val => {
 
-                    if(typeof val === "string") {
+                    if (typeof val === "string") {
                         return val;
                     }
 
-                    if(typeof val === "number") {
+                    if (typeof val === "number") {
                         return Number.prototype.toString.call(val);
                     }
 
@@ -175,9 +204,9 @@
             const filtered = keys.filter(key => {
                 const has = obj.hasOwnProperty(key);
 
-                if(has) {
+                if (has) {
 
-                    if(matched) {
+                    if (matched) {
                         throw new RangeError(`Object has more than one provided own keys`);
                     }
 
@@ -201,6 +230,7 @@
         };
 
         return {
+            complement,
             isObject,
             pushOrInitProp,
             setIf,
