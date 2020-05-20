@@ -783,7 +783,37 @@ module.exports = {
         /**
          * @summary checks which key is set on object
          * @param {object} obj 
-         * @param  {...string} keys 
+         * @param  {...string} [keys] 
+         * @returns {?string}
+         * 
+         * @throws {RangeError}
+         */
+        const whichKeyIsSet = (obj, ...keys) => {
+
+            let matched = 0;
+
+            const filtered = keys.filter(key => {
+                const has = obj.hasOwnProperty(key);
+
+                if(has) {
+
+                    if(matched) {
+                        throw new RangeError(`Object has more than one provided own keys`);
+                    }
+
+                    matched |= 1;
+                }
+
+                return has;
+            });
+
+            return filtered[0] || null;
+        };
+
+        /**
+         * @summary checks which keys are set on object
+         * @param {object} obj 
+         * @param  {...string} [keys] 
          * @returns {string[]}
          */
         const whichKeysAreSet = (obj, ...keys) => {
@@ -797,6 +827,7 @@ module.exports = {
             smartGetter,
             switchIfDiffProp,
             union,
+            whichKeyIsSet,
             whichKeysAreSet
         };
     }));
