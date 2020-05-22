@@ -14,9 +14,9 @@ const {
 } = require('../src/objects.js');
 
 describe('getOrInitProp', function () {
-    
+
     it('should noop if no callback and no property', function () {
-    
+
         const source = {
             answer: 42
         };
@@ -29,13 +29,13 @@ describe('getOrInitProp', function () {
     });
 
     it('should return created value if not set', function () {
-        
+
         const source = {
             delta: 4,
             epsilon: 5
         };
 
-        const zeta = getOrInitProp(source, "zeta", (ctxt) => 6 );
+        const zeta = getOrInitProp(source, "zeta", (ctxt) => 6);
 
         expect(zeta).to.equal(6);
 
@@ -43,16 +43,29 @@ describe('getOrInitProp', function () {
     });
 
     it('should return value if already set', function () {
-        
+
         const source = {
             eta: 7
         };
 
-        const eta = getOrInitProp(source, "eta", (ctxt) => "should not run" );
+        const eta = getOrInitProp(source, "eta", (ctxt) => "should not run");
 
         expect(eta).to.equal(7);
 
         expect(source).to.have.property("eta").that.equals(7);
+    });
+
+    it('should work on static class properties', function () {
+
+        class Timer {
+
+            static getTime() {
+                return getOrInitProp(Timer, "time", () => 59);
+            }
+        }
+
+        expect(Timer.getTime()).to.equal(59);
+        expect(Timer.time).to.equal(59);
     });
 
 });
@@ -84,7 +97,7 @@ describe('complement', function () {
 
     it('should return only unique values', function () {
         const target = {
-            numbers: [2,3,5,7],
+            numbers: [2, 3, 5, 7],
             string: "aloha",
             bool: true
         };
@@ -97,7 +110,7 @@ describe('complement', function () {
         const output = complement(target, source);
 
         expect(output).to.be.deep.equal({
-            numbers: [2,3,5,7],
+            numbers: [2, 3, 5, 7],
             bool: true,
             drink: "cocoa"
         });
@@ -121,7 +134,7 @@ describe('whichKeyIsSet', function () {
             another: 42
         };
 
-        const result = whichKeyIsSet(obj,"other");
+        const result = whichKeyIsSet(obj, "other");
         expect(result).to.equal(null);
     });
 
@@ -130,7 +143,7 @@ describe('whichKeyIsSet', function () {
             and_another: 1024
         };
 
-        const result = whichKeyIsSet(obj,"and_another","and_even_more","that");
+        const result = whichKeyIsSet(obj, "and_another", "and_even_more", "that");
         expect(result).to.equal("and_another");
     });
 
@@ -140,16 +153,16 @@ describe('whichKeyIsSet', function () {
             indeed: "fail"
         };
 
-        const makeResult = () => whichKeyIsSet(obj,"that","indeed");
+        const makeResult = () => whichKeyIsSet(obj, "that", "indeed");
         expect(makeResult).to.throw(RangeError);
     });
 
 });
 
 describe('whichKeysAreSet', function () {
-    
+
     it('should return empty array on no keys', function () {
-        
+
         const source = {
             apha: 1,
             beta: 2
@@ -160,13 +173,13 @@ describe('whichKeysAreSet', function () {
     });
 
     it('should correctly filter keys', function () {
-        
+
         const source = {
             gamma: 3,
             delta: 4
         };
 
-        const result = whichKeysAreSet(source,"delta");
+        const result = whichKeysAreSet(source, "delta");
         expect(result).to.deep.equal(["delta"]);
     });
 
@@ -209,8 +222,8 @@ describe('pushOrInitProp', function () {
     });
 
     it('should push to property if already set', function () {
-        const output = pushOrInitProp({ "volumes": [1,2] }, "volumes", 3);
-        expect(output).to.haveOwnProperty("volumes").that.deep.equals([1,2,3]);
+        const output = pushOrInitProp({ "volumes": [1, 2] }, "volumes", 3);
+        expect(output).to.haveOwnProperty("volumes").that.deep.equals([1, 2, 3]);
     });
 
     it('should wrap non-array props in array first', function () {
