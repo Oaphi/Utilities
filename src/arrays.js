@@ -55,6 +55,13 @@
         };
 
         /**
+         * @summary returns last element of array
+         * @param {any[]} array
+         * @returns {any} 
+         */
+        const last = (array) => array[array.length - 1];
+
+        /**
          * Executes a callback for each element
          * (same as forEach, but in FP style + faster)
          * @param {any[]} [array]
@@ -139,6 +146,7 @@
             filterMapped,
             forAll,
             keyMap,
+            last,
             mergeOnto,
             spliceInto
         };

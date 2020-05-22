@@ -7,6 +7,7 @@ const {
     filterMapped, 
     forAll, 
     keyMap, 
+    last,
     mergeOnto, 
     spliceInto 
 } = require('../src/arrays.js');
@@ -179,6 +180,19 @@ describe('keyMap()', function () {
         const res = keyMap(toMap)();
 
         expect(res).to.deep.equal(toMap);
+    });
+
+});
+
+describe('last', function () {
+    
+    it('it should get last element', function () {
+        const arr = [1,2,3,4,5];
+        expect(last(arr)).to.equal(5);
+    });
+
+    it('should return undefined if no elems', function () {
+        expect(last([])).to.be.undefined;
     });
 
 });
