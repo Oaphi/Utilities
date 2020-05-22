@@ -787,9 +787,9 @@ module.exports = {
 
             return sources.reduce((acc, curr) => {
 
-                for(const key in curr) {
+                for (const key in curr) {
 
-                    if(tracked.includes(key)) {
+                    if (tracked.includes(key)) {
                         delete acc[key];
                         continue;
                     }
@@ -803,6 +803,24 @@ module.exports = {
             }, {});
         };
 
+        /**
+         * @summary gets value from object or inits it via callback
+         * @param {object} obj
+         * @param {string} propName
+         * @param {function(object) : any} [callback]
+         * @returns {any}
+         */
+        const getOrInitProp = (obj, propName, callback) => {
+
+            if (propName in obj) {
+                return obj[propName];
+            }
+
+            if(callback) {
+                obj[propName] = callback(obj);
+                return obj[propName];
+            }
+        };
 
         /**
          * @summary checks if an object is a valid object
@@ -996,6 +1014,7 @@ module.exports = {
 
         return {
             complement,
+            getOrInitProp,
             isObject,
             pushOrInitProp,
             setIf,
