@@ -2,6 +2,7 @@ const { expect } = require('chai');
 
 const {
     complement,
+    getOrInitProp,
     isObject,
     pushOrInitProp,
     smartGetter,
@@ -11,6 +12,50 @@ const {
     whichKeyIsSet,
     whichKeysAreSet
 } = require('../src/objects.js');
+
+describe('getOrInitProp', function () {
+    
+    it('should noop if no callback and no property', function () {
+    
+        const source = {
+            answer: 42
+        };
+
+        const question = getOrInitProp(source, "question");
+
+        expect(source).to.not.have.property("question");
+
+        expect(question).to.be.undefined;
+    });
+
+    it('should return created value if not set', function () {
+        
+        const source = {
+            delta: 4,
+            epsilon: 5
+        };
+
+        const zeta = getOrInitProp(source, "zeta", (ctxt) => 6 );
+
+        expect(zeta).to.equal(6);
+
+        expect(source).to.have.property("zeta");
+    });
+
+    it('should return value if already set', function () {
+        
+        const source = {
+            eta: 7
+        };
+
+        const eta = getOrInitProp(source, "eta", (ctxt) => "should not run" );
+
+        expect(eta).to.equal(7);
+
+        expect(source).to.have.property("eta").that.equals(7);
+    });
+
+});
 
 describe('complement', function () {
 
