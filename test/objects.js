@@ -2,6 +2,7 @@ const { expect } = require('chai');
 
 const {
     complement,
+    getGetterDescriptors,
     getOrInitProp,
     isObject,
     pushOrInitProp,
@@ -12,6 +13,42 @@ const {
     whichKeyIsSet,
     whichKeysAreSet
 } = require('../src/objects.js');
+
+describe('getGetterDescriptors', function () {
+
+    it('should return empty array on no source', function () {
+        const getters = getGetterDescriptors();
+        expect(getters).to.be.empty;
+    });
+
+    it('should return getters only (both init and added later)', function () {
+        const source = {
+
+            scored: 0,
+
+            set score(value) {
+                this.scored = +value;
+            },
+
+            get score() {
+                return 9999;
+            }
+        };
+
+        Object.defineProperty(source, "succeeded", {
+            get() {
+                return this.scored > 75;
+            }
+        });
+
+        const getters = getGetterDescriptors(source);
+
+        expect(getters).to.be.of.length(2);
+        expect(getters).to.deep.contain(["score", Object.getOwnPropertyDescriptor(source, "score")]);
+        expect(getters).to.deep.contain(["succeeded", Object.getOwnPropertyDescriptor(source, "succeeded")]);
+});
+
+});
 
 describe('getOrInitProp', function () {
 
