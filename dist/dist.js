@@ -859,6 +859,25 @@ module.exports = {
         };
 
         /**
+         * @typedef {({ 
+         *  configurable: boolean,
+         *  enumerable: boolean,
+         *  writable: boolean,
+         *  get: function, 
+         *  set: function,
+         *  value: any
+         * })} PropertyDescriptor
+         * 
+         * @param {object} obj
+         * @returns {PropertyDescriptor}
+         */
+        const getGetterDescriptors = (obj = {}) => {
+            return Object
+                .entries(Object.getOwnPropertyDescriptors(obj))
+                .filter(entry => typeof entry[1].get === "function");
+        };
+
+        /**
          * @summary gets value from object or inits it via callback
          * @param {object} obj
          * @param {string} propName
@@ -871,7 +890,7 @@ module.exports = {
                 return obj[propName];
             }
 
-            if(callback) {
+            if (callback) {
                 obj[propName] = callback(obj);
                 return obj[propName];
             }
@@ -1069,6 +1088,7 @@ module.exports = {
 
         return {
             complement,
+            getGetterDescriptors,
             getOrInitProp,
             isObject,
             pushOrInitProp,
