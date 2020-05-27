@@ -9,10 +9,38 @@ const {
     keyMap, 
     last,
     mergeOnto, 
-    spliceInto 
+    spliceInto,
+    splitIntoConseq
 } = require('../src/arrays.js');
 
 const bench = require('benchmark');
+
+describe('splitIntoConseq', function () {
+    
+    it('should return empty array on no args', function () {
+        const output = splitIntoConseq();
+        expect(output).to.be.empty;
+    });
+
+    it('should return an array of conseq. subsequences', function () {
+        
+        const input = [1,2,18,14,19,20,6,5];
+
+        const output = splitIntoConseq(input);
+
+        expect(output).to.deep.equal([[1,2],[5,6],[14],[18,19,20]]);
+    });
+
+    it('should split in 1-elem subsequences if no-conseq', function () {
+        
+        const input = [5,10,7,13];
+
+        const output = splitIntoConseq(input);
+
+        expect(output).to.deep.equal([[5],[7],[10],[13]]);
+    });
+
+});
 
 describe('filterMap()', function () {
     const arr = [1, 2, 3, 4, 5, 6, 7, 8];
