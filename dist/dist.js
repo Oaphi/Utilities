@@ -248,7 +248,7 @@
 
             const output = [];
 
-            for(let index = 0; index < source.length; index++) {
+            for (let index = 0; index < source.length; index++) {
                 const item = source[index];
 
                 if (typeof item === "undefined") {
@@ -262,7 +262,7 @@
                     output.push(finalValue);
                     continue;
                 }
-        
+
                 output.push(item);
             }
 
@@ -279,7 +279,7 @@
 
             const output = source.map(item => item); //shallow copy;
 
-            for(const target of targets) {
+            for (const target of targets) {
                 target.forEach((item, index) => {
                     if (typeof item !== "undefined") {
                         output.splice(index, 0, item);
@@ -288,7 +288,50 @@
             }
 
             return output;
-        }
+        };
+
+        /**
+         * @summary splits array in consequitive subsequences
+         * @param {any[]} [source] 
+         * @returns {any[][]}
+         */
+        const splitIntoConseq = (source = []) => {
+
+            const sequences = [], tails = [];
+
+            let highestElem = -Infinity;
+
+            source.forEach(element => {
+
+                const precedeIndex = tails.indexOf(element + 1);
+                const tailIndex = tails.indexOf(element - 1);
+
+                if (tailIndex > -1) {
+                    sequences[tailIndex].push(element);
+                    tails[tailIndex] = element;
+                    return;
+                }
+
+                if (precedeIndex > -1) {
+                    sequences[precedeIndex].unshift(element);
+                    tails[precedeIndex] = element;
+                    return;
+                }
+
+                if (element > highestElem) {
+                    tails.push(element);
+                    sequences.push([element]);
+                    highestElem = element;
+                    return;
+                }
+
+                const spliceIndex = tails.findIndex((e) => e < element) + 1;
+                tails.splice(spliceIndex, 0, element);
+                sequences.splice(spliceIndex, 0, [element]);
+            });
+
+            return sequences;
+        };
 
 
         return {
@@ -298,7 +341,8 @@
             keyMap,
             last,
             mergeOnto,
-            spliceInto
+            spliceInto,
+            splitIntoConseq
         };
 
     }));

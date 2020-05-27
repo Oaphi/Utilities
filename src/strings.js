@@ -79,8 +79,8 @@
             return `${amount} ${irregularPlural}`;
         }
 
-        if(manWomanCase = normalized.match(/(\w*)(man|woman)$/)) {
-            return `${amount} ${manWomanCase[1]}${manWomanCase[2].replace("a","e")}`;
+        if (manWomanCase = normalized.match(/(\w*)(man|woman)$/)) {
+            return `${amount} ${manWomanCase[1]}${manWomanCase[2].replace("a", "e")}`;
         }
 
         const staySameExceptions = new Set(["sheep", "series", "species", "deer", "fish"]);
@@ -103,8 +103,8 @@
             return `${amount} ${normalized}s`;
         }
 
-        if (oneLastLetter === "f" || twoLastLetters === "fe") {
-            return `${amount} ${normalized.slice(0, normalized.lastIndexOf("f"))}ves`;
+        if (/(?:f|fe)$/.test(noun)) {
+            return `${amount} ${ normalized.replace(/(?:f|fe)$/,"ves")}`;
         }
 
         const twoLettersReplaceMap = {
@@ -117,7 +117,7 @@
             return `${amount} ${wordBase}${lastLettersReplace}`;
         }
 
-        const twoLettersAddMap = new Set(["ch","ss","sh"]);
+        const twoLettersAddMap = new Set(["ch", "ss", "sh"]);
         if (twoLettersAddMap.has(twoLastLetters)) {
             return `${amount} ${normalized}es`;
         }
@@ -141,7 +141,7 @@
         }
 
         if (oneLastLetter === "y" && isLetterBeforeLastConsonant) {
-            return `${amount} ${normalized.slice(0,-1)}ies`;
+            return `${amount} ${normalized.slice(0, -1)}ies`;
         }
 
         return `${amount} ${normalized}s`;
