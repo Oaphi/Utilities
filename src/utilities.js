@@ -36,13 +36,6 @@ const exp32 = offsetK(32);
 const exp64 = offsetK(64);
 
 /**
- * String Utilities
- */
-
-//Applies sentence case to a string
-const sentenceCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
-
-/**
  * Object Utilities
  */
 
