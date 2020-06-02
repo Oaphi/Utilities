@@ -1,6 +1,38 @@
 const { expect } = require("chai");
 
-const { isLcase, isUcase, pluralizeCountable } = require("../src/strings.js");
+const { 
+    isLcase, 
+    isUcase, 
+    pluralizeCountable, 
+    sentenceCase 
+} = require("../src/strings.js");
+
+describe('sentenceCase', function () {
+
+    it('should result in no-op for empty strings', function () {
+
+        const empty = sentenceCase("");
+        expect(empty).to.equal("");
+    });
+
+    it('should not fail on single char', function () {
+        
+        const single = sentenceCase("o");
+        expect(single).to.equal("O");
+    });
+    
+    it('should uppercase first char and lowercase others', function () {
+
+        const camel = sentenceCase("camelCase");
+        const allLow = sentenceCase("lowercase");
+        const allUp = sentenceCase("UPPERCASE");
+
+        expect(camel).to.equal("Camelcase");
+        expect(allLow).to.equal("Lowercase");
+        expect(allUp).to.equal("Uppercase");
+    });
+
+});
 
 describe('pluralizeCountable', function () {
 
@@ -91,9 +123,6 @@ describe('pluralizeCountable', function () {
             const result = exceptions.every(singular => {
                 const randomAmount = Math.floor(Math.random() * 100) + 2;
                 const plural = pluralizeCountable(randomAmount, singular);
-
-                console.log(`${singular} -> ${plural}`);
-
                 return plural === `${randomAmount} ${singular}s`;
             });
 

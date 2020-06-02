@@ -148,6 +148,13 @@
     };
 
     /**
+     * @summary makes word Sentence-case
+     * @param {string} word 
+     * @returns {string}
+     */
+    const sentenceCase = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+
+    /**
      * @summary trims string and removes non-word chars
      * 
      * @example
@@ -162,6 +169,7 @@
         isLcase,
         isUcase,
         pluralizeCountable,
+        sentenceCase,
         trimAndRemoveSep
     };
 
