@@ -12,6 +12,8 @@
 //delays callback for a specified number of milliseconds;
 const delay = (time) => (callback) => (...args) => setTimeout(() => callback(...args), time || 100);
 
+const noop = () => {};
+
 /**
  * Number utilities
  */
@@ -326,6 +328,7 @@ module.exports = {
     jsonToFormatString,
     keysByValue,
     numCombinations,
+    noop,
     offsetK,
     relativeGrowth,
     subsplit,
