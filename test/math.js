@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const {
     average, divide, divSum,
     multiply, multSum, substract,
-    sum, LCM, GCD
+    sum, LCM, GCD, fibonacci
 } = require('../src/math.js');
 
 const { randomArray } = require('../src/random.js');
@@ -110,6 +110,22 @@ describe('Math Utilities', function () {
             it('should correctly apply sum() -> divide()', function () {
                 const res = divSum(3)(1, 2, 3, 4, 5, 6);
                 strictEqual(res, 7);
+            });
+
+        });
+
+        describe('fibonacci()', function () {
+            
+            it('should return empty array on no N', function () {
+                const numsNo = fibonacci();
+                const numsZero = fibonacci(0);
+                expect(numsNo).to.be.deep.equal(numsNo).and.to.be.empty;
+            });
+
+            it('should return first N numbers correctly', function () {
+                const first = [0,1,1,2,3,5,8];
+                const out = fibonacci(first.length);
+                expect(out).to.deep.equal(first);
             });
 
         });
