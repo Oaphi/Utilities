@@ -1,7 +1,10 @@
-const { expect } = require('chai');
+import chai from "chai";
+const { expect } = chai;
 
+import * as objects from '../src/objects.mjs';
 const {
     complement,
+    deepGetByType,
     getGetterDescriptors,
     getOrInitProp,
     isObject,
@@ -12,7 +15,72 @@ const {
     union,
     whichKeyIsSet,
     whichKeysAreSet
-} = require('../src/objects.js');
+} = objects;
+
+describe('deepGetByType', function () {
+
+    describe('type filtering', function () {
+
+        const source = {
+            undef1: undefined,
+            nullish1: null,
+            bool1: true,
+            bool2: false,
+            num1: 0,
+            num2: 1,
+            str1: "first",
+            str2: "second",
+            subObject: {
+                undef2: undefined,
+                nullish2: null,
+                bool3: true,
+                bool4: false,
+                num3: 2,
+                num4: 3,
+                str3: "three",
+                str4: "four"
+            }
+        };
+
+        it('Boolean: should return boolean only', function () {
+            const result = deepGetByType(source)("boolean");
+            expect(result).to.deep.equal({
+                bool1: true, bool2: false,
+                bool3: true, bool4: false,
+            });
+        });
+
+        it('Number: should return number only', function () {
+            const result = deepGetByType(source)("number");
+            expect(result).to.deep.equal({
+                num1: 0, num2: 1,
+                num3: 2, num4: 3,
+            });
+        });
+
+        it('String: should returns string only', function () {
+            const result = deepGetByType(source)("string");
+            expect(result).to.deep.equal({
+                str1: "first", str2: "second",
+                str3: "three", str4: "four"
+            });
+        });
+
+        it('null and undefined special cases', function () {
+            const resultUndef = deepGetByType(source)("undefined");
+            expect(resultUndef).to.to.deep.equal({
+                undef1: undefined, undef2: undefined,
+            });
+
+            const resultNull = deepGetByType(source)(null);
+            expect(resultNull).to.be.deep.equal({
+                nullish1: null, nullish2: null,
+            });
+        });
+
+    });
+
+});
 
 describe('getGetterDescriptors', function () {
 
@@ -46,7 +114,7 @@ describe('getGetterDescriptors', function () {
         expect(getters).to.be.of.length(2);
         expect(getters).to.deep.contain(["score", Object.getOwnPropertyDescriptor(source, "score")]);
         expect(getters).to.deep.contain(["succeeded", Object.getOwnPropertyDescriptor(source, "succeeded")]);
-});
+    });
 
 });
 
@@ -72,7 +140,7 @@ describe('getOrInitProp', function () {
             epsilon: 5
         };
 
-        const zeta = getOrInitProp(source, "zeta", (ctxt) => 6);
+        const zeta = getOrInitProp(source, "zeta", () => 6);
 
         expect(zeta).to.equal(6);
 
@@ -85,7 +153,7 @@ describe('getOrInitProp', function () {
             eta: 7
         };
 
-        const eta = getOrInitProp(source, "eta", (ctxt) => "should not run");
+        const eta = getOrInitProp(source, "eta", () => "should not run");
 
         expect(eta).to.equal(7);
 
