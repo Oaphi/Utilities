@@ -901,11 +901,31 @@ const LCM = (...args) => {
     return args.reduce((out, arg) => arg * out / GCD(arg, out));
 };
 
+/**
+ * @summary returns first N fibonacci numbers
+ * @param {number} [n]
+ * @returns {number[]}
+ */
+function fibonacci(n = 0) {
+
+    const sequencer = (times, acc = [0]) => {
+        if (times === 1) {
+            return acc;
+        }
+        const { length } = acc;
+        acc.push(acc[length - 1] + acc[length - 2] || 1);
+        return sequencer(times - 1, acc);
+    };
+
+    return n < 1 ? [] : sequencer(n);
+}
+
 
 module.exports = {
     average,
     divide,
     divSum,
+    fibonacci,
     GCD,
     HCF: GCD,
     LCM,
