@@ -361,7 +361,7 @@ const { noop } = utilities;
  */
 const waitAsync = ({ ms = 1, callback = noop }) =>
 
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
         const now = Date.now();
 
         setTimeout(() => {
@@ -371,7 +371,20 @@ const waitAsync = ({ ms = 1, callback = noop }) =>
     });
 
 /**
- * @summary promise-based forEach preserving order
+ * @summary promise-based forEach preserving value and execution order
+ * @param {any[]} source 
+ * @param {function(any,number, any[]) : Promise<void>} asyncCallback
+ * @returns {Promise<void>}
+ */
+const forAwait = async (source, asyncCallback) => {
+    let i = 0;
+    for (const val of source) {
+        await asyncCallback(val, i++, source);
+    }
+};
+
+/**
+ * @summary promise-based forEach preserving value order
  * @param {Promise<any>[]} array
  * @param {function(any,number, Promise<any>[]) : void} callback
  * @returns {void}
@@ -382,6 +395,7 @@ const forEachAwait = async (source, callback) => {
 };
 
 export {
+    forAwait,
     forEachAwait,
     waitAsync
 };
