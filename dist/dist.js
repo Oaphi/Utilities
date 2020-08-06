@@ -389,7 +389,7 @@ exports["default"] = _default;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.reduceWithStep = exports.mergeOnto = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.chunkify = void 0;
+exports["default"] = void 0;
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -459,8 +459,6 @@ var chunkify = function chunkify(source) {
  */
 
 
-exports.chunkify = chunkify;
-
 var filterMap = function filterMap() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   return function () {
@@ -499,8 +497,6 @@ var filterMap = function filterMap() {
  * @returns {function(function):function(function):any[]}
  */
 
-
-exports.filterMap = filterMap;
 
 var filterMapped = function filterMapped() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -542,8 +538,6 @@ var filterMapped = function filterMapped() {
  */
 
 
-exports.filterMapped = filterMapped;
-
 var last = function last(array) {
   return array[array.length - 1];
 };
@@ -554,8 +548,6 @@ var last = function last(array) {
  * @returns {function(function):void} 
  */
 
-
-exports.last = last;
 
 var forAll = function forAll() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -587,8 +579,6 @@ var forAll = function forAll() {
  */
 
 
-exports.forAll = forAll;
-
 var keyMap = function keyMap() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   return function (key) {
@@ -604,8 +594,6 @@ var keyMap = function keyMap() {
  * @returns {any[]}
  */
 
-
-exports.keyMap = keyMap;
 
 var mergeOnto = function mergeOnto(source) {
   var output = [];
@@ -654,8 +642,6 @@ var mergeOnto = function mergeOnto(source) {
  */
 
 
-exports.mergeOnto = mergeOnto;
-
 var reduceWithStep = function reduceWithStep(_ref2) {
   var _ref2$source = _ref2.source,
       source = _ref2$source === void 0 ? [] : _ref2$source,
@@ -682,27 +668,43 @@ var reduceWithStep = function reduceWithStep(_ref2) {
  */
 
 
-exports.reduceWithStep = reduceWithStep;
-
 var shrinkGrid = function shrinkGrid() {
   var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      source = _ref3.source,
-      _ref3$horizontally = _ref3.horizontally,
-      horizontally = _ref3$horizontally === void 0 ? 0 : _ref3$horizontally,
       _ref3$vertically = _ref3.vertically,
       vertically = _ref3$vertically === void 0 ? 0 : _ref3$vertically,
+      source = _ref3.source,
       _ref3$top = _ref3.top,
       top = _ref3$top === void 0 ? 0 : _ref3$top,
       _ref3$right = _ref3.right,
       right = _ref3$right === void 0 ? 0 : _ref3$right,
+      _ref3$left = _ref3.left,
+      left = _ref3$left === void 0 ? 0 : _ref3$left,
+      _ref3$leave = _ref3.leave,
+      leave = _ref3$leave === void 0 ? {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0
+  } : _ref3$leave,
+      _ref3$horizontally = _ref3.horizontally,
+      horizontally = _ref3$horizontally === void 0 ? 0 : _ref3$horizontally,
       _ref3$bottom = _ref3.bottom,
       bottom = _ref3$bottom === void 0 ? 0 : _ref3$bottom,
-      _ref3$left = _ref3.left,
-      left = _ref3$left === void 0 ? 0 : _ref3$left;
+      _ref3$all = _ref3.all,
+      all = _ref3$all === void 0 ? 0 : _ref3$all;
 
   if (!source || !source.length) {
     return [[]];
   }
+
+  var _leave$top = leave.top,
+      leaveTop = _leave$top === void 0 ? 0 : _leave$top,
+      _leave$right = leave.right,
+      leaveRight = _leave$right === void 0 ? 0 : _leave$right,
+      _leave$bottom = leave.bottom,
+      leaveBottom = _leave$bottom === void 0 ? 0 : _leave$bottom,
+      _leave$left = leave.left,
+      leaveLeft = _leave$left === void 0 ? 0 : _leave$left;
 
   if (horizontally) {
     left = right = Math.floor(horizontally / 2);
@@ -712,13 +714,14 @@ var shrinkGrid = function shrinkGrid() {
     top = bottom = Math.floor(vertically / 2);
   }
 
-  var temp = [];
-  temp = source.slice(top);
-  temp = bottom ? temp.slice(0, -bottom) : temp;
-  return temp.map(function (row) {
-    return right ? row.slice(0, -right) : row;
-  }).map(function (row) {
-    return row.slice(left);
+  var length = source.length;
+  var topShift = length - (leaveBottom || length);
+  var bottomShift = length - (leaveTop || length);
+  return source.slice(all || top || topShift, (all || length) - (bottom || bottomShift)).map(function (row) {
+    var length = row.length;
+    var leftShift = length - (leaveRight || length);
+    var rightShift = length - (leaveLeft || length);
+    return row.slice(all || left || leftShift, (all || length) - (right || rightShift));
   });
 };
 /**
@@ -728,8 +731,6 @@ var shrinkGrid = function shrinkGrid() {
  * @returns {any[]}
  */
 
-
-exports.shrinkGrid = shrinkGrid;
 
 var spliceInto = function spliceInto(source) {
   var output = source.map(function (item) {
@@ -757,8 +758,6 @@ var spliceInto = function spliceInto(source) {
  * @returns {any[][]}
  */
 
-
-exports.spliceInto = spliceInto;
 
 var splitIntoConseq = function splitIntoConseq() {
   var source = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -797,7 +796,20 @@ var splitIntoConseq = function splitIntoConseq() {
   return sequences;
 };
 
-exports.splitIntoConseq = splitIntoConseq;
+var _default = {
+  chunkify: chunkify,
+  filterMap: filterMap,
+  filterMapped: filterMapped,
+  forAll: forAll,
+  keyMap: keyMap,
+  last: last,
+  mergeOnto: mergeOnto,
+  reduceWithStep: reduceWithStep,
+  shrinkGrid: shrinkGrid,
+  spliceInto: spliceInto,
+  splitIntoConseq: splitIntoConseq
+};
+exports["default"] = _default;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
