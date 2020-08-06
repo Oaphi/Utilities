@@ -1644,7 +1644,7 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepGetByType = exports.complement = void 0;
+exports["default"] = void 0;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -1687,18 +1687,16 @@ var complement = function complement() {
   }, {});
 };
 /**
- * @summary deep gets properties of specified type
+ * @summary deep gets properties of type
  * @param {object} [obj]
  */
 
-
-exports.complement = complement;
 
 var deepGetByType = function deepGetByType() {
   var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return (
     /**
-     * @param {string} type
+     * @param {("string"|"number"|"object"|"undefined"|"boolean"|null)} type
      * @returns {object}
      */
     function (type) {
@@ -1723,6 +1721,68 @@ var deepGetByType = function deepGetByType() {
     }
   );
 };
+
+var initArrOrObj = function initArrOrObj(entity) {
+  return entity !== undefined ? [] : {};
+};
+/**
+ * @summary deep parses properties of type
+ * @param {object} source 
+ * @returns {object}
+ */
+
+
+var deepParseByPath = function deepParseByPath(source) {
+  if (!isObject(source)) {
+    return source;
+  }
+
+  var output = {};
+  var idxRegExp = /([\w$@]+)(?:\[(\d+)\])?/;
+  Object.entries(source).forEach(function (_ref3) {
+    var _ref4 = _slicedToArray(_ref3, 2),
+        key = _ref4[0],
+        val = _ref4[1];
+
+    var levels = key.split(".");
+    var tmp = output;
+    var tmpIdx;
+    var length = levels.length;
+    levels.forEach(function (level, i) {
+      var _level$match = level.match(idxRegExp),
+          _level$match2 = _slicedToArray(_level$match, 3),
+          subkey = _level$match2[1],
+          idx = _level$match2[2];
+
+      tmpIdx || subkey in tmp || (tmp[subkey] = initArrOrObj(idx));
+
+      if (i < length - 1) {
+        tmp = tmp[subkey];
+        idx !== undefined && (tmpIdx = idx);
+        return;
+      }
+
+      if (tmpIdx) {
+        tmpIdx in tmp || (tmp[tmpIdx] = initArrOrObj(idx));
+      }
+
+      var parsedVal = deepParseByPath(val);
+      var idxOrKey = tmpIdx || subkey;
+
+      if (tmpIdx !== undefined) {
+        tmp[tmpIdx][subkey] = parsedVal;
+        return;
+      }
+
+      if (idx !== undefined) {
+        tmp[idxOrKey][idx] = parsedVal;
+      } else {
+        tmp[idxOrKey] = parsedVal;
+      }
+    });
+  });
+  return output;
+};
 /**
  * @typedef {({ 
  *  configurable: boolean,
@@ -1738,8 +1798,6 @@ var deepGetByType = function deepGetByType() {
  */
 
 
-exports.deepGetByType = deepGetByType;
-
 var getGetterDescriptors = function getGetterDescriptors() {
   var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return Object.entries(Object.getOwnPropertyDescriptors(obj)).filter(function (entry) {
@@ -1754,8 +1812,6 @@ var getGetterDescriptors = function getGetterDescriptors() {
  * @returns {any}
  */
 
-
-exports.getGetterDescriptors = getGetterDescriptors;
 
 var getOrInitProp = function getOrInitProp(obj, propName, callback) {
   if (propName in obj) {
@@ -1774,8 +1830,6 @@ var getOrInitProp = function getOrInitProp(obj, propName, callback) {
  */
 
 
-exports.getOrInitProp = getOrInitProp;
-
 var isObject = function isObject(obj) {
   return _typeof(obj) === 'object' && obj !== null && !Array.isArray(obj);
 };
@@ -1787,8 +1841,6 @@ var isObject = function isObject(obj) {
  * @returns {object}
  */
 
-
-exports.isObject = isObject;
 
 var pushOrInitProp = function pushOrInitProp(obj, key, value) {
   if (key in obj) {
@@ -1819,8 +1871,6 @@ var pushOrInitProp = function pushOrInitProp(obj, key, value) {
  * @returns {object}
  */
 
-
-exports.pushOrInitProp = pushOrInitProp;
 
 var setIf = function setIf(source, key) {
   var target = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -1862,8 +1912,6 @@ var setIf = function setIf(source, key) {
  */
 
 
-exports.setIf = setIf;
-
 var smartGetter = function smartGetter(context, propName, callback) {
   return Object.defineProperty(context, propName, {
     configurable: true,
@@ -1882,8 +1930,6 @@ var smartGetter = function smartGetter(context, propName, callback) {
  * @param {string} propName property name
  */
 
-
-exports.smartGetter = smartGetter;
 
 var switchIfDiffProp = function switchIfDiffProp(target, propName) {
   return (
@@ -1911,8 +1957,6 @@ var switchIfDiffProp = function switchIfDiffProp(target, propName) {
  * @returns {object}
  */
 
-
-exports.switchIfDiffProp = switchIfDiffProp;
 
 var union = function union(target) {
   var union = Object.assign({}, target);
@@ -1945,8 +1989,6 @@ var union = function union(target) {
  */
 
 
-exports.union = union;
-
 var whichKeyIsSet = function whichKeyIsSet(obj) {
   var matched = 0;
 
@@ -1977,8 +2019,6 @@ var whichKeyIsSet = function whichKeyIsSet(obj) {
  */
 
 
-exports.whichKeyIsSet = whichKeyIsSet;
-
 var whichKeysAreSet = function whichKeysAreSet(obj) {
   for (var _len4 = arguments.length, keys = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
     keys[_key4 - 1] = arguments[_key4];
@@ -1988,8 +2028,100 @@ var whichKeysAreSet = function whichKeysAreSet(obj) {
     return obj.hasOwnProperty(key);
   });
 };
+/**
+ * @summary maps each object key with mapper
+ * @param {object|[]} obj 
+ * @param {function (string,any) : any} mapper 
+ * @param {{ 
+ *  opaqueArrays : (boolean|true), 
+ *  keyMapper : function (string) : string 
+ * }} [options]
+ * @returns {object|[]}
+ */
 
-exports.whichKeysAreSet = whichKeysAreSet;
+
+var deepMap = function deepMap(obj, mapper) {
+  var _ref5 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      keyMapper = _ref5.keyMapper,
+      _ref5$opaqueArrays = _ref5.opaqueArrays,
+      opaqueArrays = _ref5$opaqueArrays === void 0 ? true : _ref5$opaqueArrays;
+
+  var isArr = Array.isArray(obj);
+  var output = isArr ? [] : {};
+  var mapKeys = typeof keyMapper === "function";
+  Object.entries(obj).forEach(function (_ref6) {
+    var _ref7 = _slicedToArray(_ref6, 2),
+        key = _ref7[0],
+        value = _ref7[1];
+
+    if (Array.isArray(value) && !opaqueArrays) {
+      output[mapKeys ? keyMapper(key) : key] = mapper(key, value);
+      return;
+    }
+
+    var mapped = _typeof(value) === "object" && value ? deepMap(value, mapper, {
+      keyMapper: keyMapper,
+      opaqueArrays: opaqueArrays
+    }) : mapper(mapKeys ? keyMapper(key) : key, value);
+    output[mapKeys && !isArr ? keyMapper(key) : key] = mapped;
+  });
+  return output;
+};
+/**
+ * @typedef {object} DeepFilterConfig
+ * @property {object} [accumulator] accumulates entities filtered out
+ * @property {boolean|true} [opaqueArrays] if false, treats arrays as values
+ * 
+ * @summary filters each object key with filterer
+ * @param {object|[]} obj 
+ * @param {function (string,any): boolean} filterer 
+ * @param {DeepFilterConfig} [options]
+ * @returns {object|[]}
+ */
+
+
+var deepFilter = function deepFilter(obj, filterer) {
+  var _ref8 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      accumulator = _ref8.accumulator,
+      _ref8$opaqueArrays = _ref8.opaqueArrays,
+      opaqueArrays = _ref8$opaqueArrays === void 0 ? true : _ref8$opaqueArrays;
+
+  var output = Array.isArray(obj) ? [] : {};
+  Object.entries(obj).forEach(function (_ref9) {
+    var _ref10 = _slicedToArray(_ref9, 2),
+        key = _ref10[0],
+        value = _ref10[1];
+
+    var canAdd = filterer(key, value);
+
+    if (opaqueArrays && Array.isArray(value) || isObject(value)) {
+      output[key] = deepFilter(value, filterer);
+      return;
+    }
+
+    canAdd && (output[key] = value) || accumulator && (accumulator[key] = value);
+  });
+  return output;
+};
+
+var _default = {
+  complement: complement,
+  deepFilter: deepFilter,
+  deepGetByType: deepGetByType,
+  deepMap: deepMap,
+  deepParseByPath: deepParseByPath,
+  getGetterDescriptors: getGetterDescriptors,
+  getOrInitProp: getOrInitProp,
+  isObject: isObject,
+  pushOrInitProp: pushOrInitProp,
+  setIf: setIf,
+  smartGetter: smartGetter,
+  switchIfDiffProp: switchIfDiffProp,
+  union: union,
+  whichKeyIsSet: whichKeyIsSet,
+  whichKeysAreSet: whichKeysAreSet
+};
+exports["default"] = _default;
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
