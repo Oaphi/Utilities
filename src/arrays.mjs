@@ -194,18 +194,32 @@ const reduceWithStep = ({
  * @param {ShrinkConfig} [source]
  */
 const shrinkGrid = ({
-    source,
-    horizontally = 0,
     vertically = 0,
+    source,
     top = 0,
     right = 0,
+    left = 0,
+    leave = {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0
+    },
+    horizontally = 0,
     bottom = 0,
-    left = 0
+    all = 0
 } = {}) => {
 
     if (!source || !source.length) {
         return [[]];
     }
+
+    const {
+        top: leaveTop = 0,
+        right: leaveRight = 0,
+        bottom: leaveBottom = 0,
+        left: leaveLeft = 0
+    } = leave;
 
     if (horizontally) {
         left = right = Math.floor(horizontally / 2);
@@ -215,14 +229,21 @@ const shrinkGrid = ({
         top = bottom = Math.floor(vertically / 2);
     }
 
-    let temp = [];
+    const { length } = source;
 
-    temp = source.slice(top);
-    temp = bottom ? temp.slice(0, -bottom) : temp;
+    const topShift = length - (leaveBottom || length);
+    const bottomShift = length - (leaveTop || length);
 
-    return temp
-        .map(row => right ? row.slice(0, -right) : row)
-        .map(row => row.slice(left));
+    return source
+        .slice((all || top || topShift), (all || length) - (bottom || bottomShift))
+        .map(row => {
+            const { length } = row;
+
+            const leftShift = length - (leaveRight || length);
+            const rightShift = length - (leaveLeft || length);
+
+            return row.slice((all || left || leftShift), (all || length) - (right || rightShift));
+        });
 };
 
 /**
@@ -289,7 +310,7 @@ const splitIntoConseq = (source = []) => {
     return sequences;
 };
 
-export {
+export default {
     chunkify,
     filterMap,
     filterMapped,

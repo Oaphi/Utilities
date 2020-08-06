@@ -5,7 +5,7 @@ const { expect } = chai;
 
 import bench from "benchmark";
 
-import * as arrays from "../src/arrays.mjs";
+import arrays from "../src/arrays.mjs";
 const {
     chunkify,
     filterMap,
@@ -25,11 +25,11 @@ describe('Arrays', function () {
     describe('reduceWithStep', function () {
 
         it('should copy reduce if no step', function () {
-            
-            const source = [1,2,3,4,5];
+
+            const source = [1, 2, 3, 4, 5];
 
             const output = reduceWithStep({
-                source, callback: (acc,cur) => acc + cur, initial : 100
+                source, callback: (acc, cur) => acc + cur, initial: 100
             });
 
             expect(output).to.equal(115);
@@ -71,6 +71,18 @@ describe('Arrays', function () {
                 expect(output[0]).to.deep.equal(source[1]);
             });
 
+            it('to the top with leave', function () {
+                const source = [
+                    [1, 2, 3, 4],
+                    [5, 6, 7, 8]
+                ];
+
+                const output = shrinkGrid({ source, leave: { top: 1 } });
+
+                expect(output).to.have.length(1);
+                expect(output[0]).to.deep.equal(source[0]);
+            });
+
             it('to the right', function () {
                 const source = [
                     [1, 2, 3],
@@ -84,6 +96,19 @@ describe('Arrays', function () {
                 expect(output[0]).to.deep.equal(source[0].slice(0, -2));
             });
 
+            it('to the right with leave', function () {
+                const source = [
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ];
+
+                const output = shrinkGrid({ source, leave: { right: 2 } });
+
+                expect(output).to.have.length(3);
+                expect(output[0]).to.deep.equal([2, 3]);
+            });
+
             it('to the bottom', function () {
                 const source = [
                     [1, 2, 3, 4],
@@ -94,6 +119,18 @@ describe('Arrays', function () {
 
                 expect(output).to.have.length(1);
                 expect(output[0]).to.deep.equal(source[0]);
+            });
+
+            it('to the bottom with leave', function () {
+                const source = [
+                    [1, 2, 3, 4],
+                    [5, 6, 7, 8]
+                ];
+
+                const output = shrinkGrid({ source, leave : { bottom: 1 } });
+
+                expect(output).to.have.length(1);
+                expect(output[0]).to.deep.equal(source[1]);
             });
 
             it('to the left', function () {
@@ -109,6 +146,20 @@ describe('Arrays', function () {
                 expect(output[0]).to.deep.equal(source[0].slice(2));
             });
 
+            it('to the left with leave', function () {
+                const source = [
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ];
+
+                const output = shrinkGrid({ source, leave : { left : 2 } });
+
+                expect(output).to.have.length(3);
+
+                output.forEach((row,i) => expect(row).to.deep.equal(source[i].slice(0,2)));
+            });
+
             it('horizontally', function () {
                 const source = [
                     [1, 2, 3, 4, 5]
@@ -117,7 +168,7 @@ describe('Arrays', function () {
                 const output = shrinkGrid({ source, horizontally: 2 });
 
                 expect(output).to.have.length(1);
-                expect(output[0]).to.deep.equal(source[0].slice(1,-1));
+                expect(output[0]).to.deep.equal(source[0].slice(1, -1));
             });
 
             it('vertically', function () {
@@ -134,7 +185,17 @@ describe('Arrays', function () {
             });
 
             it('all at once', function () {
+                const source = [
+                    [1, 1, 1],
+                    [1, 42, 1],
+                    [1, 1, 1]
+                ];
 
+                const output = shrinkGrid({ source, top: 1, right: 1, bottom: 1, left: 1 });
+
+                expect(output[0]).to.contain(42);
+                expect(output.length).to.equal(1);
+                expect(output[0].length).to.equal(1);
             });
 
         });
