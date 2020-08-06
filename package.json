@@ -11,7 +11,9 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@oaphi/distributor": "^1.3.2",
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
@@ -22,8 +24,7 @@
     "mocha": "^7.2.0"
   },
   "scripts": {
-    "dist": "distribute -s",
-    "dist-watch": "npm run dist -- -w",
+    "dist": "babel --out-file dist/dist.js",
     "document": "jsdoc -c configs/jsdoc.js",
     "test": "mocha --reporter min --watch",
     "test-ci": "mocha"
@@ -50,5 +51,6 @@
       "showDiff": true
     }
   },
+  "babel": {},
   "homepage": "https://github.com/Oaphi/Utilities#readme"
 }
