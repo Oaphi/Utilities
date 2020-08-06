@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "underscore": "^1.10.2",
-    "yargs": "^15.3.1"
+    "yargs": "^15.4.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
@@ -17,14 +17,14 @@
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "chalk": "^4.0.0",
-    "jsdoc": "^3.6.4",
-    "jsdom": "^16.2.2",
-    "jshint": "^2.11.1",
+    "chalk": "^4.1.0",
+    "jsdoc": "^3.6.5",
+    "jsdom": "^16.3.0",
+    "jshint": "^2.12.0",
     "mocha": "^7.2.0"
   },
   "scripts": {
-    "dist": "babel --out-file dist/dist.js",
+    "dist": "babel src --out-file dist/dist.js",
     "document": "jsdoc -c configs/jsdoc.js",
     "test": "mocha --reporter min --watch",
     "test-ci": "mocha"
@@ -51,6 +51,10 @@
       "showDiff": true
     }
   },
-  "babel": {},
+  "babel": {
+    "presets": [
+      "@babel/env"
+    ]
+  },
   "homepage": "https://github.com/Oaphi/Utilities#readme"
 }
