@@ -27,13 +27,13 @@ const complement = (...sources) => {
 };
 
 /**
- * @summary deep gets properties of specified type
+ * @summary deep gets properties of type
  * @param {object} [obj]
  */
 const deepGetByType = (obj = {}) =>
 
     /**
-     * @param {string} type
+     * @param {("string"|"number"|"object"|"undefined"|"boolean"|null)} type
      * @returns {object}
      */
     (type) => {
@@ -60,6 +60,71 @@ const deepGetByType = (obj = {}) =>
 
         return output;
     };
+
+const initArrOrObj = (entity) => entity !== undefined ? [] : {};
+
+/**
+ * @summary deep parses properties of type
+ * @param {object} source 
+ * @returns {object}
+ */
+const deepParseByPath = (source) => {
+
+    if (!isObject(source)) {
+        return source;
+    }
+
+    const output = {};
+
+    const idxRegExp = /([\w$@]+)(?:\[(\d+)\])?/;
+
+    Object
+        .entries(source)
+        .forEach(([key, val]) => {
+
+            const levels = key.split(".");
+
+            let tmp = output;
+            let tmpIdx;
+
+            const { length } = levels;
+
+            levels.forEach((level, i) => {
+
+                const [, subkey, idx] = level.match(idxRegExp);
+
+                tmpIdx || subkey in tmp || (tmp[subkey] = initArrOrObj(idx));
+
+                if (i < length - 1) {
+                    tmp = tmp[subkey];
+                    idx !== undefined && (tmpIdx = idx);
+                    return;
+                }
+
+                if (tmpIdx) {
+                    tmpIdx in tmp || (tmp[tmpIdx] = initArrOrObj(idx));
+                }
+
+                const parsedVal = deepParseByPath(val);
+
+                const idxOrKey = tmpIdx || subkey;
+
+                if (tmpIdx !== undefined) {
+                    tmp[tmpIdx][subkey] = parsedVal;
+                    return;
+                }
+
+                if (idx !== undefined) {
+                    tmp[idxOrKey][idx] = parsedVal;
+                } else {
+                    tmp[idxOrKey] = parsedVal;
+                }
+            });
+        });
+
+
+    return output;
+};
 
 /**
  * @typedef {({ 
@@ -289,9 +354,89 @@ const whichKeysAreSet = (obj, ...keys) => {
     return keys.filter(key => obj.hasOwnProperty(key));
 };
 
-export {
+
+
+/**
+ * @summary maps each object key with mapper
+ * @param {object|[]} obj 
+ * @param {function (string,any) : any} mapper 
+ * @param {{ 
+ *  opaqueArrays : (boolean|true), 
+ *  keyMapper : function (string) : string 
+ * }} [options]
+ * @returns {object|[]}
+ */
+const deepMap = (obj, mapper, { keyMapper, opaqueArrays = true } = {}) => {
+    const isArr = Array.isArray(obj);
+
+    const output = isArr ? [] : {};
+
+    const mapKeys = typeof keyMapper === "function";
+
+    Object
+        .entries(obj)
+        .forEach(([key, value]) => {
+
+            if (Array.isArray(value) && !opaqueArrays) {
+                output[mapKeys ? keyMapper(key) : key] = mapper(key, value);
+                return;
+            }
+
+            let mapped = typeof value === "object" && value ?
+                deepMap(value, mapper, { keyMapper, opaqueArrays }) :
+                mapper(mapKeys ? keyMapper(key) : key, value);
+
+            output[mapKeys && !isArr ? keyMapper(key) : key] = mapped;
+        });
+
+    return output;
+};
+
+/**
+ * @typedef {object} DeepFilterConfig
+ * @property {object} [accumulator] accumulates entities filtered out
+ * @property {boolean|true} [opaqueArrays] if false, treats arrays as values
+ * 
+ * @summary filters each object key with filterer
+ * @param {object|[]} obj 
+ * @param {function (string,any): boolean} filterer 
+ * @param {DeepFilterConfig} [options]
+ * @returns {object|[]}
+ */
+const deepFilter = (
+    obj,
+    filterer,
+    {
+        accumulator,
+        opaqueArrays = true
+    } = {}
+) => {
+
+    const output = Array.isArray(obj) ? [] : {};
+
+    Object
+        .entries(obj)
+        .forEach(([key, value]) => {
+
+            let canAdd = filterer(key, value);
+
+            if ((opaqueArrays && Array.isArray(value)) || isObject(value)) {
+                output[key] = deepFilter(value, filterer);
+                return;
+            }
+
+            canAdd && (output[key] = value) || (accumulator && (accumulator[key] = value));
+        });
+
+    return output;
+};
+
+export default {
     complement,
+    deepFilter,
     deepGetByType,
+    deepMap,
+    deepParseByPath,
     getGetterDescriptors,
     getOrInitProp,
     isObject,

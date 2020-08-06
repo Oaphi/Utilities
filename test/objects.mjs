@@ -1,9 +1,12 @@
 import chai from "chai";
 const { expect } = chai;
 
-import * as objects from '../src/objects.mjs';
+import objects from '../src/objects.mjs';
 const {
     complement,
+    deepFilter,
+    deepMap,
+    deepParseByPath,
     deepGetByType,
     getGetterDescriptors,
     getOrInitProp,
@@ -16,6 +19,275 @@ const {
     whichKeyIsSet,
     whichKeysAreSet
 } = objects;
+
+describe('deepFilter', function () {
+
+    it('should return empty object for empty objects', function () {
+        const source = {};
+        const output = deepFilter(source, (key, val) => val === true);
+        expect(output).to.be.empty;
+    });
+
+    it('should apply filter to each key', function () {
+
+        const source = {
+            this: true,
+            is: {
+                an: true,
+                apple: [{
+                    not: false
+                }],
+                orange: false
+            }
+        };
+
+        const output = deepFilter(source, (key, val) => val === true);
+
+        expect(output).to.deep.equal({
+            this: true,
+            is: {
+                an: true,
+                apple: [{}]
+            }
+        });
+    });
+
+    it('should work on real data', function () {
+
+        const source = {
+            "add_to_organization": [],
+            "create_organization": ["true"],
+            "org.name": ["Gmail"],
+            "org.visible_to": ["1"],
+            "person.email[0].label": ["work"],
+            "person.email[0].primary": ["true"],
+            "person.email[0].value": ["example@example.com"],
+            "person.name": ["John Doe"],
+            "person.phone[0].label": ["work"],
+            "person.phone[0].primary": ["true"],
+            "person.phone[0].value": [""],
+            "person.visible_to": ["1"]
+        };
+
+        const output = deepFilter(source, (k, v) => v.length, { opaqueArrays : false });
+
+        expect(output).to.deep.equal({
+            "create_organization": ["true"],
+            "org.name": ["Gmail"],
+            "org.visible_to": ["1"],
+            "person.email[0].label": ["work"],
+            "person.email[0].primary": ["true"],
+            "person.email[0].value": ["example@example.com"],
+            "person.name": ["John Doe"],
+            "person.phone[0].label": ["work"],
+            "person.phone[0].primary": ["true"],
+            "person.phone[0].value": [""],
+            "person.visible_to": ["1"]
+        });
+    });
+
+    describe('deepFilter options', function () {
+        
+        it('accumulator', function () {
+            
+            const source = { one : 1, two : "two", three : [ 1,2,3 ] };
+
+            const accumulator = {};
+
+            deepFilter(source, (k,v) => v === 1, { accumulator });
+
+            expect(accumulator).to.have.property("two").equal(source.two);
+
+            const nonOpaqueAccumulator = {};
+
+            deepFilter(source, (k,v) => !Array.isArray(v), {
+                accumulator: nonOpaqueAccumulator,
+                opaqueArrays: false
+            });
+
+            expect(nonOpaqueAccumulator).to.have.property("three").deep.equal(source.three);
+        });
+
+    });
+});
+
+describe('deepMap', function () {
+
+    it('should return empty object for empty objects', function () {
+        const source = {};
+        const output = deepMap(source, (val) => true);
+        expect(output).to.be.empty;
+    });
+
+    it('should apply map to each key', function () {
+
+        const source = {
+            one: 1,
+            two: "2",
+            three: {
+                uno: 1,
+                duo: 2
+            },
+            four: [1, 2, 3]
+        };
+
+        const testCallback = (key, val) => +val * 5;
+
+        const output = deepMap(source, testCallback);
+
+        expect(output).to.deep.equal({
+            one: 5,
+            two: 10,
+            three: {
+                uno: 5,
+                duo: 10
+            },
+            four: [5, 10, 15]
+        });
+    });
+
+    describe('deepMap options', function () {
+
+        it('keyMapper', function () {
+            const source = {
+                some : "thing",
+                one: {
+                    two : [3,4],
+                    five: 5
+                },
+                six : false
+            };
+
+            const output = deepMap(source, (k,v) => v, { 
+                keyMapper : (k) => k + 1
+            });
+
+            expect(output).to.deep.equal({
+                some1: "thing",
+                one1: {
+                    two1: [3, 4],
+                    five1: 5
+                },
+                six1: false
+            });
+        });
+
+        it('opaqueArrays', function () {
+            const source = {
+                one: 5,
+                list: ["E", "C", "M", "A"]
+            };
+
+            const testCallback = (key, val) => Array.isArray(val) ?
+                val.join("") :
+                val * 2;
+
+            const output = deepMap(source, testCallback, { opaqueArrays: false });
+
+            expect(output).to.deep.equal({
+                one: 10,
+                list: "ECMA"
+            });
+        });
+
+    });
+
+});
+
+describe('deepGetByPath', function () {
+
+    it('should return empty object for no paths', function () {
+        const source = {};
+        expect(source).to.be.empty;
+    });
+
+    it('should create nested objects for dots until last dot', function () {
+
+        const source = {
+            "that.is.a.subpath": [1, 2, 3],
+            "that.is.a.path": 42,
+            "that.was.the.path": true
+        };
+
+        const output = deepParseByPath(source);
+
+        expect(output).to.deep.equal({
+            that: {
+                is: {
+                    a: {
+                        path: 42,
+                        subpath: [1, 2, 3]
+                    }
+                },
+                was: {
+                    the: {
+                        path: true
+                    }
+                }
+            }
+        });
+    });
+
+    it('should create arrays for bracket accessors', function () {
+
+        const source = {
+            "top[0]": {
+                "lvl1[0]": 1,
+                "lvl2[1]": 2
+            },
+            "top[1]": {
+                "lvl1[0]": 3,
+                "lvl2[1]": 4
+            },
+            "top[2]": {
+                "lvl[2]": {
+                    "lvl[3]": true
+                }
+            },
+            "top[3].sublvl": {
+                "subsub": 42
+            }
+        };
+
+        const output = deepParseByPath(source);
+
+        expect(output).to.deep.equal({
+            top: [{
+                lvl1: [1],
+                lvl2: [, 2]
+            }, {
+                lvl1: [3],
+                lvl2: [, 4]
+            }, {
+                lvl: [, , { lvl: [, , , true] }]
+            }, {
+                sublvl: {
+                    subsub: 42
+                }
+            }]
+        });
+    });
+
+    it('should work on real data', function () {
+
+        const source = {
+            "create_organization": ["true"],
+            "org.name": ["Gmail"],
+            "org.visible_to": ["1"],
+            "person.email[0].label": ["work"],
+            "person.email[0].primary": ["true"],
+            "person.email[0].value": ["example@example.com"],
+            "person.name": ["Oleg Valter"],
+            "person.phone[0].label": ["work"],
+            "person.phone[0].primary": ["true"],
+            "person.phone[0].value": [""],
+            "person.visible_to": ["1"]
+        };
+
+        const output = deepParseByPath(source);
+    });
+
+});
 
 describe('deepGetByType', function () {
 
