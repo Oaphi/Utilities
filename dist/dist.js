@@ -1,152 +1,401 @@
+"use strict";
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.utilsDOM = factory();
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.AppendQueue = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  /**
+   * @summary wrapper around promise of HTMLElement
+   * @class
+   */
+  var AsyncAppendable =
+  /**
+   * @param {Promise<HTMLElement>} promise
+            * @param {AsyncAppendQueue} queue
+            * @param {function} callback
+   * @param {number} [index]
+   */
+  function AsyncAppendable(promise, queue, callback) {
+    var _this = this;
+
+    var index = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
+    _classCallCheck(this, AsyncAppendable);
+
+    this.promise = promise;
+    this.index = index;
+    this.queue = queue;
+    this.callback = callback;
+    promise.then(function (res) {
+      var callback = _this.callback,
+          index = _this.index;
+      res.weight = index;
+      var root = queue.root;
+      var children = root.children;
+      var length = children.length;
+
+      if (!length) {
+        root.append(res);
+        callback && callback(res);
+        return res;
+      }
+
+      elementsLeftUntil(root, function (elem) {
+        return elem.weight < index;
+      }, function (matched, idx) {
+        return elementsRightUntil(root, idx, function (elem) {
+          return elem.weight > index;
+        }, function (elem) {
+          return elem.before(res);
+        }, function () {
+          return matched.after(res);
+        });
+      }, function () {
+        return elementsRightUntil(root, function (elem) {
+          return elem.weight > index;
+        }, function (matched, idx) {
+          return elementsLeftUntil(root, idx, function (elem) {
+            return elem.weight < index;
+          }, function (elem) {
+            return elem.after(res);
+          }, function () {
+            return matched.before(res);
+          });
+        });
+      });
+      callback && callback(res);
+      return res;
+    });
+  };
+  /**
+   * @summary queue controller
+   * @class
+   */
+
+
+  var AsyncAppendQueue = /*#__PURE__*/function () {
+    /**
+     * @param {HTMLElement} root 
+     */
+    function AsyncAppendQueue(root) {
+      _classCallCheck(this, AsyncAppendQueue);
+
+      /** @type {AsyncAppendable[]} */
+      this.promises = [];
+      this.root = root;
     }
-}(
-    typeof self !== 'undefined' ? self : this,
-    function () {
+    /**
+     * @summary enqueues promise of HTMLElement
+     * @param {Promise<HTMLElement>} promise 
+     * @param {function} callback
+     * @returns {AsyncAppendQueue}
+     */
 
-        /**
-         * @description traverses children left to right, calling comparator on each one
-         * until it evaluates to true, then calls the callback with first element passing 
-         * the condition or with root itself if none
-         * @param {HTMLElement} root 
-         * @param {number} [offset]
-         * @param {function(HTMLElement): boolean} comparator 
-         * @param {function(HTMLElement)} [callback] 
-         * @param {function(HTMLElement)} [fallback]
-         * @param {boolean} [strict]
-         */
-        function elementsRightUntil(root, offset, comparator, callback, fallback, strict = false) {
 
-            if (typeof offset === "function") {
-                fallback = callback;
-                callback = comparator;
-                comparator = offset;
-                offset = 0;
-            }
+    _createClass(AsyncAppendQueue, [{
+      key: "enqueue",
+      value: function enqueue(promise, callback) {
+        var promises = this.promises;
+        var length = promises.length;
+        var prepared = new AsyncAppendable(promise, this, callback, length);
+        promises.push(prepared);
+        return this;
+      }
+      /**
+       * @summary clears promise queue
+       * @returns {AsyncAppendQueue}
+       */
 
-            if (typeof callback === "boolean") {
-                strict = callback;
-                callback = null;
-            }
+    }, {
+      key: "clear",
+      value: function clear() {
+        var promises = this.promises;
+        promises.length = 0;
+        return this;
+      }
+    }]);
 
-            if (typeof fallback === "boolean") {
-                strict = fallback;
-                fallback = null;
-            }
+    return AsyncAppendQueue;
+  }();
 
-            let current = root.children[offset] || (strict ? null : root);
+  return AsyncAppendQueue;
+});
+"use strict";
 
-            let matchedOnce = comparator(current) ? 1 : 0;
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-            let index = offset;
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.utilsDOM = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  /**
+   * @description traverses children left to right, calling comparator on each one
+   * until it evaluates to true, then calls the callback with first element passing 
+   * the condition or with root itself if none
+   * @param {HTMLElement} root 
+   * @param {number} [offset]
+   * @param {function(HTMLElement): boolean} comparator 
+   * @param {function(HTMLElement)} [callback] 
+   * @param {function(HTMLElement)} [fallback]
+   * @param {boolean} [strict]
+   */
+  function elementsRightUntil(root, offset, comparator, callback, fallback) {
+    var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
 
-            if (!matchedOnce) {
-                while (current.nextElementSibling) {
-                    index++;
+    if (typeof offset === "function") {
+      fallback = callback;
+      callback = comparator;
+      comparator = offset;
+      offset = 0;
+    }
 
-                    current = current.nextElementSibling;
-                    if (comparator(current)) {
-                        matchedOnce |= 1;
-                        break;
-                    }
-                }
-            }
+    if (typeof callback === "boolean") {
+      strict = callback;
+      callback = null;
+    }
 
-            const use = matchedOnce ? callback : fallback;
-            return use ? use(current, index) : current;
+    if (typeof fallback === "boolean") {
+      strict = fallback;
+      fallback = null;
+    }
+
+    var current = root.children[offset] || (strict ? null : root);
+    var matchedOnce = comparator(current) ? 1 : 0;
+    var index = offset;
+
+    if (!matchedOnce) {
+      while (current.nextElementSibling) {
+        index++;
+        current = current.nextElementSibling;
+
+        if (comparator(current)) {
+          matchedOnce |= 1;
+          break;
+        }
+      }
+    }
+
+    var use = matchedOnce ? callback : fallback;
+    return use ? use(current, index) : current;
+  }
+  /**
+   * @summary inverse of elementsRightUntil
+   * @param {HTMLElement} root
+   * @param {number} [offset]
+   * @param {function(HTMLElement): boolean} comparator
+   * @param {function(HTMLElement)} [callback]
+   * @param {function(HTMLElement)} [fallback]
+   * @param {boolean} [strict]
+   */
+
+
+  function elementsLeftUntil(root, offset, comparator, callback, fallback) {
+    var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
+
+    if (typeof offset === "function") {
+      fallback = callback;
+      callback = comparator;
+      comparator = offset;
+      offset = 0;
+    }
+
+    if (typeof callback === "boolean") {
+      strict = callback;
+      callback = null;
+    }
+
+    if (typeof fallback === "boolean") {
+      strict = fallback;
+      fallback = null;
+    }
+
+    var children = root.children;
+    var lastIndex = children.length - 1 - offset;
+    var current = children[lastIndex] || (strict ? null : root);
+    var matchedOnce = comparator(current) ? 1 : 0;
+    var index = lastIndex;
+
+    if (!matchedOnce) {
+      while (current.previousElementSibling) {
+        index--;
+        current = current.previousElementSibling;
+
+        if (comparator(current)) {
+          matchedOnce |= 1;
+          break;
+        }
+      }
+    }
+
+    var use = matchedOnce ? callback : fallback;
+    return use ? use(current, index) : current;
+  }
+  /**
+   * @summary checks if some tokens are contained
+   * @param {DOMTokenList} list
+   */
+
+
+  var listContainsSome = function listContainsSome(list) {
+    return (
+      /**
+       * @param {...string} [tokens]
+       * @returns {boolean}
+       */
+      function () {
+        var boundContains = list.contains.bind(list);
+
+        for (var _len = arguments.length, tokens = new Array(_len), _key = 0; _key < _len; _key++) {
+          tokens[_key] = arguments[_key];
         }
 
-        /**
-         * @summary inverse of elementsRightUntil
-         * @param {HTMLElement} root
-         * @param {number} [offset]
-         * @param {function(HTMLElement): boolean} comparator
-         * @param {function(HTMLElement)} [callback]
-         * @param {function(HTMLElement)} [fallback]
-         * @param {boolean} [strict]
-         */
-        function elementsLeftUntil(root, offset, comparator, callback, fallback, strict = false) {
+        return tokens.some(boundContains);
+      }
+    );
+  };
+  /**
+   * @summary removes last child of Element
+   * @param {Element} element
+   * @returns {void}
+   */
 
-            if (typeof offset === "function") {
-                fallback = callback;
-                callback = comparator;
-                comparator = offset;
-                offset = 0;
-            }
 
-            if (typeof callback === "boolean") {
-                strict = callback;
-                callback = null;
-            }
+  var removeLastChild = function removeLastChild(element) {
+    return element.lastChild && element.lastChild.remove();
+  };
 
-            if (typeof fallback === "boolean") {
-                strict = fallback;
-                fallback = null;
-            }
+  return {
+    elementsRightUntil: elementsRightUntil,
+    elementsLeftUntil: elementsLeftUntil,
+    listContainsSome: listContainsSome,
+    removeLastChild: removeLastChild
+  };
+});
+"use strict";
 
-            const { children } = root;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
 
-            const lastIndex = children.length - 1 - offset;
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-            let current = children[lastIndex] || (strict ? null : root);
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
-            let matchedOnce = comparator(current) ? 1 : 0;
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-            let index = lastIndex;
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-            if (!matchedOnce) {
-                while (current.previousElementSibling) {
-                    index--;
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-                    current = current.previousElementSibling;
-                    if (comparator(current)) {
-                        matchedOnce |= 1;
-                        break;
-                    }
-                }
-            }
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
-            const use = matchedOnce ? callback : fallback;
-            return use ? use(current, index) : current;
-        }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-        /**
-         * @summary checks if some tokens are contained
-         * @param {DOMTokenList} list
-         */
-        const listContainsSome = (list) =>
+/**
+ * @summary recursive parser
+ * @param {string[]} order
+ * @param {[string, any][]} entries 
+ * @param {boolean} encode
+ * @param {string} seq
+ * @returns {string}
+ */
+var deep = function deep(order, entries, encode, seq) {
+  return entries.map(function (entry) {
+    var _entry = _slicedToArray(entry, 2),
+        key = _entry[0],
+        value = _entry[1];
 
-            /**
-             * @param {...string} [tokens]
-             * @returns {boolean}
-             */
-            (...tokens) => {
-                const boundContains = list.contains.bind(list);
-                return tokens.some(boundContains);
-            };
+    var seqOrSingleKey = "".concat(seq ? "".concat(seq, "[").concat(key, "]") : key);
 
-        /**
-         * @summary removes last child of Element
-         * @param {Element} element
-         * @returns {void}
-         */
-        const removeLastChild = (element) => element.lastChild && element.lastChild.remove();
+    if (value === null) {
+      return;
+    }
 
-        return {
-            elementsRightUntil,
-            elementsLeftUntil,
-            listContainsSome,
-            removeLastChild
-        };
+    if (_typeof(value) === "object") {
+      return deep(order, Object.entries(value), encode, seqOrSingleKey);
+    }
 
-    }));
+    if (value !== undefined) {
+      var encoded = encode ? encodeURIComponent(value) : value;
+      return "".concat(seqOrSingleKey, "=").concat(encoded);
+    }
+  }).filter(function (val) {
+    return val !== undefined;
+  }).join("&");
+};
+/**
+ * @typedef {object} JSONtoQueryConfig
+ * @property {boolean} [encodeParams=false]
+ * @property {string[]} [paramOrder=[]]
+ * 
+ * @summary converts object to query
+ * @param {object} json parameters
+ * @param {JSONtoQueryConfig}
+ * @returns {string} query string
+ */
+
+
+function JSONtoQuery(json) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+    encodeParams: false,
+    paramOrder: []
+  },
+      encodeParams = _ref.encodeParams,
+      _ref$paramOrder = _ref.paramOrder,
+      paramOrder = _ref$paramOrder === void 0 ? [] : _ref$paramOrder;
+
+  var ordered = [];
+  Object.entries(json).forEach(function (entry) {
+    var _entry2 = _slicedToArray(entry, 1),
+        key = _entry2[0];
+
+    var orderIndex = paramOrder.indexOf(key);
+
+    if (orderIndex > -1) {
+      ordered[orderIndex] = entry;
+      return;
+    }
+
+    ordered.push(entry);
+  });
+  return deep(paramOrder, ordered, encodeParams);
+}
+
+var _default = {
+  JSONtoQuery: JSONtoQuery
+};
+exports["default"] = _default;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.reduceWithStep = exports.mergeOnto = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.chunkify = void 0;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 /**
  * @fileoverview Array utilities
@@ -154,202 +403,423 @@
  * @module
  */
 
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.Arrays = factory();
+/**
+ * @typedef {object} ChunkifyConfig
+ * @property {number} [size]
+ * @property {number[]} [limits]
+ * 
+ * @summary splits an array into chunks
+ * @param {any[]} source 
+ * @param {ChunkifyConfig}
+ * @returns {any[][]}
+ */
+var chunkify = function chunkify(source) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$limits = _ref.limits,
+      limits = _ref$limits === void 0 ? [] : _ref$limits,
+      size = _ref.size;
+
+  var output = [];
+
+  if (size) {
+    var _length = source.length;
+    var maxNumChunks = Math.ceil((_length || 1) / size);
+    var numChunksLeft = maxNumChunks;
+
+    while (numChunksLeft) {
+      var chunksProcessed = maxNumChunks - numChunksLeft;
+      var elemsProcessed = chunksProcessed * size;
+      output.push(source.slice(elemsProcessed, elemsProcessed + size));
+      numChunksLeft--;
     }
-}(
-    typeof self !== 'undefined' ? self : this,
-    function () {
 
-        /**
-         * Combines filter() and map() in O(n)
-         * @param {any[]} [array]
-         * @returns {function(function):function(function):any[]}
-         */
-        const filterMap = (array = []) => (filter = e => true) => (mapper = e => e) => {
-            const mappedArr = [];
+    return output;
+  }
 
-            let initialIndex = 0, filteredIndex = 0;
+  var length = limits.length;
 
-            for (const elem of array) {
-                filter(elem, initialIndex++) &&
-                    mappedArr.push(mapper(elem, filteredIndex++));
-            }
+  if (!length) {
+    return [Object.assign([], source)];
+  }
 
-            return mappedArr;
-        };
-
-        /**
-         * Combines filter() and map() in reverse in O(n)
-         * @param {any[]} [array] 
-         * @returns {function(function):function(function):any[]}
-         */
-        const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) => {
-            const filteredArr = [];
-
-            let initialIndex = 0, filteredIndex = 0;
-
-            for (const elem of array) {
-                const mappedElem = mapper(elem, initialIndex++);
-
-                filter(mappedElem, filteredIndex++) &&
-                    filteredArr.push(mappedElem);
-            }
-
-            return filteredArr;
-        };
-
-        /**
-         * @summary returns last element of array
-         * @param {any[]} array
-         * @returns {any} 
-         */
-        const last = (array) => array[array.length - 1];
-
-        /**
-         * Executes a callback for each element
-         * (same as forEach, but in FP style + faster)
-         * @param {any[]} [array]
-         * @returns {function(function):void} 
-         */
-        const forAll = (array = []) => (callback) => {
-
-            let index = 0;
-
-            for (const elem of array) {
-                callback(elem, index++);
-            }
-
-            return;
-        };
-
-        /**
-         * Maps array to values of 
-         * property by key
-         * @param {any[]} [array] 
-         * @returns {function(string):any[]}
-         */
-        const keyMap = (array = []) => (key) => {
-            return !key ? array : array.map(elem => elem[key]);
-        };
-
-        /**
-         * @summary merges arrays
-         * @param {any[]} source 
-         * @param  {...any[]} [targets]
-         * @returns {any[]}
-         */
-        const mergeOnto = (source, ...targets) => {
-
-            const output = [];
-
-            for (let index = 0; index < source.length; index++) {
-                const item = source[index];
-
-                if (typeof item === "undefined") {
-
-                    let finalValue = item;
-
-                    for (const target of targets) {
-                        finalValue = target[index];
-                    }
-
-                    output.push(finalValue);
-                    continue;
-                }
-
-                output.push(item);
-            }
-
-            return output;
-        };
-
-        /**
-         * 
-         * @param {any[]} source 
-         * @param {...any[]} targets
-         * @returns {any[]}
-         */
-        const spliceInto = (source, ...targets) => {
-
-            const output = source.map(item => item); //shallow copy;
-
-            for (const target of targets) {
-                target.forEach((item, index) => {
-                    if (typeof item !== "undefined") {
-                        output.splice(index, 0, item);
-                    }
-                });
-            }
-
-            return output;
-        };
-
-        /**
-         * @summary splits array in consequitive subsequences
-         * @param {any[]} [source] 
-         * @returns {any[][]}
-         */
-        const splitIntoConseq = (source = []) => {
-
-            const sequences = [], tails = [];
-
-            let highestElem = -Infinity;
-
-            source.forEach(element => {
-
-                const precedeIndex = tails.indexOf(element + 1);
-                const tailIndex = tails.indexOf(element - 1);
-
-                if (tailIndex > -1) {
-                    sequences[tailIndex].push(element);
-                    tails[tailIndex] = element;
-                    return;
-                }
-
-                if (precedeIndex > -1) {
-                    sequences[precedeIndex].unshift(element);
-                    tails[precedeIndex] = element;
-                    return;
-                }
-
-                if (element > highestElem) {
-                    tails.push(element);
-                    sequences.push([element]);
-                    highestElem = element;
-                    return;
-                }
-
-                const spliceIndex = tails.findIndex((e) => e < element) + 1;
-                tails.splice(spliceIndex, 0, element);
-                sequences.splice(spliceIndex, 0, [element]);
-            });
-
-            return sequences;
-        };
+  var lastSlicedElem = 0;
+  limits.forEach(function (limit, i) {
+    var limitPosition = lastSlicedElem + limit;
+    output[i] = source.slice(lastSlicedElem, limitPosition);
+    lastSlicedElem = limitPosition;
+  });
+  var lastChunk = source.slice(lastSlicedElem);
+  lastChunk.length && output.push(lastChunk);
+  return output;
+};
+/**
+ * Combines filter() and map() in O(n)
+ * @param {any[]} [array]
+ * @returns {function(function):function(function):any[]}
+ */
 
 
-        return {
-            filterMap,
-            filterMapped,
-            forAll,
-            keyMap,
-            last,
-            mergeOnto,
-            spliceInto,
-            splitIntoConseq
-        };
+exports.chunkify = chunkify;
 
-    }));
+var filterMap = function filterMap() {
+  var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  return function () {
+    var filter = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (e) {
+      return true;
+    };
+    return function () {
+      var mapper = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (e) {
+        return e;
+      };
+      var mappedArr = [];
+      var initialIndex = 0,
+          filteredIndex = 0;
 
-import utilities from "./utilities.js";
-const { noop } = utilities;
+      var _iterator = _createForOfIteratorHelper(array),
+          _step;
 
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var elem = _step.value;
+          filter(elem, initialIndex++) && mappedArr.push(mapper(elem, filteredIndex++));
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      return mappedArr;
+    };
+  };
+};
+/**
+ * Combines filter() and map() in reverse in O(n)
+ * @param {any[]} [array] 
+ * @returns {function(function):function(function):any[]}
+ */
+
+
+exports.filterMap = filterMap;
+
+var filterMapped = function filterMapped() {
+  var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  return function () {
+    var mapper = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (e) {
+      return e;
+    };
+    return function () {
+      var filter = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (e) {
+        return true;
+      };
+      var filteredArr = [];
+      var initialIndex = 0,
+          filteredIndex = 0;
+
+      var _iterator2 = _createForOfIteratorHelper(array),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var elem = _step2.value;
+          var mappedElem = mapper(elem, initialIndex++);
+          filter(mappedElem, filteredIndex++) && filteredArr.push(mappedElem);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+
+      return filteredArr;
+    };
+  };
+};
+/**
+ * @summary returns last element of array
+ * @param {any[]} array
+ * @returns {any} 
+ */
+
+
+exports.filterMapped = filterMapped;
+
+var last = function last(array) {
+  return array[array.length - 1];
+};
+/**
+ * Executes a callback for each element
+ * (same as forEach, but in FP style + faster)
+ * @param {any[]} [array]
+ * @returns {function(function):void} 
+ */
+
+
+exports.last = last;
+
+var forAll = function forAll() {
+  var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  return function (callback) {
+    var index = 0;
+
+    var _iterator3 = _createForOfIteratorHelper(array),
+        _step3;
+
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var elem = _step3.value;
+        callback(elem, index++);
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+
+    return;
+  };
+};
+/**
+ * Maps array to values of 
+ * property by key
+ * @param {any[]} [array] 
+ * @returns {function(string):any[]}
+ */
+
+
+exports.forAll = forAll;
+
+var keyMap = function keyMap() {
+  var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  return function (key) {
+    return !key ? array : array.map(function (elem) {
+      return elem[key];
+    });
+  };
+};
+/**
+ * @summary merges arrays
+ * @param {any[]} source 
+ * @param  {...any[]} [targets]
+ * @returns {any[]}
+ */
+
+
+exports.keyMap = keyMap;
+
+var mergeOnto = function mergeOnto(source) {
+  var output = [];
+
+  for (var _len = arguments.length, targets = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    targets[_key - 1] = arguments[_key];
+  }
+
+  for (var index = 0; index < source.length; index++) {
+    var item = source[index];
+
+    if (typeof item === "undefined") {
+      var finalValue = item;
+
+      var _iterator4 = _createForOfIteratorHelper(targets),
+          _step4;
+
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var target = _step4.value;
+          finalValue = target[index];
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+
+      output.push(finalValue);
+      continue;
+    }
+
+    output.push(item);
+  }
+
+  return output;
+};
+/**
+ * @typedef {object} StepReduceConfig
+ * @property {any[]} source
+ * @property {function(any,any,number?,any[]?) : any} callback
+ * @property {number} [step]
+ * @property {any} [initial]
+ * 
+ * @param {StepReduceConfig}
+ */
+
+
+exports.mergeOnto = mergeOnto;
+
+var reduceWithStep = function reduceWithStep(_ref2) {
+  var _ref2$source = _ref2.source,
+      source = _ref2$source === void 0 ? [] : _ref2$source,
+      callback = _ref2.callback,
+      _ref2$step = _ref2.step,
+      step = _ref2$step === void 0 ? 1 : _ref2$step,
+      initial = _ref2.initial;
+  return source.reduce(function (acc, curr, i) {
+    return i % step ? acc : callback(acc, curr, i + step - 1, source);
+  }, initial || source[0]);
+};
+/**
+ * @typedef {object} ShrinkConfig
+ * @property {any[][]} [source]
+ * @property {number} [left]
+ * @property {number} [right]
+ * @property {number} [bottom]
+ * @property {number} [horizontally]
+ * @property {number} [top]
+ * @property {number} [vertically]
+ * 
+ * @summary shirnks a grid
+ * @param {ShrinkConfig} [source]
+ */
+
+
+exports.reduceWithStep = reduceWithStep;
+
+var shrinkGrid = function shrinkGrid() {
+  var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref3.source,
+      _ref3$horizontally = _ref3.horizontally,
+      horizontally = _ref3$horizontally === void 0 ? 0 : _ref3$horizontally,
+      _ref3$vertically = _ref3.vertically,
+      vertically = _ref3$vertically === void 0 ? 0 : _ref3$vertically,
+      _ref3$top = _ref3.top,
+      top = _ref3$top === void 0 ? 0 : _ref3$top,
+      _ref3$right = _ref3.right,
+      right = _ref3$right === void 0 ? 0 : _ref3$right,
+      _ref3$bottom = _ref3.bottom,
+      bottom = _ref3$bottom === void 0 ? 0 : _ref3$bottom,
+      _ref3$left = _ref3.left,
+      left = _ref3$left === void 0 ? 0 : _ref3$left;
+
+  if (!source || !source.length) {
+    return [[]];
+  }
+
+  if (horizontally) {
+    left = right = Math.floor(horizontally / 2);
+  }
+
+  if (vertically) {
+    top = bottom = Math.floor(vertically / 2);
+  }
+
+  var temp = [];
+  temp = source.slice(top);
+  temp = bottom ? temp.slice(0, -bottom) : temp;
+  return temp.map(function (row) {
+    return right ? row.slice(0, -right) : row;
+  }).map(function (row) {
+    return row.slice(left);
+  });
+};
+/**
+ * 
+ * @param {any[]} source 
+ * @param {...any[]} targets
+ * @returns {any[]}
+ */
+
+
+exports.shrinkGrid = shrinkGrid;
+
+var spliceInto = function spliceInto(source) {
+  var output = source.map(function (item) {
+    return item;
+  }); //shallow copy;
+
+  for (var _len2 = arguments.length, targets = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+    targets[_key2 - 1] = arguments[_key2];
+  }
+
+  for (var _i = 0, _targets = targets; _i < _targets.length; _i++) {
+    var target = _targets[_i];
+    target.forEach(function (item, index) {
+      if (typeof item !== "undefined") {
+        output.splice(index, 0, item);
+      }
+    });
+  }
+
+  return output;
+};
+/**
+ * @summary splits array in consequitive subsequences
+ * @param {any[]} [source] 
+ * @returns {any[][]}
+ */
+
+
+exports.spliceInto = spliceInto;
+
+var splitIntoConseq = function splitIntoConseq() {
+  var source = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  var sequences = [],
+      tails = [];
+  var highestElem = -Infinity;
+  source.forEach(function (element) {
+    var precedeIndex = tails.indexOf(element + 1);
+    var tailIndex = tails.indexOf(element - 1);
+
+    if (tailIndex > -1) {
+      sequences[tailIndex].push(element);
+      tails[tailIndex] = element;
+      return;
+    }
+
+    if (precedeIndex > -1) {
+      sequences[precedeIndex].unshift(element);
+      tails[precedeIndex] = element;
+      return;
+    }
+
+    if (element > highestElem) {
+      tails.push(element);
+      sequences.push([element]);
+      highestElem = element;
+      return;
+    }
+
+    var spliceIndex = tails.findIndex(function (e) {
+      return e < element;
+    }) + 1;
+    tails.splice(spliceIndex, 0, element);
+    sequences.splice(spliceIndex, 0, [element]);
+  });
+  return sequences;
+};
+
+exports.splitIntoConseq = splitIntoConseq;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.waitAsync = exports.forEachAwait = exports.forAwait = void 0;
+
+var _utilities = _interopRequireDefault(require("./utilities.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+var noop = _utilities["default"].noop;
 /**
  * @typedef {object} WaitConfig
  * @property {number} [ms = 1]
@@ -359,429 +829,603 @@ const { noop } = utilities;
  * @param {WaitConfig} param0 
  * @returns {Promise<any>}
  */
-const waitAsync = ({ ms = 1, callback = noop }) =>
 
-    new Promise((resolve) => {
-        const now = Date.now();
-
-        setTimeout(() => {
-            const newNow = Date.now();
-            resolve(callback(newNow - now));
-        }, ms);
-    });
-
+var waitAsync = function waitAsync(_ref) {
+  var _ref$ms = _ref.ms,
+      ms = _ref$ms === void 0 ? 1 : _ref$ms,
+      _ref$callback = _ref.callback,
+      callback = _ref$callback === void 0 ? noop : _ref$callback;
+  return new Promise(function (resolve) {
+    var now = Date.now();
+    setTimeout(function () {
+      var newNow = Date.now();
+      resolve(callback(newNow - now));
+    }, ms);
+  });
+};
 /**
  * @summary promise-based forEach preserving value and execution order
  * @param {any[]} source 
  * @param {function(any,number, any[]) : Promise<void>} asyncCallback
  * @returns {Promise<void>}
  */
-const forAwait = async (source, asyncCallback) => {
-    let i = 0;
-    for (const val of source) {
-        await asyncCallback(val, i++, source);
-    }
-};
 
+
+exports.waitAsync = waitAsync;
+
+var forAwait = /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(source, asyncCallback) {
+    var i, _iterator, _step, val;
+
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            i = 0;
+            _iterator = _createForOfIteratorHelper(source);
+            _context.prev = 2;
+
+            _iterator.s();
+
+          case 4:
+            if ((_step = _iterator.n()).done) {
+              _context.next = 10;
+              break;
+            }
+
+            val = _step.value;
+            _context.next = 8;
+            return asyncCallback(val, i++, source);
+
+          case 8:
+            _context.next = 4;
+            break;
+
+          case 10:
+            _context.next = 15;
+            break;
+
+          case 12:
+            _context.prev = 12;
+            _context.t0 = _context["catch"](2);
+
+            _iterator.e(_context.t0);
+
+          case 15:
+            _context.prev = 15;
+
+            _iterator.f();
+
+            return _context.finish(15);
+
+          case 18:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[2, 12, 15, 18]]);
+  }));
+
+  return function forAwait(_x, _x2) {
+    return _ref2.apply(this, arguments);
+  };
+}();
 /**
  * @summary promise-based forEach preserving value order
  * @param {Promise<any>[]} array
  * @param {function(any,number, Promise<any>[]) : void} callback
  * @returns {void}
  */
-const forEachAwait = async (source, callback) => {
-    const results = await Promise.all(source);
-    return results.forEach((val, idx) => callback(val, idx, source));
-};
 
-export {
-    forAwait,
-    forEachAwait,
-    waitAsync
-};
+
+exports.forAwait = forAwait;
+
+var forEachAwait = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(source, callback) {
+    var results;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return Promise.all(source);
+
+          case 2:
+            results = _context2.sent;
+            return _context2.abrupt("return", results.forEach(function (val, idx) {
+              return callback(val, idx, source);
+            }));
+
+          case 4:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function forEachAwait(_x3, _x4) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+exports.forEachAwait = forEachAwait;
+"use strict";
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.Emails = factory();
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.Emails = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  var Utilities = {};
+  /**
+   * @summary splits email address into domains
+   * @param {string} email
+   * @returns {string[]}
+   */
+
+  function smartEmailSplit(email) {
+    var split = email.split('@') || [];
+
+    var _split = _slicedToArray(split, 2),
+        localPart = _split[0],
+        internetDomain = _split[1];
+
+    var partMatcher = /[!./+=%]/;
+    var domains = internetDomain.split(partMatcher);
+    var locals = localPart.split(partMatcher);
+    domains.length > 1 && domains.pop();
+    return locals.concat(domains).filter(Boolean).map(Utilities.toCase);
+  }
+
+  var registerCaseModifier = function registerCaseModifier(modifier) {
+    if (typeof modifier === "function") {
+      Utilities.toCase = modifier;
     }
-}(typeof self !== 'undefined' ? self : this, function () {
+  };
 
-    const Utilities = {};
+  return {
+    smartEmailSplit: smartEmailSplit,
+    registerCaseModifier: registerCaseModifier
+  };
+});
+"use strict";
 
-    /**
-     * @summary splits email address into domains
-     * @param {string} email
-     * @returns {string[]}
-     */
-    function smartEmailSplit(email) {
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-        const split = email.split('@') || [];
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-        const [ localPart, internetDomain ] = split;
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-        const partMatcher = /[!./+=%]/;
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-        const domains = internetDomain.split(partMatcher);
-
-        const locals = localPart.split(partMatcher);
-
-        domains.length > 1 && domains.pop();
-
-        return locals.concat(domains).filter(Boolean).map(Utilities.toCase);
-    }
-
-    const registerCaseModifier = (modifier) => {
-        if(typeof modifier === "function") {
-            Utilities.toCase = modifier;
-        }
-    };
-
-    return ({
-        smartEmailSplit,
-        registerCaseModifier
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.returnExports = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  /**
+   * @summary defines a non-changeable property
+   * @param {object} obj 
+   * @param {string} key 
+   * @param {any} val 
+   * @param {boolean} [enumerable=true]
+   * @returns {object}
+   */
+  var defineConstant = function defineConstant(obj, key, val) {
+    var enumerable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+    return Object.defineProperty(obj, key, {
+      enumerable: enumerable,
+      configurable: false,
+      writable: false,
+      value: val
     });
+  };
+  /**
+   * @summary makes a Enum
+   * @param {string[]} choices
+   * @returns {object}
+   */
 
-}));
+
+  var makeEnum = function makeEnum(choices) {
+    var length = choices.length;
+    var enumerator = Object.create(null);
+    var increment = 1,
+        index = 0;
+
+    var _iterator = _createForOfIteratorHelper(choices),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var choice = _step.value;
+        defineConstant(enumerator, index, choice, false);
+        defineConstant(enumerator, choice, increment);
+        increment = increment << 1;
+        index++;
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+
+    defineConstant(enumerator, "length", length, false);
+    defineConstant(enumerator, "toString", function () {
+      return "[object Enum]";
+    }, false);
+
+    enumerator[Symbol.iterator] = function () {
+      var i = 0;
+      return {
+        next: function next() {
+          return {
+            done: i >= length,
+            value: enumerator[i++]
+          };
+        }
+      };
+    };
+
+    var frozen = Object.freeze(enumerator);
+    return new Proxy(frozen, {
+      get: function get(target, key) {
+        if (!Reflect.has(target, key)) {
+          throw new RangeError("Invalid enum property: ".concat(key));
+        }
+
+        return target[key];
+      }
+    });
+  };
+
+  return {
+    defineConstant: defineConstant,
+    makeEnum: makeEnum
+  };
+});
+"use strict";
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.returnExports = factory();
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.Headers = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  /**
+   * @summary maps headers to headers object
+   * @param {string} [headers]
+   * @returns {Object.<string, string>}
+   */
+  var mapResponseHeaders = function mapResponseHeaders() {
+    var headers = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+    var split = headers.split(/[\r\n]+/);
+    var headerMap = {};
+
+    if (!headers) {
+      return headerMap;
     }
-}(typeof self !== 'undefined' ? self : this, function () {
 
-    /**
-     * @summary defines a non-changeable property
-     * @param {object} obj 
-     * @param {string} key 
-     * @param {any} val 
-     * @param {boolean} [enumerable=true]
-     * @returns {object}
-     */
-    const defineConstant = (obj, key, val, enumerable = true) => {
-        return Object.defineProperty(obj, key, {
-            enumerable,
-            configurable: false,
-            writable: false,
-            value: val
-        });
-    };
+    var _iterator = _createForOfIteratorHelper(split),
+        _step;
 
-    /**
-     * @summary makes a Enum
-     * @param {string[]} choices
-     * @returns {object}
-     */
-    const makeEnum = (choices) => {
-        const { length } = choices;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var header = _step.value;
+        var data = header.trim().split(': ');
+        var name = data.shift();
 
-        const enumerator = Object.create(null);
+        if (name) {
+          var value = data.join(': ');
+          headerMap[name] = value;
 
-        let increment = 1, index = 0;
-
-        for (const choice of choices) {
-            defineConstant(enumerator, index, choice, false);
-            defineConstant(enumerator, choice, increment);
-
-            increment = increment << 1;
-            index++;
+          if (/\-/.test(name)) {
+            var snakeCase = name.split("-").map(function (part) {
+              var fchar = part[0];
+              return part.length > 1 ? fchar.toUpperCase() + part.slice(1) : part;
+            }).join("");
+            headerMap[snakeCase] = value;
+          }
         }
-
-        defineConstant(enumerator, "length", length, false);
-        defineConstant(enumerator, "toString", () => `[object Enum]`, false);
-
-        enumerator[Symbol.iterator] = () => {
-            let i = 0;
-
-            return {
-                next: () => ({
-                    done: i >= length,
-                    value: enumerator[i++]
-                })
-            };
-        };
-
-        const frozen = Object.freeze(enumerator);
-
-        return new Proxy(frozen, {
-            get: (target, key) => {
-
-                if (!Reflect.has(target, key)) {
-                    throw new RangeError(`Invalid enum property: ${key}`);
-                }
-
-                return target[key];
-            }
-        });
-    };
-    
-    return {
-        defineConstant,
-        makeEnum
-    };
-
-}));
-
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.Headers = factory();
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
     }
-}(typeof self !== 'undefined' ? self : this, function () {
 
-    /**
-     * @summary maps headers to headers object
-     * @param {string} [headers]
-     * @returns {Object.<string, string>}
-     */
-    const mapResponseHeaders = (headers = "") => {
+    return headerMap;
+  };
 
-        const split = headers.split(/[\r\n]+/);
-
-        const headerMap = {};
-
-        if (!headers) {
-            return headerMap;
-        }
-
-        for (const header of split) {
-            const data = header.trim().split(': ');
-
-            const name = data.shift();
-
-            if(name) {
-                const value = data.join(': ');
-                headerMap[name] = value;
-
-                if (/\-/.test(name)) {
-                    const snakeCase = name
-                        .split("-")
-                        .map((part) => {
-                            const fchar = part[0];
-
-                            return part.length > 1 ? fchar.toUpperCase() + part.slice(1) : part;
-                        })
-                        .join("");
-
-                    headerMap[snakeCase] = value;
-                }
-            }
-
-        }
-
-        return headerMap;
-    };
-
-    return {
-        mapResponseHeaders
-    };
-
-}));
-
+  return {
+    mapResponseHeaders: mapResponseHeaders
+  };
+});
+"use strict";
 
 /**
  * @summary runs a function several times
  * @param {number} [num] 
  */
-const runUntil = (num = 1) =>
+var runUntil = function runUntil() {
+  var num = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+  return (
+    /**
+     * @param {function} callback
+     */
+    function (callback) {
+      var i = 0;
 
-	/**
-	 * @param {function} callback
-	 */
-    (callback, ...args) => {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
 
-        let i = 0;
-        while (i < num) {
-            callback(i, ...args);
-            i++;
-        }
-    };
-
-module.exports = {
-    runUntil
+      while (i < num) {
+        callback.apply(void 0, [i].concat(args));
+        i++;
+      }
+    }
+  );
 };
 
+module.exports = {
+  runUntil: runUntil
+};
+"use strict";
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.Logic = factory();
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.Logic = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  /**
+   * @summary ANDs lists of values
+   * 
+   * @description
+   * For inputs of any size, fails if any of inputs are false
+   *     
+   *     | A | B | AND |
+   *     | 0 | 0 | 0   |
+   *     | 0 | 1 | 0   |
+   *     | 1 | 0 | 0   |
+   *     | 1 | 1 | 1   |
+   * 
+   * Due to being vacuously truthy, no arguments should produce`true`: \
+   * ∀ arg: P (arg) => Q (arg) && ∀ arg: ¬ P (arg)
+   * 
+   * @param  {...any} [args]
+   * @returns {boolean}
+   */
+  var AND = function AND() {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
-}(
-    typeof self !== 'undefined' ? self : this,
-    function () {
 
-        /**
-         * @summary ANDs lists of values
-         * 
-         * @description
-         * For inputs of any size, fails if any of inputs are false
-         *     
-         *     | A | B | AND |
-         *     | 0 | 0 | 0   |
-         *     | 0 | 1 | 0   |
-         *     | 1 | 0 | 0   |
-         *     | 1 | 1 | 1   |
-         * 
-         * Due to being vacuously truthy, no arguments should produce`true`: \
-         * ∀ arg: P (arg) => Q (arg) && ∀ arg: ¬ P (arg)
-         * 
-         * @param  {...any} [args]
-         * @returns {boolean}
-         */
-        const AND = (...args) => args.every(Boolean);
+    return args.every(Boolean);
+  };
+  /**
+   * @summary NANDs lists of values
+   * 
+   * @description
+   * For inputs of any size, fails only if not all inputs are true
+   * 
+   *     | A | B | NAND |
+   *     | 0 | 0 | 1    |
+   *     | 0 | 1 | 1    |
+   *     | 1 | 0 | 1    |
+   *     | 1 | 1 | 0    |
+   * 
+   * Due to being vacuously truthy, no arguments should produce `true`: \
+   * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
+   * 
+   * De Morgan's law:
+   * 
+   * Negation of conjunction: !A && !B === !(A + B)
+   * 
+   * @param  {...any} args 
+   * @returns {boolean}
+   */
 
-        /**
-         * @summary NANDs lists of values
-         * 
-         * @description
-         * For inputs of any size, fails only if not all inputs are true
-         * 
-         *     | A | B | NAND |
-         *     | 0 | 0 | 1    |
-         *     | 0 | 1 | 1    |
-         *     | 1 | 0 | 1    |
-         *     | 1 | 1 | 0    |
-         * 
-         * Due to being vacuously truthy, no arguments should produce `true`: \
-         * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
-         * 
-         * De Morgan's law:
-         * 
-         * Negation of conjunction: !A && !B === !(A + B)
-         * 
-         * @param  {...any} args 
-         * @returns {boolean}
-         */
-        const NAND = (...args) => args.reduce((previous, current) => !AND(previous, current), true);
 
-        /**
-         * @summary ORs lists of values
-         * 
-         * @description
-         * For inputs of any size, succeeds if any of the inputs are true
-         * 
-         *     | A | B | OR |
-         *     | 0 | 0 | 0  |
-         *     | 0 | 1 | 1  |
-         *     | 1 | 0 | 1  |
-         *     | 1 | 1 | 1  |
-         * 
-         * Due to being vacuously truthy, no arguments should produce `true`: \
-         * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
-         * 
-         * @param  {...any} [args]
-         * @returns {boolean}
-         */
-        const OR = (...args) => args.length ? args.some(Boolean) : true;
+  var NAND = function NAND() {
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
 
-        /**
-         * @summary NORs lists of values
-         * 
-         * @description
-         * For inputs of any size, succeeds only if all inputs false
-         * 
-         *     | A | B | NOR |
-         *     | 0 | 0 | 1   |
-         *     | 0 | 1 | 0   |
-         *     | 1 | 0 | 0   |
-         *     | 1 | 1 | 0   |
-         * 
-         * Due to being vacuously truthy, no arguments should produce `true`: \
-         * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
-         * 
-         * De Morgan's law:
-         * 
-         * Negation of disjunction: !A && !B === !(A + B)
-         * 
-         * @param  {...any} args 
-         * @returns {boolean}
-         */
-        const NOR = (...args) => args.reduce((previous, current) => !OR(previous, current), true);
+    return args.reduce(function (previous, current) {
+      return !AND(previous, current);
+    }, true);
+  };
+  /**
+   * @summary ORs lists of values
+   * 
+   * @description
+   * For inputs of any size, succeeds if any of the inputs are true
+   * 
+   *     | A | B | OR |
+   *     | 0 | 0 | 0  |
+   *     | 0 | 1 | 1  |
+   *     | 1 | 0 | 1  |
+   *     | 1 | 1 | 1  |
+   * 
+   * Due to being vacuously truthy, no arguments should produce `true`: \
+   * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
+   * 
+   * @param  {...any} [args]
+   * @returns {boolean}
+   */
 
-        /**
-         * @summary XORs lists of values
-         * 
-         *  @description
-         * For inputs > 2, proper XOR is several of XOR gates with result of binary XOR and new input
-         * 
-         *     | A | B | XOR |
-         *     | 0 | 0 | 0   |
-         *     | 0 | 1 | 1   |
-         *     | 1 | 0 | 1   |
-         *     | 1 | 1 | 0   |
-         * 
-         * Due to being vacuously truthy, no arguments should produce `true`: \
-         * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
-         * 
-         * To be different from one-hot switch, XOR for more than 2 inputs \
-         * should be a stacked instead of reducing XOR
-         * 
-         * @param  {...any} [args]
-         * @returns {boolean}
-         */
-        const XOR = (...args) => {
 
-            const { length } = args;
+  var OR = function OR() {
+    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
+    }
 
-            if (!length) {
-                return true;
-            }
+    return args.length ? args.some(Boolean) : true;
+  };
+  /**
+   * @summary NORs lists of values
+   * 
+   * @description
+   * For inputs of any size, succeeds only if all inputs false
+   * 
+   *     | A | B | NOR |
+   *     | 0 | 0 | 1   |
+   *     | 0 | 1 | 0   |
+   *     | 1 | 0 | 0   |
+   *     | 1 | 1 | 0   |
+   * 
+   * Due to being vacuously truthy, no arguments should produce `true`: \
+   * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
+   * 
+   * De Morgan's law:
+   * 
+   * Negation of disjunction: !A && !B === !(A + B)
+   * 
+   * @param  {...any} args 
+   * @returns {boolean}
+   */
 
-            if (length === 1) {
-                return !!args[0];
-            }
 
-            const [curr, next] = args;
+  var NOR = function NOR() {
+    for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+      args[_key4] = arguments[_key4];
+    }
 
-            const xored = OR(curr, next) && OR(!curr, !next);
+    return args.reduce(function (previous, current) {
+      return !OR(previous, current);
+    }, true);
+  };
+  /**
+   * @summary XORs lists of values
+   * 
+   *  @description
+   * For inputs > 2, proper XOR is several of XOR gates with result of binary XOR and new input
+   * 
+   *     | A | B | XOR |
+   *     | 0 | 0 | 0   |
+   *     | 0 | 1 | 1   |
+   *     | 1 | 0 | 1   |
+   *     | 1 | 1 | 0   |
+   * 
+   * Due to being vacuously truthy, no arguments should produce `true`: \
+   * ∀ arg : P ( arg ) => Q ( arg ) && ∀ arg : ¬ P ( arg )
+   * 
+   * To be different from one-hot switch, XOR for more than 2 inputs \
+   * should be a stacked instead of reducing XOR
+   * 
+   * @param  {...any} [args]
+   * @returns {boolean}
+   */
 
-            return XOR(xored, ...args.slice(2));
-        };
 
-        /**
-         * @summary XNORs lists of values
-         * 
-         * @description
-         * 
-         * XNOR acts as an equivalence gate
-         * 
-         *     | A | B | XNOR |
-         *     | 0 | 0 | 1    |
-         *     | 0 | 1 | 0    |
-         *     | 1 | 0 | 0    |
-         *     | 1 | 1 | 1    |
-         * 
-         * XNOR = inverse of NOR
-         * 
-         * 
-         * @param  {...any} args 
-         * @returns {boolean}
-         */
-        const XNOR = (...args) => args.length ? !XOR(...args) : true;
+  var XOR = function XOR() {
+    for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+      args[_key5] = arguments[_key5];
+    }
 
-        return {
-            AND,
-            NAND,
-            NOR,
-            OR,
-            XNOR,
-            XOR
-        };
+    var length = args.length;
 
-    }));
+    if (!length) {
+      return true;
+    }
+
+    if (length === 1) {
+      return !!args[0];
+    }
+
+    var curr = args[0],
+        next = args[1];
+    var xored = OR(curr, next) && OR(!curr, !next);
+    return XOR.apply(void 0, [xored].concat(_toConsumableArray(args.slice(2))));
+  };
+  /**
+   * @summary XNORs lists of values
+   * 
+   * @description
+   * 
+   * XNOR acts as an equivalence gate
+   * 
+   *     | A | B | XNOR |
+   *     | 0 | 0 | 1    |
+   *     | 0 | 1 | 0    |
+   *     | 1 | 0 | 0    |
+   *     | 1 | 1 | 1    |
+   * 
+   * XNOR = inverse of NOR
+   * 
+   * 
+   * @param  {...any} args 
+   * @returns {boolean}
+   */
+
+
+  var XNOR = function XNOR() {
+    return arguments.length ? !XOR.apply(void 0, arguments) : true;
+  };
+
+  return {
+    AND: AND,
+    NAND: NAND,
+    NOR: NOR,
+    OR: OR,
+    XNOR: XNOR,
+    XOR: XOR
+  };
+});
+"use strict";
 
 /**
  * @fileoverview Math utilities
@@ -800,41 +1444,69 @@ module.exports = {
  * @param {function} operation 
  * @returns {OperationApplier}
  */
-const binaryOp = (operation) => (...args) => args.length ? args.reduce((total, arg) => operation(total, arg)) : 0;
+var binaryOp = function binaryOp(operation) {
+  return function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
 
+    return args.length ? args.reduce(function (total, arg) {
+      return operation(total, arg);
+    }) : 0;
+  };
+};
 /**
  * Divides all arguments
  * @param  {...number} args
  * @returns {number}
  */
-const divide = (...args) => binaryOp((a, b) => {
-    if (b === 0) {
-        throw new RangeError('Cannot divide by 0');
-    }
-    return a / b;
-})(...args);
 
+
+var divide = function divide() {
+  return binaryOp(function (a, b) {
+    if (b === 0) {
+      throw new RangeError('Cannot divide by 0');
+    }
+
+    return a / b;
+  }).apply(void 0, arguments);
+};
 /**
  * Multiplies all arguments
  * @param  {...number} args
  * @return {number}
  */
-const multiply = (...args) => binaryOp((a, b) => a * b)(...args);
 
+
+var multiply = function multiply() {
+  return binaryOp(function (a, b) {
+    return a * b;
+  }).apply(void 0, arguments);
+};
 /**
  * Substracts all arguments
  * @param  {...number} args 
  * @returns {number}
  */
-const substract = (...args) => binaryOp((a, b) => a - b)(...args);
 
+
+var substract = function substract() {
+  return binaryOp(function (a, b) {
+    return a - b;
+  }).apply(void 0, arguments);
+};
 /**
  * Sums all arguments
  * @param  {...number} args
  * @returns {number}
  */
-const sum = (...args) => binaryOp((a, b) => a + b)(...args);
 
+
+var sum = function sum() {
+  return binaryOp(function (a, b) {
+    return a + b;
+  }).apply(void 0, arguments);
+};
 /**
  * Complex utilities (based on base ops)
  */
@@ -844,160 +1516,213 @@ const sum = (...args) => binaryOp((a, b) => a + b)(...args);
  * @param  {...number} args
  * @returns {number}
  */
-const average = (...args) => sum(...args) / (args.length || 1);
 
+
+var average = function average() {
+  return sum.apply(void 0, arguments) / (arguments.length || 1);
+};
 /**
  * Abstraction for M / (A + ... + Z)
  * @param {number} divisor 
  * @returns {function}
  */
-const divSum = (divisor) => (...args) => divide(sum(...args), divisor);
 
+
+var divSum = function divSum(divisor) {
+  return function () {
+    return divide(sum.apply(void 0, arguments), divisor);
+  };
+};
 /**
  * Abstraction for M * (A + ... + Z)
  * @param {number} multiplier 
  * @returns {function}
  */
-const multSum = (multiplier) => (...args) => multiply(sum(...args), multiplier);
 
 
+var multSum = function multSum(multiplier) {
+  return function () {
+    return multiply(sum.apply(void 0, arguments), multiplier);
+  };
+};
 /**
  * @summary Finds greatest common divisor
  * @param  {...number} args
  * @returns {number}
  */
-const GCD = (...args) => {
-    const { length } = args;
 
-    if (!length) {
-        throw new RangeError(`Can't compute GCD of no args`);
-    }
 
-    if (length === 1) {
-        return args[0];
-    }
+var GCD = function GCD() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
 
-    const gcd = (a, b) => !a ? b : gcd(b % a, a);
+  var length = args.length;
 
-    return args.reduce((out, arg) => gcd(out, arg), 0);
+  if (!length) {
+    throw new RangeError("Can't compute GCD of no args");
+  }
+
+  if (length === 1) {
+    return args[0];
+  }
+
+  var gcd = function gcd(a, b) {
+    return !a ? b : gcd(b % a, a);
+  };
+
+  return args.reduce(function (out, arg) {
+    return gcd(out, arg);
+  }, 0);
 };
-
 /**
  * @summary Finds least common multiplier
  * @param  {...number} args
  * @returns {number}
  */
-const LCM = (...args) => {
-    const { length } = args;
 
-    if (!args.length) {
-        throw new RangeError(`Can't compute LCM of no args`);
-    }
 
-    if (length === 1) {
-        return args[0];
-    }
+var LCM = function LCM() {
+  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    args[_key3] = arguments[_key3];
+  }
 
-    return args.reduce((out, arg) => arg * out / GCD(arg, out));
+  var length = args.length;
+
+  if (!args.length) {
+    throw new RangeError("Can't compute LCM of no args");
+  }
+
+  if (length === 1) {
+    return args[0];
+  }
+
+  return args.reduce(function (out, arg) {
+    return arg * out / GCD(arg, out);
+  });
 };
-
 /**
  * @summary returns first N fibonacci numbers
  * @param {number} [n]
  * @returns {number[]}
  */
-function fibonacci(n = 0) {
 
-    const sequencer = (times, acc = [0]) => {
-        if (times === 1) {
-            return acc;
-        }
-        const { length } = acc;
-        acc.push(acc[length - 1] + acc[length - 2] || 1);
-        return sequencer(times - 1, acc);
-    };
 
-    return n < 1 ? [] : sequencer(n);
+function fibonacci() {
+  var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+  var sequencer = function sequencer(times) {
+    var acc = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [0];
+
+    if (times === 1) {
+      return acc;
+    }
+
+    var length = acc.length;
+    acc.push(acc[length - 1] + acc[length - 2] || 1);
+    return sequencer(times - 1, acc);
+  };
+
+  return n < 1 ? [] : sequencer(n);
 }
 
-
 module.exports = {
-    average,
-    divide,
-    divSum,
-    fibonacci,
-    GCD,
-    HCF: GCD,
-    LCM,
-    multiply,
-    multSum,
-    substract,
-    sum
+  average: average,
+  divide: divide,
+  divSum: divSum,
+  fibonacci: fibonacci,
+  GCD: GCD,
+  HCF: GCD,
+  LCM: LCM,
+  multiply: multiply,
+  multSum: multSum,
+  substract: substract,
+  sum: sum
 };
+"use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepGetByType = exports.complement = void 0;
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 /**
  * @summary returns a complement of objects
  * @param  {...object} sources 
  * @returns {object}
  */
-const complement = (...sources) => {
+var complement = function complement() {
+  var tracked = [];
 
-    const tracked = [];
+  for (var _len = arguments.length, sources = new Array(_len), _key = 0; _key < _len; _key++) {
+    sources[_key] = arguments[_key];
+  }
 
-    return sources.reduce((acc, curr) => {
+  return sources.reduce(function (acc, curr) {
+    for (var key in curr) {
+      if (tracked.includes(key)) {
+        delete acc[key];
+        continue;
+      }
 
-        for (const key in curr) {
+      acc[key] = curr[key];
+      tracked.push(key);
+    }
 
-            if (tracked.includes(key)) {
-                delete acc[key];
-                continue;
-            }
-
-            acc[key] = curr[key];
-
-            tracked.push(key);
-        }
-
-        return acc;
-    }, {});
+    return acc;
+  }, {});
 };
-
 /**
  * @summary deep gets properties of specified type
  * @param {object} [obj]
  */
-const deepGetByType = (obj = {}) =>
 
+
+exports.complement = complement;
+
+var deepGetByType = function deepGetByType() {
+  var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return (
     /**
      * @param {string} type
      * @returns {object}
      */
-    (type) => {
+    function (type) {
+      var output = {};
+      Object.entries(obj).forEach(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            key = _ref2[0],
+            val = _ref2[1];
 
-        const output = {};
+        if (_typeof(val) === "object" && val) {
+          var subvals = deepGetByType(val)(type);
+          return Object.assign(output, subvals);
+        }
 
-        Object
-            .entries(obj)
-            .forEach(([key, val]) => {
+        var shouldSet = _typeof(val) === type || type === null && val === null;
 
-                if (typeof val === "object" && val) {
-                    const subvals = deepGetByType(val)(type);
-                    return Object.assign(output, subvals);
-                }
-
-                const shouldSet = typeof val === type ||
-                    type === null && val === null;
-
-                if (shouldSet) {
-                    output[key] = val;
-                }
-
-            });
-
-        return output;
-    };
-
+        if (shouldSet) {
+          output[key] = val;
+        }
+      });
+      return output;
+    }
+  );
+};
 /**
  * @typedef {({ 
  *  configurable: boolean,
@@ -1011,12 +1736,16 @@ const deepGetByType = (obj = {}) =>
  * @param {object} obj
  * @returns {PropertyDescriptor}
  */
-const getGetterDescriptors = (obj = {}) => {
-    return Object
-        .entries(Object.getOwnPropertyDescriptors(obj))
-        .filter(entry => typeof entry[1].get === "function");
-};
 
+
+exports.deepGetByType = deepGetByType;
+
+var getGetterDescriptors = function getGetterDescriptors() {
+  var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return Object.entries(Object.getOwnPropertyDescriptors(obj)).filter(function (entry) {
+    return typeof entry[1].get === "function";
+  });
+};
 /**
  * @summary gets value from object or inits it via callback
  * @param {object} obj
@@ -1024,25 +1753,32 @@ const getGetterDescriptors = (obj = {}) => {
  * @param {function(object) : any} [callback]
  * @returns {any}
  */
-const getOrInitProp = (obj, propName, callback) => {
 
-    if (propName in obj) {
-        return obj[propName];
-    }
 
-    if (callback) {
-        obj[propName] = callback(obj);
-        return obj[propName];
-    }
+exports.getGetterDescriptors = getGetterDescriptors;
+
+var getOrInitProp = function getOrInitProp(obj, propName, callback) {
+  if (propName in obj) {
+    return obj[propName];
+  }
+
+  if (callback) {
+    obj[propName] = callback(obj);
+    return obj[propName];
+  }
 };
-
 /**
  * @summary checks if an object is a valid object
  * @param {object} obj
  * @returns {boolean}
  */
-const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 
+
+exports.getOrInitProp = getOrInitProp;
+
+var isObject = function isObject(obj) {
+  return _typeof(obj) === 'object' && obj !== null && !Array.isArray(obj);
+};
 /**
  * @summary pushes value in or inits array with value
  * @param {object} obj 
@@ -1050,25 +1786,26 @@ const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isAr
  * @param {*} value 
  * @returns {object}
  */
-const pushOrInitProp = (obj, key, value) => {
 
-    if (key in obj) {
-        const temp = obj[key];
 
-        if (Array.isArray(temp)) {
-            temp.push(value);
-            return obj;
-        }
+exports.isObject = isObject;
 
-        obj[key] = [temp, value];
-        return obj;
+var pushOrInitProp = function pushOrInitProp(obj, key, value) {
+  if (key in obj) {
+    var temp = obj[key];
+
+    if (Array.isArray(temp)) {
+      temp.push(value);
+      return obj;
     }
 
-    obj[key] = [value];
-
+    obj[key] = [temp, value];
     return obj;
-};
+  }
 
+  obj[key] = [value];
+  return obj;
+};
 /**
  * @typedef {object} SetOptions
  * @property {string} [coerce]
@@ -1081,38 +1818,40 @@ const pushOrInitProp = (obj, key, value) => {
  * @param {SetOptions} [options]
  * @returns {object}
  */
-const setIf = (source, key, target = {}, options = {}) => {
 
-    if (typeof key !== "string") {
-        return target;
-    }
 
-    /** @type {Map<string, function>} */
-    const coercionMap = new Map()
-        .set("string", val => {
+exports.pushOrInitProp = pushOrInitProp;
 
-            if (typeof val === "string") {
-                return val;
-            }
+var setIf = function setIf(source, key) {
+  var target = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
-            if (typeof val === "number") {
-                return Number.prototype.toString.call(val);
-            }
-
-            return val;
-        });
-
-    const { coerce } = options;
-
-    if (key in source) {
-        const value = source[key];
-
-        target[key] = coerce ? (coercionMap.get(coerce))(value) : value;
-    }
-
+  if (typeof key !== "string") {
     return target;
-};
+  }
+  /** @type {Map<string, function>} */
 
+
+  var coercionMap = new Map().set("string", function (val) {
+    if (typeof val === "string") {
+      return val;
+    }
+
+    if (typeof val === "number") {
+      return Number.prototype.toString.call(val);
+    }
+
+    return val;
+  });
+  var coerce = options.coerce;
+
+  if (key in source) {
+    var value = source[key];
+    target[key] = coerce ? coercionMap.get(coerce)(value) : value;
+  }
+
+  return target;
+};
 /**
  * @summary defines a smart (memoizable) getter
  * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get}
@@ -1121,71 +1860,81 @@ const setIf = (source, key, target = {}, options = {}) => {
  * @param {function} callback 
  * @returns {object}
  */
-const smartGetter = (context, propName, callback) => {
-    return Object.defineProperty(context, propName, {
-        configurable: true,
-        get() {
-            const temp = callback(context);
 
-            Object.defineProperty(context, propName, {
-                value: temp
-            });
 
-            return temp;
-        }
-    });
+exports.setIf = setIf;
+
+var smartGetter = function smartGetter(context, propName, callback) {
+  return Object.defineProperty(context, propName, {
+    configurable: true,
+    get: function get() {
+      var temp = callback(context);
+      Object.defineProperty(context, propName, {
+        value: temp
+      });
+      return temp;
+    }
+  });
 };
-
 /**
  * @summary returns one of the object props equal
  * @param {object} [target] first object to compare
  * @param {string} propName property name
  */
-const switchIfDiffProp = (target, propName) =>
 
+
+exports.smartGetter = smartGetter;
+
+var switchIfDiffProp = function switchIfDiffProp(target, propName) {
+  return (
     /**
      * @param {object} [source] second object to compare
      * @returns {object}
      */
-    (source) => {
+    function (source) {
+      if (!target) {
+        return source || {};
+      }
 
-        if (!target) {
-            return source || {};
-        }
+      if (!source) {
+        return target || {};
+      }
 
-        if (!source) {
-            return target || {};
-        }
-
-        return target[propName] === source[propName] ?
-            target :
-            source;
-    };
-
+      return target[propName] === source[propName] ? target : source;
+    }
+  );
+};
 /**
  * @summary makes a union of object
  * @param {object} target 
  * @param  {...object} sources 
  * @returns {object}
  */
-const union = (target, ...sources) => {
 
-    const union = Object.assign({}, target);
 
-    const assignedKeys = {};
+exports.switchIfDiffProp = switchIfDiffProp;
 
-    for (const source of sources) {
-        for (const key in source) {
-            if (!assignedKeys[key] && !(key in union)) {
-                assignedKeys[key] |= 1;
-                union[key] = source[key];
-            }
-        }
+var union = function union(target) {
+  var union = Object.assign({}, target);
+  var assignedKeys = {};
+
+  for (var _len2 = arguments.length, sources = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+    sources[_key2 - 1] = arguments[_key2];
+  }
+
+  for (var _i2 = 0, _sources = sources; _i2 < _sources.length; _i2++) {
+    var source = _sources[_i2];
+
+    for (var key in source) {
+      if (!assignedKeys[key] && !(key in union)) {
+        assignedKeys[key] |= 1;
+        union[key] = source[key];
+      }
     }
+  }
 
-    return union;
+  return union;
 };
-
 /**
  * @summary checks which key is set on object
  * @param {object} obj 
@@ -1194,52 +1943,156 @@ const union = (target, ...sources) => {
  * 
  * @throws {RangeError}
  */
-const whichKeyIsSet = (obj, ...keys) => {
 
-    let matched = 0;
 
-    const filtered = keys.filter(key => {
-        const has = obj.hasOwnProperty(key);
+exports.union = union;
 
-        if (has) {
+var whichKeyIsSet = function whichKeyIsSet(obj) {
+  var matched = 0;
 
-            if (matched) {
-                throw new RangeError(`Object has more than one provided own keys`);
-            }
+  for (var _len3 = arguments.length, keys = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+    keys[_key3 - 1] = arguments[_key3];
+  }
 
-            matched |= 1;
-        }
+  var filtered = keys.filter(function (key) {
+    var has = obj.hasOwnProperty(key);
 
-        return has;
-    });
+    if (has) {
+      if (matched) {
+        throw new RangeError("Object has more than one provided own keys");
+      }
 
-    return filtered[0] || null;
+      matched |= 1;
+    }
+
+    return has;
+  });
+  return filtered[0] || null;
 };
-
 /**
  * @summary checks which keys are set on object
  * @param {object} obj 
  * @param  {...string} [keys] 
  * @returns {string[]}
  */
-const whichKeysAreSet = (obj, ...keys) => {
-    return keys.filter(key => obj.hasOwnProperty(key));
+
+
+exports.whichKeyIsSet = whichKeyIsSet;
+
+var whichKeysAreSet = function whichKeysAreSet(obj) {
+  for (var _len4 = arguments.length, keys = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+    keys[_key4 - 1] = arguments[_key4];
+  }
+
+  return keys.filter(function (key) {
+    return obj.hasOwnProperty(key);
+  });
 };
 
-export {
-    complement,
-    deepGetByType,
-    getGetterDescriptors,
-    getOrInitProp,
-    isObject,
-    pushOrInitProp,
-    setIf,
-    smartGetter,
-    switchIfDiffProp,
-    union,
-    whichKeyIsSet,
-    whichKeysAreSet
+exports.whichKeysAreSet = whichKeysAreSet;
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+/**
+ * @summary Makes an inspectable Promise
+ */
+var ExtendedPromise = /*#__PURE__*/function (_Promise) {
+  _inherits(ExtendedPromise, _Promise);
+
+  var _super = _createSuper(ExtendedPromise);
+
+  /**
+   * @param {function(function, function)} executor
+   */
+  function ExtendedPromise(executor) {
+    var _this;
+
+    _classCallCheck(this, ExtendedPromise);
+
+    var privates = {
+      fulfilled: false,
+      pending: true,
+      rejected: false,
+      value: undefined
+    };
+    _this = _super.call(this, function (resolve, reject) {
+      executor(function (res) {
+        privates.fulfilled = true;
+        privates.pending = false;
+        privates.value = res;
+        resolve(res);
+      }, function (err) {
+        privates.rejected = true;
+        privates.pending = false;
+        privates.value = err;
+        reject(err);
+      });
+    });
+    Object.defineProperties(_assertThisInitialized(_this), {
+      fulfilled: {
+        configurable: false,
+        get: function get() {
+          return privates.fulfilled;
+        }
+      },
+      pending: {
+        configurable: false,
+        get: function get() {
+          return privates.pending;
+        }
+      },
+      rejected: {
+        configurable: false,
+        get: function get() {
+          return privates.rejected;
+        }
+      },
+      settled: {
+        configurable: false,
+        get: function get() {
+          return !privates.pending && !(privates.value instanceof Promise);
+        }
+      },
+      value: {
+        configurable: false,
+        get: function get() {
+          return privates.value;
+        }
+      }
+    });
+    return _this;
+  }
+
+  return ExtendedPromise;
+}( /*#__PURE__*/_wrapNativeSuper(Promise));
+
+module.exports = {
+  ExtendedPromise: ExtendedPromise
 };
+"use strict";
 
 /**
  * Generates pseudo-random int[]
@@ -1247,200 +2100,562 @@ export {
  * @param {number} [seed]
  * @returns {number[]} 
  */
-const randomArray = (len, seed = 1) => {
-    const output = [];
+var randomArray = function randomArray(len) {
+  var seed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  var output = [];
+  var i = 0;
 
-    let i = 0;
+  while (i < len) {
+    var val = Math.floor(Math.random() * seed);
+    output[i] = val;
+    i++;
+  }
 
-    while (i < len) {
-        const val = Math.floor(Math.random() * seed);
-        output[i] = val;
-        i++;
-    }
-
-    return output;
+  return output;
 };
 
 module.exports = {
-    randomArray
+  randomArray: randomArray
 };
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.Strings = factory();
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.Strings = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  /**
+   * @summary checks if string is lowcase
+   * @param {string} [str] 
+   * @returns {boolean}
+   */
+  var isLcase = function isLcase() {
+    var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
+    if (!str) {
+      return false;
     }
-}(typeof self !== 'undefined' ? self : this, function () {
 
-    /**
-     * @summary checks if string is lowcase
-     * @param {string} [str] 
-     * @returns {boolean}
-     */
-    const isLcase = (str = "") => {
+    return Array.prototype.every.call(str, function (_char) {
+      var code = _char.codePointAt(0);
 
-        if (!str) {
-            return false;
-        }
+      return code < 65 || code > 90;
+    });
+  };
+  /**
+   * @summary checks if string is uppercase
+   * @param {string} [str]
+   * @returns {boolean}
+   */
 
-        return Array.prototype.every
-            .call(str, char => {
-                const code = char.codePointAt(0);
-                return code < 65 || code > 90;
-            });
+
+  var isUcase = function isUcase() {
+    var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
+    if (!str) {
+      return false;
+    }
+
+    return Array.prototype.every.call(str, function (_char2) {
+      var code = _char2.codePointAt(0);
+
+      return /\W/.test(_char2) || code > 64 && code < 91;
+    });
+  };
+  /**
+   * @summary changes noun (countable) to plural form and prepends amount
+   * 
+   * @example
+   * 1,test -> 1 test
+   * 2,test -> 2 tests
+   * 21,test -> 21 tests
+   * 
+   * @param {number} amount
+   * @param {string} noun
+   * @returns {string}
+   */
+
+
+  var pluralizeCountable = function pluralizeCountable(amount, noun) {
+    var normalized = noun.toLowerCase();
+
+    if (amount === 1) {
+      return "1 ".concat(normalized);
+    }
+
+    var irregulars = {
+      "child": "children",
+      "goose": "geese",
+      "tooth": "teeth",
+      "foot": "feet",
+      "mous": "mice",
+      "person": "people"
     };
+    var irregularPlural = irregulars[normalized];
 
-    /**
-     * @summary checks if string is uppercase
-     * @param {string} [str]
-     * @returns {boolean}
-     */
-    const isUcase = (str = "") => {
+    if (irregularPlural) {
+      return "".concat(amount, " ").concat(irregularPlural);
+    }
 
-        if (!str) {
-            return false;
-        }
+    if (manWomanCase = normalized.match(/(\w*)(man|woman)$/)) {
+      return "".concat(amount, " ").concat(manWomanCase[1]).concat(manWomanCase[2].replace("a", "e"));
+    }
 
-        return Array.prototype.every
-            .call(str, char => {
-                const code = char.codePointAt(0);
-                return /\W/.test(char) || code > 64 && code < 91;
-            });
+    var staySameExceptions = new Set(["sheep", "series", "species", "deer", "fish"]);
+
+    if (staySameExceptions.has(normalized)) {
+      return "".concat(amount, " ").concat(normalized);
+    }
+
+    var wordBase = normalized.slice(0, -2);
+    var irregularEndingWithA = new Set(["phenomenon", "datum", "criterion"]);
+
+    if (irregularEndingWithA.has(normalized)) {
+      return "".concat(amount, " ").concat(wordBase, "a");
+    }
+
+    var twoLastLetters = normalized.slice(-2);
+    var oneLastLetter = twoLastLetters.slice(-1);
+    var irregularEndingWithForFe = new Set(["roofs", "belief", "chef", "chief"]);
+
+    if (irregularEndingWithForFe.has(normalized)) {
+      return "".concat(amount, " ").concat(normalized, "s");
+    }
+
+    if (/(?:f|fe)$/.test(noun)) {
+      return "".concat(amount, " ").concat(normalized.replace(/(?:f|fe)$/, "ves"));
+    }
+
+    var twoLettersReplaceMap = {
+      "is": "es",
+      "us": "i"
     };
+    var lastLettersReplace = twoLettersReplaceMap[twoLastLetters];
+
+    if (lastLettersReplace && wordBase.length > 1) {
+      return "".concat(amount, " ").concat(wordBase).concat(lastLettersReplace);
+    }
+
+    var twoLettersAddMap = new Set(["ch", "ss", "sh"]);
+
+    if (twoLettersAddMap.has(twoLastLetters)) {
+      return "".concat(amount, " ").concat(normalized, "es");
+    }
+
+    var oneLastLetterMap = new Set(["s", "x", "z"]);
+
+    if (oneLastLetterMap.has(oneLastLetter)) {
+      return "".concat(amount, " ").concat(normalized, "es");
+    }
+
+    var consonants = new Set(["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "x", "z", "w", "y"]);
+    var isLetterBeforeLastConsonant = consonants.has(normalized.slice(-2, -1));
+
+    if (oneLastLetter === "o" && isLetterBeforeLastConsonant) {
+      var lastOexceptions = new Set(["photo", "buro", "piano", "halo"]);
+      return "".concat(amount, " ").concat(normalized).concat(lastOexceptions.has(normalized) ? "s" : "es");
+    }
+
+    if (oneLastLetter === "y" && isLetterBeforeLastConsonant) {
+      return "".concat(amount, " ").concat(normalized.slice(0, -1), "ies");
+    }
+
+    return "".concat(amount, " ").concat(normalized, "s");
+  };
+  /**
+   * @summary makes word Sentence-case
+   * @param {string} word 
+   * @returns {string}
+   */
+
+
+  var sentenceCase = function sentenceCase(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  };
+  /**
+   * @summary trims string and removes non-word chars
+   * 
+   * @example
+   *    "pineapple, apple (!); --juice" => "pineapple apple juice"
+   * 
+   * @param {string} [input] 
+   * @returns {string}
+   */
+
+
+  var trimAndRemoveSep = function trimAndRemoveSep() {
+    var input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+    return input.trim().replace(/[^\s\w]|_/g, '');
+  };
+
+  return {
+    isLcase: isLcase,
+    isUcase: isUcase,
+    pluralizeCountable: pluralizeCountable,
+    sentenceCase: sentenceCase,
+    trimAndRemoveSep: trimAndRemoveSep
+  };
+});
+"use strict";
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Node base class
+ * @class
+ */
+var Node =
+/**
+ * @param {*} value
+ */
+function Node(value) {
+  _classCallCheck(this, Node);
+
+  this.value = value;
+  this.next = null;
+};
+
+var BinaryNode = /*#__PURE__*/function (_Node) {
+  _inherits(BinaryNode, _Node);
+
+  var _super = _createSuper(BinaryNode);
+
+  function BinaryNode(value) {
+    var _this;
+
+    _classCallCheck(this, BinaryNode);
+
+    _this = _super.call(this, value);
+    _this.left = _this.right = null;
+    return _this;
+  }
+
+  return BinaryNode;
+}(Node);
+
+var TernaryNode = /*#__PURE__*/function (_Node2) {
+  _inherits(TernaryNode, _Node2);
+
+  var _super2 = _createSuper(TernaryNode);
+
+  function TernaryNode(value) {
+    var _this2;
+
+    _classCallCheck(this, TernaryNode);
+
+    _this2 = _super2.call(this, value);
+    _this2.left = _this2.center = _this2.right = null;
+    return _this2;
+  }
+
+  return TernaryNode;
+}(Node);
+/**
+ * LinkedList base class
+ * @class
+ */
+
+
+var LinkedList = /*#__PURE__*/function () {
+  /**
+   * @param {Node} root 
+   */
+  function LinkedList(root) {
+    _classCallCheck(this, LinkedList);
+
+    this.root = root;
+    /** @member {Number} size */
+
+    this.size = root ? 1 : 0;
+  }
+  /**
+   * Getter for last Node in List
+   * @returns {Node}
+   */
+
+
+  _createClass(LinkedList, [{
+    key: "add",
 
     /**
-     * @summary changes noun (countable) to plural form and prepends amount
      * 
-     * @example
-     * 1,test -> 1 test
-     * 2,test -> 2 tests
-     * 21,test -> 21 tests
-     * 
-     * @param {number} amount
-     * @param {string} noun
-     * @returns {string}
+     * @param {*} value 
+     * @returns {LinkedList}
      */
-    const pluralizeCountable = (amount, noun) => {
+    value: function add(value) {
+      var root = this.root;
+      var node = new Node(value);
+      !root && (this.root = node) || (this.last.next = node);
+      this.size++;
+      return this;
+    }
+    /**
+     * 
+     * @param {Number} [index]
+     * @returns {?Node}
+     */
 
-        const normalized = noun.toLowerCase();
+  }, {
+    key: "at",
+    value: function at() {
+      var index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var root = this.root;
 
-        if (amount === 1) {
-            return `1 ${normalized}`;
+      if (!root) {
+        return null;
+      }
+
+      if (index === 0) {
+        return root;
+      }
+
+      var currNode = root;
+      var pos = 0;
+
+      while (currNode.next) {
+        if (index === pos) {
+          return currNode;
         }
 
-        const irregulars = {
-            "child": "children",
-            "goose": "geese",
-            "tooth": "teeth",
-            "foot": "feet",
-            "mous": "mice",
-            "person": "people"
-        };
+        currNode = currNode.next;
+        pos++;
+      }
 
-        const irregularPlural = irregulars[normalized];
+      return null;
+    }
+    /**
+     * 
+     * @param {*} value
+     * @param {Number} [index]
+     * @returns {LinkedList}
+     */
 
-        if (irregularPlural) {
-            return `${amount} ${irregularPlural}`;
-        }
+  }, {
+    key: "insert",
+    value: function insert(value, index) {
+      var size = this.size;
 
-        if (manWomanCase = normalized.match(/(\w*)(man|woman)$/)) {
-            return `${amount} ${manWomanCase[1]}${manWomanCase[2].replace("a", "e")}`;
-        }
+      if (!size || index === undefined) {
+        return this.add(value);
+      }
 
-        const staySameExceptions = new Set(["sheep", "series", "species", "deer", "fish"]);
-        if (staySameExceptions.has(normalized)) {
-            return `${amount} ${normalized}`;
-        }
+      var node = new Node(value);
 
-        const wordBase = normalized.slice(0, -2);
+      if (index === 0) {
+        var root = this.root;
+        node.next = root;
+        this.root = node;
+        this.size++;
+        return this;
+      }
 
-        const irregularEndingWithA = new Set(["phenomenon", "datum", "criterion"]);
-        if (irregularEndingWithA.has(normalized)) {
-            return `${amount} ${wordBase}a`;
-        }
+      var parent = this.at(index - 1);
 
-        const twoLastLetters = normalized.slice(-2);
-        const oneLastLetter = twoLastLetters.slice(-1);
+      if (parent) {
+        node.next = parent.next;
+        parent.next = node;
+        this.size++;
+      }
 
-        const irregularEndingWithForFe = new Set(["roofs", "belief", "chef", "chief"]);
-        if (irregularEndingWithForFe.has(normalized)) {
-            return `${amount} ${normalized}s`;
-        }
+      return this;
+    }
+    /**
+     * Generates a LinkedList from 
+     * value sequence
+     * @param {*[]} sequence 
+     * @returns {Tree}
+     */
 
-        if (/(?:f|fe)$/.test(noun)) {
-            return `${amount} ${ normalized.replace(/(?:f|fe)$/,"ves")}`;
-        }
-
-        const twoLettersReplaceMap = {
-            "is": "es",
-            "us": "i"
-        };
-
-        const lastLettersReplace = twoLettersReplaceMap[twoLastLetters];
-        if (lastLettersReplace && wordBase.length > 1) {
-            return `${amount} ${wordBase}${lastLettersReplace}`;
-        }
-
-        const twoLettersAddMap = new Set(["ch", "ss", "sh"]);
-        if (twoLettersAddMap.has(twoLastLetters)) {
-            return `${amount} ${normalized}es`;
-        }
-
-        const oneLastLetterMap = new Set(["s", "x", "z"]);
-        if (oneLastLetterMap.has(oneLastLetter)) {
-            return `${amount} ${normalized}es`;
-        }
-
-        const consonants = new Set([
-            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n",
-            "p", "q", "r", "s", "t", "v", "x", "z", "w", "y"
-        ]);
-
-        const isLetterBeforeLastConsonant = consonants.has(normalized.slice(-2, -1));
-
-        if (oneLastLetter === "o" && isLetterBeforeLastConsonant) {
-            const lastOexceptions = new Set(["photo", "buro", "piano", "halo"]);
-
-            return `${amount} ${normalized}${lastOexceptions.has(normalized) ? "s" : "es"}`;
-        }
-
-        if (oneLastLetter === "y" && isLetterBeforeLastConsonant) {
-            return `${amount} ${normalized.slice(0, -1)}ies`;
-        }
-
-        return `${amount} ${normalized}s`;
-    };
+  }, {
+    key: "pop",
 
     /**
-     * @summary makes word Sentence-case
-     * @param {string} word 
-     * @returns {string}
+     * 
+     * @returns {LinkedList}
      */
-    const sentenceCase = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    value: function pop() {
+      var size = this.size;
 
+      if (!size) {
+        return this;
+      }
+
+      if (size === 1) {
+        this.root = null;
+        this.size--;
+        return this;
+      }
+
+      var beforeLast = this.at(size - 2);
+      beforeLast.next = null;
+      this.size--;
+      return this;
+    }
     /**
-     * @summary trims string and removes non-word chars
      * 
-     * @example
-     *    "pineapple, apple (!); --juice" => "pineapple apple juice"
-     * 
-     * @param {string} [input] 
-     * @returns {string}
+     * @param {*} [index] 
+     * @returns {LinkedList}
      */
-    const trimAndRemoveSep = (input = "") => input.trim().replace(/[^\s\w]|_/g, '');
 
-    return {
-        isLcase,
-        isUcase,
-        pluralizeCountable,
-        sentenceCase,
-        trimAndRemoveSep
-    };
+  }, {
+    key: "remove",
+    value: function remove(index) {
+      var size = this.size;
 
-}));
+      if (!size || index >= size) {
+        return this;
+      }
+
+      if (size === 1 || index === undefined) {
+        return this.pop();
+      }
+
+      var parent = this.at(index - 1);
+
+      if (parent) {
+        parent.next = parent.next.next;
+        this.size--;
+      }
+
+      return this;
+    }
+  }, {
+    key: "last",
+    get: function get() {
+      var root = this.root;
+      var current = root;
+
+      while (current.next) {
+        current = current.next;
+      }
+
+      return current || null;
+    }
+    /**
+     * Getter for last index in List
+     * @returns {Number}
+     */
+
+  }, {
+    key: "lastIndex",
+    get: function get() {
+      var size = this.size;
+      return size ? size - 1 : 0;
+    }
+  }], [{
+    key: "generate",
+    value: function generate() {
+      var sequence = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var list = new LinkedList();
+
+      var _iterator = _createForOfIteratorHelper(sequence),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var value = _step.value;
+          list.add(value);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      return list;
+    }
+  }]);
+
+  return LinkedList;
+}();
+
+var BinaryTree = /*#__PURE__*/function (_LinkedList) {
+  _inherits(BinaryTree, _LinkedList);
+
+  var _super3 = _createSuper(BinaryTree);
+
+  function BinaryTree(root) {
+    _classCallCheck(this, BinaryTree);
+
+    return _super3.call(this, root);
+  }
+
+  return BinaryTree;
+}(LinkedList);
+
+var TernaryTree = /*#__PURE__*/function (_LinkedList2) {
+  _inherits(TernaryTree, _LinkedList2);
+
+  var _super4 = _createSuper(TernaryTree);
+
+  function TernaryTree(root) {
+    _classCallCheck(this, TernaryTree);
+
+    return _super4.call(this, root);
+  }
+
+  return TernaryTree;
+}(LinkedList);
+
+module.exports = {
+  Node: Node,
+  BinaryNode: BinaryNode,
+  TernaryNode: TernaryNode,
+  LinkedList: LinkedList,
+  BinaryTree: BinaryTree,
+  TernaryTree: TernaryTree
+};
+"use strict";
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 /**
  * @fileoverview JavaScript Utilities
@@ -1448,16 +2663,25 @@ module.exports = {
  * @version 0.0.2
  */
 
-
 /**
  * General Utilities
  */
-
 //delays callback for a specified number of milliseconds;
-const delay = (time) => (callback) => (...args) => setTimeout(() => callback(...args), time || 100);
+var delay = function delay(time) {
+  return function (callback) {
+    return function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
 
-const noop = () => {};
+      return setTimeout(function () {
+        return callback.apply(void 0, args);
+      }, time || 100);
+    };
+  };
+};
 
+var noop = function noop() {};
 /**
  * Number utilities
  */
@@ -1467,98 +2691,98 @@ const noop = () => {};
  * for a given number of bits
  * @param {BigInt|Number} bits 
  */
-const offsetK = (bits) => {
-    const offset = 2 ** (bits - 1);
 
-    return (
-        offset > Number.MAX_SAFE_INTEGER ?
-            BigInt(offset) - 1n :
-            offset - 1
-    );
-};
 
-//partially applied utils;
-const exp32 = offsetK(32);
-const exp64 = offsetK(64);
+var offsetK = function offsetK(bits) {
+  var offset = Math.pow(2, bits - 1);
+  return offset > Number.MAX_SAFE_INTEGER ? BigInt(offset) - 1n : offset - 1;
+}; //partially applied utils;
 
+
+var exp32 = offsetK(32);
+var exp64 = offsetK(64);
 /**
  * Object Utilities
  */
-
 //Extracts entries from an object;
-const getEntries = (object) => Object.keys(object).map(key => object[key]);
 
-//Extracts key name by its value;
-const keysByValue = (object) => (value) => Object.keys(object).filter(key => object[key] === value);
+var getEntries = function getEntries(object) {
+  return Object.keys(object).map(function (key) {
+    return object[key];
+  });
+}; //Extracts key name by its value;
 
-//performs deep Object comparison;
-const compare = (...args) => {
-    return args.every((arg, a) => {
-        if (a) {
-            const previous = args[a - 1];
 
-            if (typeof arg !== typeof previous && !(arg instanceof RegExp) && !(previous instanceof RegExp))
-                return false;
-
-            switch (typeof arg) {
-                case 'function':
-                    return Function.prototype.toString.call(arg) === Function.prototype.toString.call(previous);
-                case 'object':
-                    //test against null;
-                    if (arg === null || previous === null)
-                        return arg === previous;
-
-                    //test against RegExp (backwards);
-                    if (arg instanceof RegExp && (typeof previous === 'string' || typeof previous === 'number'))
-                        return arg.test(previous.toString());
-
-                    let isOK = true;
-
-                    //check current element;
-                    for (const key in arg) {
-                        isOK = previous.hasOwnProperty(key) && compare(arg[key], previous[key]);
-                        if (!isOK)
-                            return false;
-                    }
-
-                    //check previous element;
-                    for (const key in previous) {
-                        isOK = arg.hasOwnProperty(key) && compare(arg[key], previous[key]);
-                        if (!isOK)
-                            return false;
-                    }
-
-                    return isOK;
-                default:
-                    //test against RegExp (forwards);
-                    if ((typeof arg === 'string' || typeof arg === 'number') && previous instanceof RegExp)
-                        return previous.test(arg.toString());
-
-                    return arg === previous;
-            }
-        } else {
-            return true;
-        }
+var keysByValue = function keysByValue(object) {
+  return function (value) {
+    return Object.keys(object).filter(function (key) {
+      return object[key] === value;
     });
-};
+  };
+}; //performs deep Object comparison;
 
-//finds latest element deeply equal to a given one;
-const getDeepLastIndex = (arr, elem) => {
-    let lidx = -1;
 
-    const aIndex = arr.length - 1;
+var compare = function compare() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
 
-    for (let index = aIndex; index >= 0; index--) {
-        const same = compare(arr[index], elem);
-        if (same) {
-            lidx = index;
-            break;
-        }
+  return args.every(function (arg, a) {
+    if (a) {
+      var previous = args[a - 1];
+      if (_typeof(arg) !== _typeof(previous) && !(arg instanceof RegExp) && !(previous instanceof RegExp)) return false;
+
+      switch (_typeof(arg)) {
+        case 'function':
+          return Function.prototype.toString.call(arg) === Function.prototype.toString.call(previous);
+
+        case 'object':
+          //test against null;
+          if (arg === null || previous === null) return arg === previous; //test against RegExp (backwards);
+
+          if (arg instanceof RegExp && (typeof previous === 'string' || typeof previous === 'number')) return arg.test(previous.toString());
+          var isOK = true; //check current element;
+
+          for (var key in arg) {
+            isOK = previous.hasOwnProperty(key) && compare(arg[key], previous[key]);
+            if (!isOK) return false;
+          } //check previous element;
+
+
+          for (var _key3 in previous) {
+            isOK = arg.hasOwnProperty(_key3) && compare(arg[_key3], previous[_key3]);
+            if (!isOK) return false;
+          }
+
+          return isOK;
+
+        default:
+          //test against RegExp (forwards);
+          if ((typeof arg === 'string' || typeof arg === 'number') && previous instanceof RegExp) return previous.test(arg.toString());
+          return arg === previous;
+      }
+    } else {
+      return true;
     }
+  });
+}; //finds latest element deeply equal to a given one;
 
-    return lidx;
+
+var getDeepLastIndex = function getDeepLastIndex(arr, elem) {
+  var lidx = -1;
+  var aIndex = arr.length - 1;
+
+  for (var index = aIndex; index >= 0; index--) {
+    var same = compare(arr[index], elem);
+
+    if (same) {
+      lidx = index;
+      break;
+    }
+  }
+
+  return lidx;
 };
-
 /**
  * Array Utilities
  */
@@ -1568,63 +2792,131 @@ const getDeepLastIndex = (arr, elem) => {
  * @param {Number[]} bits
  * @returns {Number}
  */
-const toDecimal = (bits) => {
-    const len = bits.length - 1;
-    return bits.reduce((acc, bit, pos) => acc + bit * 2 ** (len - pos), 0);
-};
 
+
+var toDecimal = function toDecimal(bits) {
+  var len = bits.length - 1;
+  return bits.reduce(function (acc, bit, pos) {
+    return acc + bit * Math.pow(2, len - pos);
+  }, 0);
+};
 /**
  * Subsplits an Array into several parts
  * @param {number} [n] 
  * @returns {function(Array): any[][]}
  */
-const subsplit = (n = 1) => (array) => {
-    const { length } = array;
 
-    const maxSplitLength = Math.floor(length / n);
 
-    const output = [];
+var subsplit = function subsplit() {
+  var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+  return function (array) {
+    var length = array.length;
+    var maxSplitLength = Math.floor(length / n);
+    var output = [];
 
-    for (let i = 0; i < n; i++) {
-        const start = i * maxSplitLength;
-        output.push(array.slice(start, start + maxSplitLength));
+    for (var i = 0; i < n; i++) {
+      var start = i * maxSplitLength;
+      output.push(array.slice(start, start + maxSplitLength));
     }
 
     return output;
+  };
+}; //Allocates an Array (avoids using loops);
+
+
+var allocArray = function allocArray(numElems) {
+  return new Array(numElems || 0).fill(1);
+}; //Wraps non-Array data into an Array;
+
+
+var arrayify = function arrayify(data) {
+  return data instanceof Array ? data : [data];
+}; //Resolves with the result of async mapping over an Array;
+
+
+var asyncMap = function asyncMap(array) {
+  return /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(callback) {
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return Promise.all(array.map(callback));
+
+            case 2:
+              return _context.abrupt("return", _context.sent);
+
+            case 3:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    return function (_x) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+}; //Gets an object satisfying value;
+
+
+var byKeyVal = function byKeyVal(array) {
+  return function (key) {
+    return function (value) {
+      return array.filter(function (obj) {
+        return obj[key] === value;
+      });
+    };
+  };
+}; //Gets last element of an Array (regardless of length);
+
+
+var getLastElem = function getLastElem(array) {
+  return array[array.length - 1];
+}; //Gets every Nth element of an Array (optional offset);
+
+
+var getEveryNthElem = function getEveryNthElem(pos) {
+  return function (array, offset) {
+    return array.slice(offset || 0).filter(function (elem, e) {
+      return !((e + 1) % pos);
+    });
+  };
+}; //Gets all elements of an Array except for one at position (composable);
+
+
+var getOtherElems = function getOtherElems(pos) {
+  return function (array) {
+    return array.filter(function (elem, e) {
+      return e !== pos;
+    });
+  };
+}; //Gets elements of an Array at even positions;
+
+
+var getEvenPosElems = function getEvenPosElems(array) {
+  return array.filter(function (elem, e) {
+    return e % 2;
+  });
+}; //Gets elements of an Array at odd positions;
+
+
+var getOddPosElems = function getOddPosElems(array) {
+  return array.filter(function (elem, e) {
+    return !(e % 2);
+  });
+}; //Maps elements of an Array and returns only elements that are defined;
+
+
+var mapExisting = function mapExisting(callback) {
+  return function (array) {
+    return array.map(callback).filter(function (e) {
+      return e !== undefined;
+    });
+  };
 };
-
-
-
-//Allocates an Array (avoids using loops);
-const allocArray = (numElems) => new Array(numElems || 0).fill(1);
-
-//Wraps non-Array data into an Array;
-const arrayify = (data) => data instanceof Array ? data : [data];
-
-//Resolves with the result of async mapping over an Array;
-const asyncMap = (array) => async (callback) => await Promise.all(array.map(callback));
-
-//Gets an object satisfying value;
-const byKeyVal = (array) => (key) => (value) => array.filter(obj => obj[key] === value);
-
-//Gets last element of an Array (regardless of length);
-const getLastElem = (array) => array[array.length - 1];
-
-//Gets every Nth element of an Array (optional offset);
-const getEveryNthElem = (pos) => (array, offset) => array.slice(offset || 0).filter((elem, e) => !((e + 1) % pos));
-
-//Gets all elements of an Array except for one at position (composable);
-const getOtherElems = (pos) => (array) => array.filter((elem, e) => e !== pos);
-
-//Gets elements of an Array at even positions;
-const getEvenPosElems = (array) => array.filter((elem, e) => e % 2);
-
-//Gets elements of an Array at odd positions;
-const getOddPosElems = (array) => array.filter((elem, e) => !(e % 2));
-
-//Maps elements of an Array and returns only elements that are defined;
-const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !== undefined);
-
 /**
  * Counts number of permutations given the 
  * set of entities and repetitions number
@@ -1632,151 +2924,224 @@ const mapExisting = (callback) => (array) => array.map(callback).filter(e => e !
  * @param {Number} repeat
  * @returns {Number}
  */
-const numCombinations = (set, repeat) => {
-    const len = set.length;
-    return repeat ? len ** repeat : 0;
-};
 
-//Maps relative growth Array into actual values using [0] element as base
-const relativeGrowth = (array) => array.reduce((acc, elem) => {
+
+var numCombinations = function numCombinations(set, repeat) {
+  var len = set.length;
+  return repeat ? Math.pow(len, repeat) : 0;
+}; //Maps relative growth Array into actual values using [0] element as base
+
+
+var relativeGrowth = function relativeGrowth(array) {
+  return array.reduce(function (acc, elem) {
     return acc.concat([elem + (acc[acc.length - 1] || 0)]);
-}, []);
-
-//Reorders a 2D Array by provided ordering criteria 
+  }, []);
+}; //Reorders a 2D Array by provided ordering criteria 
 //and filters out indices not present in criteria
-const filterAndReorder = (source, order) => source
-    .map(
-        (row, r) => row
-            .map((cell, c) => source[r][order[c]])
-            .filter((cell, c) => cell !== undefined)
-    );
 
-//Removes elements from start to end and returns modified Array (no mutation);
-const simpleSplice = (array) => (start, end) => array.filter((e, pos) => pos < start || pos > end);
 
-//Splits an Array on every Nth element;
+var filterAndReorder = function filterAndReorder(source, order) {
+  return source.map(function (row, r) {
+    return row.map(function (cell, c) {
+      return source[r][order[c]];
+    }).filter(function (cell, c) {
+      return cell !== undefined;
+    });
+  });
+}; //Removes elements from start to end and returns modified Array (no mutation);
+
+
+var simpleSplice = function simpleSplice(array) {
+  return function (start, end) {
+    return array.filter(function (e, pos) {
+      return pos < start || pos > end;
+    });
+  };
+}; //Splits an Array on every Nth element;
 //[1,2,3,4] on second elem returns [ [1,2], [3,4] ];
 //0 as position results in an empty Array;
-const splitOnNthElem = (pos) => (array) => array
-    .map((e, i, a) => !(i % pos) ? a.slice(i, i + pos) : 0)
-    .filter(e => e.length);
 
-//Returns whether number of occurencies of each element is unique
-const uniqueOccurrences = (arr) => {
-    const copy = arr.map(e => e).sort();
 
-    const occurs = copy
-        .reduce((a, c, i) => {
-            return c !== copy[i - 1] ?
-                a.concat([copy.slice(i, copy.lastIndexOf(c) + 1).length]) :
-                a;
-        }, []);
+var splitOnNthElem = function splitOnNthElem(pos) {
+  return function (array) {
+    return array.map(function (e, i, a) {
+      return !(i % pos) ? a.slice(i, i + pos) : 0;
+    }).filter(function (e) {
+      return e.length;
+    });
+  };
+}; //Returns whether number of occurencies of each element is unique
 
-    return !occurs
-        .some((e, i) => occurs.lastIndexOf(e) > i);
+
+var uniqueOccurrences = function uniqueOccurrences(arr) {
+  var copy = arr.map(function (e) {
+    return e;
+  }).sort();
+  var occurs = copy.reduce(function (a, c, i) {
+    return c !== copy[i - 1] ? a.concat([copy.slice(i, copy.lastIndexOf(c) + 1).length]) : a;
+  }, []);
+  return !occurs.some(function (e, i) {
+    return occurs.lastIndexOf(e) > i;
+  });
 };
-
 /**
  * Date Utilities
  */
-
 //adds number od days to a Date;
-const addDays = (days) => (date) => new Date(date.valueOf() + (days || 0) * 86400000);
 
-//splits date into ISO standard date or time string;
-const isoDate = (date) => date.toISOString().slice(0, 10);
-const isoTime = (date) => date.toISOString().slice(11, 19);
 
-//counts number of nights between two date instances;
-const nights = (start, end) => (end.valueOf() - start.valueOf()) / 86400000;
+var addDays = function addDays(days) {
+  return function (date) {
+    return new Date(date.valueOf() + (days || 0) * 86400000);
+  };
+}; //splits date into ISO standard date or time string;
 
+
+var isoDate = function isoDate(date) {
+  return date.toISOString().slice(0, 10);
+};
+
+var isoTime = function isoTime(date) {
+  return date.toISOString().slice(11, 19);
+}; //counts number of nights between two date instances;
+
+
+var nights = function nights(start, end) {
+  return (end.valueOf() - start.valueOf()) / 86400000;
+};
 /**
  * Logging Utilities
  */
-
 //logs object at log time;
-const logFixed = (object) => console.log(JSON.parse(JSON.stringify(object)));
 
+
+var logFixed = function logFixed(object) {
+  return console.log(JSON.parse(JSON.stringify(object)));
+};
 /**
  * DOM Utilities
  */
-
 //simply gets element by id;
-const byId = (id) => document.querySelector(`#${id}`);
-const byClass = (cls) => document.querySelector(`.${cls}`);
 
-//clears element of children (chainable);
-const clearElem = (elem) => Array.from(elem.children).forEach(child => child.remove()) || elem;
 
+var byId = function byId(id) {
+  return document.querySelector("#".concat(id));
+};
+
+var byClass = function byClass(cls) {
+  return document.querySelector(".".concat(cls));
+}; //clears element of children (chainable);
+
+
+var clearElem = function clearElem(elem) {
+  return Array.from(elem.children).forEach(function (child) {
+    return child.remove();
+  }) || elem;
+};
 /**
  * Transforms json to key : value; string
  * @param {Object} [json]
  * @returns {String}
  */
-const jsonToFormatString = (json = {}) => {
-    return Object.entries(json).map(entry => {
-        const [key, value] = entry;
-        return `${key}: ${value}`;
-    }).join('; ');
-};
 
+
+var jsonToFormatString = function jsonToFormatString() {
+  var json = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return Object.entries(json).map(function (entry) {
+    var _entry = _slicedToArray(entry, 2),
+        key = _entry[0],
+        value = _entry[1];
+
+    return "".concat(key, ": ").concat(value);
+  }).join('; ');
+};
 /**
  * Stringifies JSON into DOMString
  * @param {Object} [json] 
  * @returns {DOMString}
  */
-const jsonToDOMString = (json = {}) => {
-    const keyErrMsg = `DOMString key should be set`;
-    const valueErrMsg = `DOMString value should be set`;
 
-    const errors = new Map()
-        .set('key', (value) => { throw new SyntaxError(`${keyErrMsg}: ${value}`); })
-        .set('value', (key) => { throw new SyntaxError(`${valueErrMsg}: ${key}`); });
 
-    return Object.entries(json).map(entry => {
-        const [key, value] = entry;
+var jsonToDOMString = function jsonToDOMString() {
+  var json = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var keyErrMsg = "DOMString key should be set";
+  var valueErrMsg = "DOMString value should be set";
+  var errors = new Map().set('key', function (value) {
+    throw new SyntaxError("".concat(keyErrMsg, ": ").concat(value));
+  }).set('value', function (key) {
+    throw new SyntaxError("".concat(valueErrMsg, ": ").concat(key));
+  });
+  return Object.entries(json).map(function (entry) {
+    var _entry2 = _slicedToArray(entry, 2),
+        key = _entry2[0],
+        value = _entry2[1];
 
-        value === '' && errors.get('value')(key);
-        key === '' && errors.get('key')(value);
+    value === '' && errors.get('value')(key);
+    key === '' && errors.get('key')(value);
+    return "".concat(key, "=").concat(value);
+  }).join(',');
+}; //removes first child from element if it has any (non-leaking);
 
-        return `${key}=${value}`;
-    }).join(',');
+
+var removeFirstChild = function removeFirstChild(element) {
+  return void !element.firstChild || element.firstChild.remove();
+}; //removes N last children from element if it has any (non-leaking);
+
+
+var removeLastChildren = function removeLastChildren(num) {
+  return function (element) {
+    return void Array.from(element.children).slice(-num).forEach(function (child) {
+      return child.remove();
+    });
+  };
+}; //changes check state of an element + 2 use cases;
+
+
+var changeCheck = function changeCheck(cbx) {
+  return function (value) {
+    return cbx.checked = value;
+  };
 };
 
-//removes first child from element if it has any (non-leaking);
-const removeFirstChild = (element) => void !element.firstChild || element.firstChild.remove();
+var check = function check(cbx) {
+  return changeCheck(cbx)(true);
+};
 
-//removes N last children from element if it has any (non-leaking);
-const removeLastChildren = (num) => (element) => void Array.from(element.children).slice(-num).forEach(child => child.remove());
+var uncheck = function uncheck(cbx) {
+  return changeCheck(cbx)(false);
+}; //toggles class on an element if it is set and vice versa (non-leaking);
 
-//changes check state of an element + 2 use cases;
-const changeCheck = (cbx) => (value) => cbx.checked = value;
-const check = (cbx) => changeCheck(cbx)(true);
-const uncheck = (cbx) => changeCheck(cbx)(false);
 
-//toggles class on an element if it is set and vice versa (non-leaking);
-const toggleClassIfSet = (name) => (element) => void (!element.classList.contains(name) || element.classList.toggle(name));
-const toggleClassIfNot = (name) => (element) => void (element.classList.contains(name) || element.classList.toggle(name));
+var toggleClassIfSet = function toggleClassIfSet(name) {
+  return function (element) {
+    return void (!element.classList.contains(name) || element.classList.toggle(name));
+  };
+};
+
+var toggleClassIfNot = function toggleClassIfNot(name) {
+  return function (element) {
+    return void (element.classList.contains(name) || element.classList.toggle(name));
+  };
+};
 
 module.exports = {
-    asyncMap,
-    compare,
-    delay,
-    filterAndReorder,
-    getEntries,
-    getOtherElems,
-    getDeepLastIndex,
-    isoDate,
-    isoTime,
-    jsonToDOMString,
-    jsonToFormatString,
-    keysByValue,
-    numCombinations,
-    noop,
-    offsetK,
-    relativeGrowth,
-    subsplit,
-    toDecimal,
-    uniqueOccurrences
+  asyncMap: asyncMap,
+  compare: compare,
+  delay: delay,
+  filterAndReorder: filterAndReorder,
+  getEntries: getEntries,
+  getOtherElems: getOtherElems,
+  getDeepLastIndex: getDeepLastIndex,
+  isoDate: isoDate,
+  isoTime: isoTime,
+  jsonToDOMString: jsonToDOMString,
+  jsonToFormatString: jsonToFormatString,
+  keysByValue: keysByValue,
+  numCombinations: numCombinations,
+  noop: noop,
+  offsetK: offsetK,
+  relativeGrowth: relativeGrowth,
+  subsplit: subsplit,
+  toDecimal: toDecimal,
+  uniqueOccurrences: uniqueOccurrences
 };
-
