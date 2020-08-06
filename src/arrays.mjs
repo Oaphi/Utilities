@@ -158,6 +158,29 @@ const mergeOnto = (source, ...targets) => {
 };
 
 /**
+ * @typedef {object} StepReduceConfig
+ * @property {any[]} source
+ * @property {function(any,any,number?,any[]?) : any} callback
+ * @property {number} [step]
+ * @property {any} [initial]
+ * 
+ * @param {StepReduceConfig}
+ */
+const reduceWithStep = ({
+    source = [],
+    callback,
+    step = 1,
+    initial
+}) => {
+    return source
+        .reduce((acc, curr, i) => {
+            return i % step ?
+                acc :
+                callback(acc, curr, i + step - 1, source);
+        }, initial || source[0]);
+};
+
+/**
  * @typedef {object} ShrinkConfig
  * @property {any[][]} [source]
  * @property {number} [left]
@@ -184,11 +207,11 @@ const shrinkGrid = ({
         return [[]];
     }
 
-    if(horizontally) {
+    if (horizontally) {
         left = right = Math.floor(horizontally / 2);
     }
 
-    if(vertically) {
+    if (vertically) {
         top = bottom = Math.floor(vertically / 2);
     }
 
@@ -274,6 +297,7 @@ export {
     keyMap,
     last,
     mergeOnto,
+    reduceWithStep,
     shrinkGrid,
     spliceInto,
     splitIntoConseq

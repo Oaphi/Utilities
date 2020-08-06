@@ -14,12 +14,38 @@ const {
     keyMap,
     last,
     mergeOnto,
+    reduceWithStep,
     shrinkGrid,
     spliceInto,
     splitIntoConseq
 } = arrays;
 
 describe('Arrays', function () {
+
+    describe('reduceWithStep', function () {
+
+        it('should copy reduce if no step', function () {
+            
+            const source = [1,2,3,4,5];
+
+            const output = reduceWithStep({
+                source, callback: (acc,cur) => acc + cur, initial : 100
+            });
+
+            expect(output).to.equal(115);
+        });
+
+        it('should behave like reduce while skipping items', function () {
+            const source = [1, 2, 3, 4, 5];
+
+            const output = reduceWithStep({
+                source, callback: (acc, cur) => acc + cur, initial: 100, step: 2
+            });
+
+            expect(output).to.equal(109);
+        });
+
+    });
 
     describe('shrinkGrid', function () {
 
