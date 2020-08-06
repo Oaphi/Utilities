@@ -33,12 +33,10 @@ const deep = (order, entries, encode, seq) => entries
  * @typedef {object} JSONtoQueryConfig
  * @property {boolean} [encodeParams=false]
  * @property {string[]} [paramOrder=[]]
- */
-
-/**
+ * 
  * @summary converts object to query
  * @param {object} json parameters
- * @param {JSONtoQueryConfig} [config]
+ * @param {JSONtoQueryConfig}
  * @returns {string} query string
  */
 function JSONtoQuery(
@@ -46,7 +44,7 @@ function JSONtoQuery(
     {
         encodeParams,
         paramOrder = []
-    } = config = {
+    } = {
         encodeParams: false,
         paramOrder: []
     }
