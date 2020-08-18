@@ -8,6 +8,8 @@ import bench from "benchmark";
 import arrays from "../src/arrays.mjs";
 const {
     chunkify,
+    countObjects,
+    deduplicate,
     filterMap,
     filterMapped,
     forAll,
@@ -21,6 +23,69 @@ const {
 } = arrays;
 
 describe('Arrays', function () {
+
+    describe('deduplicate', function () {
+
+        it('should return empty array on no params', function () {
+            const deduped = deduplicate();
+            expect(deduped).to.be.instanceOf(Array).and.be.empty;
+        });
+
+        it('should not consider objects of diff key length dupes', function () {
+            const original = [{ a: 1, b: 2, c: 3 }, { a: 1, c: 3 }];
+            const deduped = deduplicate({ source: original });
+            expect(deduped).to.deep.equal(original);
+        });
+
+        it('should dedupe on object entries by default', function () {
+            const original = [{ id: 1, name: "Alex" }, { id: 2, name: "Aeris" }];
+            original.push(original[0], original[1]);
+
+            const deduped = deduplicate({ source: original });
+            expect(deduped).to.deep.equal(original.slice(0, 2));
+        });
+
+        it('shoud dedupe on object values if type is set to "values"', function () {
+            const original = [{ name: "Anry" }, { fullName: "Anry" }, { name: "Berta" }];
+
+            const deduped = deduplicate({ source: original, type : "values" });
+            expect(deduped).to.deep.equal([original[1], original[2]]);
+        });
+
+        it('should dedupe on object keys if type is set to "keys"', function () {
+            const original = [{ name: "Anry" }, { fullName: "Anry" }, { name: "Berta" }, { name : "Claire" }];
+
+            const deduped = deduplicate({ source: original, type: "keys" });
+            expect(deduped).to.deep.equal([original[1], original[3]]);
+        });
+
+    });
+
+    describe('countObjects', function () {
+
+        it('should return an empty object on no params', function () {
+            const counted = countObjects();
+            expect(counted).to.be.instanceof(Object).and.be.empty;
+        });
+
+        it('should return empty object on empty array', function () {
+            const counted = countObjects({ source: [] });
+            expect(counted).to.be.instanceof(Object).and.be.empty;
+        });
+
+        it('defaults to first key in object', function () {
+            const counted = countObjects({
+                source: [
+                    { test: 1, prop: 2 },
+                    { test: 1, prop: 2 },
+                    { prop: 3 }
+                ]
+            });
+
+            expect(counted).to.be.deep.equal({ "1": 2 });
+        });
+
+    });
 
     describe('reduceWithStep', function () {
 
@@ -127,7 +192,7 @@ describe('Arrays', function () {
                     [5, 6, 7, 8]
                 ];
 
-                const output = shrinkGrid({ source, leave : { bottom: 1 } });
+                const output = shrinkGrid({ source, leave: { bottom: 1 } });
 
                 expect(output).to.have.length(1);
                 expect(output[0]).to.deep.equal(source[1]);
@@ -153,11 +218,11 @@ describe('Arrays', function () {
                     [1, 2, 3]
                 ];
 
-                const output = shrinkGrid({ source, leave : { left : 2 } });
+                const output = shrinkGrid({ source, leave: { left: 2 } });
 
                 expect(output).to.have.length(3);
 
-                output.forEach((row,i) => expect(row).to.deep.equal(source[i].slice(0,2)));
+                output.forEach((row, i) => expect(row).to.deep.equal(source[i].slice(0, 2)));
             });
 
             it('horizontally', function () {

@@ -183,6 +183,12 @@ const reduceWithStep = ({
 /**
  * @typedef {object} ShrinkConfig
  * @property {any[][]} [source]
+ * @property {{ 
+ *  top : number, 
+ *  right : number, 
+ *  bottom : number, 
+ *  left : number 
+ * }} [leave]
  * @property {number} [left]
  * @property {number} [right]
  * @property {number} [bottom]
@@ -310,8 +316,87 @@ const splitIntoConseq = (source = []) => {
     return sequences;
 };
 
+/**
+ * @summary creates an object counter
+ * @param {{
+ *  onKey : string,
+ *  source : object[]
+ * }}
+ */
+const countObjects = ({ source = [], onKey } = {}) => {
+
+    const validObjects = source.filter(Boolean);
+
+    const { length } = validObjects;
+    if (!length) {
+        return {};
+    }
+
+    const validProp = onKey || Object.keys(validObjects[0])[0];
+
+    const counter = {};
+
+    validObjects.forEach(obj => {
+        if (validProp in obj) {
+            const val = obj[validProp];
+
+            const inCount = counter[val] || 0;
+
+            counter[val] = inCount + 1;
+        }
+    });
+
+    return counter;
+};
+
+/**
+ * @typedef {{
+ *  source : object[],
+ *  type : ("entries"|"keys"|"values")
+ * }} DedupeConfig
+ * 
+ * @param {DedupeConfig}
+ * @returns {object[]}
+ */
+const deduplicate = ({
+    source = [],
+    type = "entries"
+} = {}) => {
+
+    const toDedupe = source.map(obj => obj).reverse();
+
+    const { length } = toDedupe;
+
+    return source.filter((srcObj, srcIdx) => {
+
+        const srcEntries = Object.entries(srcObj);
+
+        const lastIdx = toDedupe.findIndex((tgtObj) => {
+
+            const tgtEntries = Object.entries(tgtObj);
+
+            if (tgtEntries.length !== srcEntries.length) { return false; }
+
+            const sameOnEntries = type === "entries" &&
+                tgtEntries.every(([key, val]) => srcObj[key] === val);
+
+            const sameOnValues = type === "values" &&
+                Object.values(tgtObj).every((tgtVal) => Object.values(srcObj).includes(tgtVal));
+
+            const sameOnKeys = type === "keys" &&
+                Object.keys(tgtObj).every((tgtKey) => Object.keys(srcObj).includes(tgtKey));
+
+            return sameOnEntries || sameOnValues || sameOnKeys;
+        });
+
+        return srcIdx === (length - lastIdx - 1);
+    });
+};
+
 export default {
     chunkify,
+    countObjects,
+    deduplicate,
     filterMap,
     filterMapped,
     forAll,
