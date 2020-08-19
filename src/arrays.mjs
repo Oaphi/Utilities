@@ -351,14 +351,21 @@ const countObjects = ({ source = [], onKey } = {}) => {
 
 /**
  * @typedef {{
+ *  keys : string[]
+ * }} DedupeIgnore
+ * 
+ * @typedef {{
+ *  ignore : DedupeIgnore,
  *  source : object[],
  *  type : ("entries"|"keys"|"values")
  * }} DedupeConfig
  * 
+ * @summary deduplicates an array of objects
  * @param {DedupeConfig}
  * @returns {object[]}
  */
 const deduplicate = ({
+    ignore = {},
     source = [],
     type = "entries"
 } = {}) => {
@@ -367,13 +374,15 @@ const deduplicate = ({
 
     const { length } = toDedupe;
 
+    const { keys = [] } = ignore;
+
     return source.filter((srcObj, srcIdx) => {
 
-        const srcEntries = Object.entries(srcObj);
+        const srcEntries = Object.entries(srcObj).filter(([k]) => !keys.includes(k));
 
         const lastIdx = toDedupe.findIndex((tgtObj) => {
 
-            const tgtEntries = Object.entries(tgtObj);
+            const tgtEntries = Object.entries(tgtObj).filter(([k]) => !keys.includes(k));
 
             if (tgtEntries.length !== srcEntries.length) { return false; }
 
@@ -381,10 +390,10 @@ const deduplicate = ({
                 tgtEntries.every(([key, val]) => srcObj[key] === val);
 
             const sameOnValues = type === "values" &&
-                Object.values(tgtObj).every((tgtVal) => Object.values(srcObj).includes(tgtVal));
+                tgtEntries.map(([,v]) => v).every((tgtVal) => Object.values(srcObj).includes(tgtVal));
 
             const sameOnKeys = type === "keys" &&
-                Object.keys(tgtObj).every((tgtKey) => Object.keys(srcObj).includes(tgtKey));
+                tgtEntries.map(([k]) => k).every((tgtKey) => Object.keys(srcObj).includes(tgtKey));
 
             return sameOnEntries || sameOnValues || sameOnKeys;
         });

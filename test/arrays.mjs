@@ -48,15 +48,28 @@ describe('Arrays', function () {
         it('shoud dedupe on object values if type is set to "values"', function () {
             const original = [{ name: "Anry" }, { fullName: "Anry" }, { name: "Berta" }];
 
-            const deduped = deduplicate({ source: original, type : "values" });
+            const deduped = deduplicate({ source: original, type: "values" });
             expect(deduped).to.deep.equal([original[1], original[2]]);
         });
 
         it('should dedupe on object keys if type is set to "keys"', function () {
-            const original = [{ name: "Anry" }, { fullName: "Anry" }, { name: "Berta" }, { name : "Claire" }];
+            const original = [{ name: "Anry" }, { fullName: "Anry" }, { name: "Berta" }, { name: "Claire" }];
 
             const deduped = deduplicate({ source: original, type: "keys" });
             expect(deduped).to.deep.equal([original[1], original[3]]);
+        });
+
+        describe('should ignore correctly if "ignore" option specified', function () {
+            const original = [
+                { name: "Carry", id: "123" },
+                { name: "Carry", id: "456" },
+                { name: "Berta" }, { name: "Claire" }
+            ];
+
+            it('keys if "keys" suboption provided', function () {
+                const deduped = deduplicate({ source: original, ignore: { keys: ["id"] } });
+                expect(deduped).to.deep.equal(original.slice(1));
+            });
         });
 
     });
