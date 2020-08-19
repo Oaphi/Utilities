@@ -844,10 +844,16 @@ var countObjects = function countObjects() {
 };
 /**
  * @typedef {{
+ *  keys : string[]
+ * }} DedupeIgnore
+ * 
+ * @typedef {{
+ *  ignore : DedupeIgnore,
  *  source : object[],
  *  type : ("entries"|"keys"|"values")
  * }} DedupeConfig
  * 
+ * @summary deduplicates an array of objects
  * @param {DedupeConfig}
  * @returns {object[]}
  */
@@ -855,6 +861,8 @@ var countObjects = function countObjects() {
 
 var deduplicate = function deduplicate() {
   var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref5$ignore = _ref5.ignore,
+      ignore = _ref5$ignore === void 0 ? {} : _ref5$ignore,
       _ref5$source = _ref5.source,
       source = _ref5$source === void 0 ? [] : _ref5$source,
       _ref5$type = _ref5.type,
@@ -864,26 +872,48 @@ var deduplicate = function deduplicate() {
     return obj;
   }).reverse();
   var length = toDedupe.length;
+  var _ignore$keys = ignore.keys,
+      keys = _ignore$keys === void 0 ? [] : _ignore$keys;
   return source.filter(function (srcObj, srcIdx) {
-    var srcEntries = Object.entries(srcObj);
+    var srcEntries = Object.entries(srcObj).filter(function (_ref6) {
+      var _ref7 = _slicedToArray(_ref6, 1),
+          k = _ref7[0];
+
+      return !keys.includes(k);
+    });
     var lastIdx = toDedupe.findIndex(function (tgtObj) {
-      var tgtEntries = Object.entries(tgtObj);
+      var tgtEntries = Object.entries(tgtObj).filter(function (_ref8) {
+        var _ref9 = _slicedToArray(_ref8, 1),
+            k = _ref9[0];
+
+        return !keys.includes(k);
+      });
 
       if (tgtEntries.length !== srcEntries.length) {
         return false;
       }
 
-      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref6) {
-        var _ref7 = _slicedToArray(_ref6, 2),
-            key = _ref7[0],
-            val = _ref7[1];
+      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref10) {
+        var _ref11 = _slicedToArray(_ref10, 2),
+            key = _ref11[0],
+            val = _ref11[1];
 
         return srcObj[key] === val;
       });
-      var sameOnValues = type === "values" && Object.values(tgtObj).every(function (tgtVal) {
+      var sameOnValues = type === "values" && tgtEntries.map(function (_ref12) {
+        var _ref13 = _slicedToArray(_ref12, 2),
+            v = _ref13[1];
+
+        return v;
+      }).every(function (tgtVal) {
         return Object.values(srcObj).includes(tgtVal);
       });
-      var sameOnKeys = type === "keys" && Object.keys(tgtObj).every(function (tgtKey) {
+      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref14) {
+        var _ref15 = _slicedToArray(_ref14, 1),
+            k = _ref15[0];
+
+        return k;
+      }).every(function (tgtKey) {
         return Object.keys(srcObj).includes(tgtKey);
       });
       return sameOnEntries || sameOnValues || sameOnKeys;
