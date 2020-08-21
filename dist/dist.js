@@ -921,9 +921,48 @@ var deduplicate = function deduplicate() {
     return srcIdx === length - lastIdx - 1;
   });
 };
+/**
+ * @typedef {{
+ *  value : any,
+ *  values : any[]
+ * }} ClosestConfig
+ * 
+ * @summary finds closest value in the array
+ * @param {ClosestConfig} [config]
+ */
+
+
+var closestValue = function closestValue() {
+  var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  if (!("value" in config)) {
+    return null;
+  }
+
+  var value = config.value,
+      _config$values = config.values,
+      values = _config$values === void 0 ? [] : _config$values;
+
+  if (!values.length) {
+    return null;
+  }
+
+  var closestIndex = 0,
+      currClosest = Math.abs(value - values[0]);
+  values.forEach(function (val, i) {
+    var diff = Math.abs(value - val);
+
+    if (currClosest > diff) {
+      closestIndex = i;
+      currClosest = diff;
+    }
+  });
+  return values[closestIndex];
+};
 
 var _default = {
   chunkify: chunkify,
+  closestValue: closestValue,
   countObjects: countObjects,
   deduplicate: deduplicate,
   filterMap: filterMap,
