@@ -390,7 +390,7 @@ const deduplicate = ({
                 tgtEntries.every(([key, val]) => srcObj[key] === val);
 
             const sameOnValues = type === "values" &&
-                tgtEntries.map(([,v]) => v).every((tgtVal) => Object.values(srcObj).includes(tgtVal));
+                tgtEntries.map(([, v]) => v).every((tgtVal) => Object.values(srcObj).includes(tgtVal));
 
             const sameOnKeys = type === "keys" &&
                 tgtEntries.map(([k]) => k).every((tgtKey) => Object.keys(srcObj).includes(tgtKey));
@@ -402,8 +402,44 @@ const deduplicate = ({
     });
 };
 
+/**
+ * @typedef {{
+ *  value : any,
+ *  values : any[]
+ * }} ClosestConfig
+ * 
+ * @summary finds closest value in the array
+ * @param {ClosestConfig} [config]
+ */
+const closestValue = (config = {}) => {
+
+    if (!("value" in config)) {
+        return null;
+    }
+
+    const { value, values = [] } = config;
+
+    if (!values.length) {
+        return null;
+    }
+
+    let closestIndex = 0, currClosest = Math.abs(value - values[0]);
+
+    values.forEach((val, i) => {
+        const diff = Math.abs(value - val);
+        
+        if (currClosest > diff) {
+            closestIndex = i;
+            currClosest = diff;
+        }
+    });
+
+    return values[closestIndex];
+};
+
 export default {
     chunkify,
+    closestValue,
     countObjects,
     deduplicate,
     filterMap,

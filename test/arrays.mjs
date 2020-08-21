@@ -8,6 +8,7 @@ import bench from "benchmark";
 import arrays from "../src/arrays.mjs";
 const {
     chunkify,
+    closestValue,
     countObjects,
     deduplicate,
     filterMap,
@@ -23,6 +24,25 @@ const {
 } = arrays;
 
 describe('Arrays', function () {
+
+    describe('closestValue', function () {
+
+        it('should return null on no value', function () {
+            const closest = closestValue();
+            expect(closest).to.be.null;
+        });
+        
+        it('should return null on empty array', function () {
+            const closest = closestValue({ value : 1 });
+            expect(closest).to.be.null;
+        });
+
+        it('should find closest value', function () {
+            const closest = closestValue({ value: 1, values : [ 7,34,18,3,15 ] });
+            expect(closest).to.equal(3);
+        });
+
+    });
 
     describe('deduplicate', function () {
 
@@ -70,6 +90,21 @@ describe('Arrays', function () {
                 const deduped = deduplicate({ source: original, ignore: { keys: ["id"] } });
                 expect(deduped).to.deep.equal(original.slice(1));
             });
+
+        });
+
+        describe('should ignore correctly on arrays as objects to dedupe', function () {
+            const original = [
+                ["Carry", "123", "same"],
+                ["Carry", "456", "same"],
+                ["Berta", "789", "same"],
+                ["Carry", "123", "same"]
+            ];
+
+            it('keys if "keys" suboption provided', function () {
+                const deduped = deduplicate({ source: original, ignore: { keys: ["0"] } });
+                expect(deduped).to.deep.equal(original.slice(1));
+            });
         });
 
     });
@@ -96,6 +131,20 @@ describe('Arrays', function () {
             });
 
             expect(counted).to.be.deep.equal({ "1": 2 });
+        });
+
+        it('should count on key provided', function () {
+            
+            const counted = countObjects({
+                source: [
+                    { test: 1, prop: 2 },
+                    { test: 1, prop: 2 },
+                    { prop: 3 }
+                ],
+                onKey : "prop"
+            });
+
+            expect(counted).to.be.deep.equal({ "2" : 2, "3" : 1 });
         });
 
     });
