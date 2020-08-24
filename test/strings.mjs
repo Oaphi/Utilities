@@ -1,11 +1,26 @@
-const { expect } = require("chai");
+import chai from "chai";
+const { expect } = chai;
 
-const { 
-    isLcase, 
-    isUcase, 
-    pluralizeCountable, 
-    sentenceCase 
-} = require("../src/strings.js");
+import {
+    isLcase,
+    isUcase,
+    parToSentenceCase,
+    pluralizeCountable,
+    sentenceCase,
+    splitIntoSentences
+} from "../src/strings.mjs";
+
+describe('parToSentenceCase', function () {
+    
+    it('should correctly normalize to sentene case', function () {
+        
+        const par = "something changed... Has IT? deFInitely!";
+        const sc = parToSentenceCase(par);
+
+        expect(sc).to.equal("Something changed... Has it? Definitely!");
+    });
+
+});
 
 describe('sentenceCase', function () {
 
@@ -16,11 +31,11 @@ describe('sentenceCase', function () {
     });
 
     it('should not fail on single char', function () {
-        
+
         const single = sentenceCase("o");
         expect(single).to.equal("O");
     });
-    
+
     it('should uppercase first char and lowercase others', function () {
 
         const camel = sentenceCase("camelCase");
@@ -34,10 +49,60 @@ describe('sentenceCase', function () {
 
 });
 
+describe('splitIntoSentences', function () {
+
+    it('should return empty array for empty string', function () {
+        const empty = splitIntoSentences("");
+        expect(empty).to.be.an.instanceof(Array).and.be.empty;
+    });
+
+    it('should split by single ending char (dot, exclamation point, question mark)', function () {
+        const par = "This is a dot. This is also a dot. And this.";
+        const dots = splitIntoSentences(par);
+        expect(dots).to.have.length(3);
+        expect(dots).to.be.deep.equal(
+            par.split(/\.\s?/).slice(0, -1).map(s => `${s}.`)
+        );
+    });
+
+    it('should split by multi-ending chars (ellipsis)', function () {
+        const par = "I don't know... Should we..? Yeah...";
+        const ellipsis = splitIntoSentences(par);
+        expect(ellipsis).to.have.length(3);
+        expect(ellipsis).to.be.deep.equal(
+            par.split(/([.?])\s+/)
+                .map((s, i, a) => `${s}${a[i + 1] || ""}`)
+                .filter((_, i) => !(i % 2))
+        );
+    });
+
+});
+
+describe('allSentenceCase', function () {
+
+    it('should convert uppercase sentences correctly', function () {
+
+    });
+
+    it('should convert lowercase sentences correctly', function () {
+
+    });
+
+});
+
 describe('pluralizeCountable', function () {
 
     describe('Utility features', function () {
-        
+
+        it('should correctly treat floats', function () {
+
+            const testWord = "month";
+
+            const result = pluralizeCountable(1.75, testWord);
+
+            expect(result).to.equal("1.75 months");
+        });
+
         it('should return string of form <count>\s<plural>', function () {
 
             const testWord = "citizenship";
@@ -48,7 +113,7 @@ describe('pluralizeCountable', function () {
         });
 
         it('should work for case mismatch', function () {
-            
+
             const testWord = "toolBOX";
 
             const result = pluralizeCountable(42, testWord);
@@ -85,7 +150,7 @@ describe('pluralizeCountable', function () {
     });
 
     describe('Changes ending to -es', function () {
-        
+
         it('should add -es for nouns ending in ‑s, -ss, -sh, -ch, -x, -z and -o + consonant', function () {
 
             const special = [
@@ -168,7 +233,7 @@ describe('pluralizeCountable', function () {
         const result = yPrecededByConsonant.every(singular => {
             const randomAmount = Math.floor(Math.random() * 100) + 2;
             const plural = pluralizeCountable(randomAmount, singular);
-            return plural === `${randomAmount} ${singular.slice(0,-1)}ies`;
+            return plural === `${randomAmount} ${singular.slice(0, -1)}ies`;
         });
 
         expect(result).to.be.true;
@@ -201,20 +266,19 @@ describe('pluralizeCountable', function () {
     });
 
     describe('exceptions', function () {
-
         it('should return special form for irregulars', function () {
-    
+
             const irregular = {
-                "child" : "children",
-                "goose" : "geese",
-                "man" : "men",
-                "woman" : "women",
-                "tooth" : "teeth",
-                "foot" : "feet",
-                "mous" : "mice",
-                "person" : "people",
-                "postman" : "postmen",
-                "fireman" : "firemen"
+                "child": "children",
+                "goose": "geese",
+                "man": "men",
+                "woman": "women",
+                "tooth": "teeth",
+                "foot": "feet",
+                "mous": "mice",
+                "person": "people",
+                "postman": "postmen",
+                "fireman": "firemen"
             };
 
             const result = Object.entries(irregular).every(entry => {
