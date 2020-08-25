@@ -2430,189 +2430,259 @@ module.exports = {
 };
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define([], factory);
-  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
-    module.exports = factory();
-  } else {
-    root.Strings = factory();
-  }
-})(typeof self !== 'undefined' ? self : void 0, function () {
-  /**
-   * @summary checks if string is lowcase
-   * @param {string} [str] 
-   * @returns {boolean}
-   */
-  var isLcase = function isLcase() {
-    var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-
-    if (!str) {
-      return false;
-    }
-
-    return Array.prototype.every.call(str, function (_char) {
-      var code = _char.codePointAt(0);
-
-      return code < 65 || code > 90;
-    });
-  };
-  /**
-   * @summary checks if string is uppercase
-   * @param {string} [str]
-   * @returns {boolean}
-   */
-
-
-  var isUcase = function isUcase() {
-    var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-
-    if (!str) {
-      return false;
-    }
-
-    return Array.prototype.every.call(str, function (_char2) {
-      var code = _char2.codePointAt(0);
-
-      return /\W/.test(_char2) || code > 64 && code < 91;
-    });
-  };
-  /**
-   * @summary changes noun (countable) to plural form and prepends amount
-   * 
-   * @example
-   * 1,test -> 1 test
-   * 2,test -> 2 tests
-   * 21,test -> 21 tests
-   * 
-   * @param {number} amount
-   * @param {string} noun
-   * @returns {string}
-   */
-
-
-  var pluralizeCountable = function pluralizeCountable(amount, noun) {
-    var normalized = noun.toLowerCase();
-
-    if (amount === 1) {
-      return "1 ".concat(normalized);
-    }
-
-    var irregulars = {
-      "child": "children",
-      "goose": "geese",
-      "tooth": "teeth",
-      "foot": "feet",
-      "mous": "mice",
-      "person": "people"
-    };
-    var irregularPlural = irregulars[normalized];
-
-    if (irregularPlural) {
-      return "".concat(amount, " ").concat(irregularPlural);
-    }
-
-    if (manWomanCase = normalized.match(/(\w*)(man|woman)$/)) {
-      return "".concat(amount, " ").concat(manWomanCase[1]).concat(manWomanCase[2].replace("a", "e"));
-    }
-
-    var staySameExceptions = new Set(["sheep", "series", "species", "deer", "fish"]);
-
-    if (staySameExceptions.has(normalized)) {
-      return "".concat(amount, " ").concat(normalized);
-    }
-
-    var wordBase = normalized.slice(0, -2);
-    var irregularEndingWithA = new Set(["phenomenon", "datum", "criterion"]);
-
-    if (irregularEndingWithA.has(normalized)) {
-      return "".concat(amount, " ").concat(wordBase, "a");
-    }
-
-    var twoLastLetters = normalized.slice(-2);
-    var oneLastLetter = twoLastLetters.slice(-1);
-    var irregularEndingWithForFe = new Set(["roofs", "belief", "chef", "chief"]);
-
-    if (irregularEndingWithForFe.has(normalized)) {
-      return "".concat(amount, " ").concat(normalized, "s");
-    }
-
-    if (/(?:f|fe)$/.test(noun)) {
-      return "".concat(amount, " ").concat(normalized.replace(/(?:f|fe)$/, "ves"));
-    }
-
-    var twoLettersReplaceMap = {
-      "is": "es",
-      "us": "i"
-    };
-    var lastLettersReplace = twoLettersReplaceMap[twoLastLetters];
-
-    if (lastLettersReplace && wordBase.length > 1) {
-      return "".concat(amount, " ").concat(wordBase).concat(lastLettersReplace);
-    }
-
-    var twoLettersAddMap = new Set(["ch", "ss", "sh"]);
-
-    if (twoLettersAddMap.has(twoLastLetters)) {
-      return "".concat(amount, " ").concat(normalized, "es");
-    }
-
-    var oneLastLetterMap = new Set(["s", "x", "z"]);
-
-    if (oneLastLetterMap.has(oneLastLetter)) {
-      return "".concat(amount, " ").concat(normalized, "es");
-    }
-
-    var consonants = new Set(["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "x", "z", "w", "y"]);
-    var isLetterBeforeLastConsonant = consonants.has(normalized.slice(-2, -1));
-
-    if (oneLastLetter === "o" && isLetterBeforeLastConsonant) {
-      var lastOexceptions = new Set(["photo", "buro", "piano", "halo"]);
-      return "".concat(amount, " ").concat(normalized).concat(lastOexceptions.has(normalized) ? "s" : "es");
-    }
-
-    if (oneLastLetter === "y" && isLetterBeforeLastConsonant) {
-      return "".concat(amount, " ").concat(normalized.slice(0, -1), "ies");
-    }
-
-    return "".concat(amount, " ").concat(normalized, "s");
-  };
-  /**
-   * @summary makes word Sentence-case
-   * @param {string} word 
-   * @returns {string}
-   */
-
-
-  var sentenceCase = function sentenceCase(word) {
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  };
-  /**
-   * @summary trims string and removes non-word chars
-   * 
-   * @example
-   *    "pineapple, apple (!); --juice" => "pineapple apple juice"
-   * 
-   * @param {string} [input] 
-   * @returns {string}
-   */
-
-
-  var trimAndRemoveSep = function trimAndRemoveSep() {
-    var input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-    return input.trim().replace(/[^\s\w]|_/g, '');
-  };
-
-  return {
-    isLcase: isLcase,
-    isUcase: isUcase,
-    pluralizeCountable: pluralizeCountable,
-    sentenceCase: sentenceCase,
-    trimAndRemoveSep: trimAndRemoveSep
-  };
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
+exports.trimAndRemoveSep = exports.splitIntoSentences = exports.sentenceCase = exports.pluralizeCountable = exports.parToSentenceCase = exports.isUcase = exports.isLcase = void 0;
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _toArray(arr) { return _arrayWithHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+/**
+ * @summary checks if string is lowcase
+ * @param {string} [str] 
+ * @returns {boolean}
+ */
+var isLcase = function isLcase() {
+  var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
+  if (!str) {
+    return false;
+  }
+
+  return Array.prototype.every.call(str, function (_char) {
+    var code = _char.codePointAt(0);
+
+    return code < 65 || code > 90;
+  });
+};
+/**
+ * @summary checks if string is uppercase
+ * @param {string} [str]
+ * @returns {boolean}
+ */
+
+
+exports.isLcase = isLcase;
+
+var isUcase = function isUcase() {
+  var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
+  if (!str) {
+    return false;
+  }
+
+  return Array.prototype.every.call(str, function (_char2) {
+    var code = _char2.codePointAt(0);
+
+    return /\W/.test(_char2) || code > 64 && code < 91;
+  });
+};
+/**
+ * @summary changes noun (countable) to plural form and prepends amount
+ * 
+ * @example
+ * 1,test -> 1 test
+ * 2,test -> 2 tests
+ * 21,test -> 21 tests
+ * 
+ * @param {number} amount
+ * @param {string} noun
+ * @returns {string}
+ */
+
+
+exports.isUcase = isUcase;
+
+var pluralizeCountable = function pluralizeCountable(amount, noun) {
+  var normalized = noun.toLowerCase();
+
+  if (amount === 1) {
+    return "1 ".concat(normalized);
+  }
+
+  var irregulars = {
+    "child": "children",
+    "goose": "geese",
+    "tooth": "teeth",
+    "foot": "feet",
+    "mous": "mice",
+    "person": "people"
+  };
+  var irregularPlural = irregulars[normalized];
+
+  if (irregularPlural) {
+    return "".concat(amount, " ").concat(irregularPlural);
+  }
+
+  var manWomanCase = normalized.match(/(\w*)(man|woman)$/);
+
+  if (manWomanCase) {
+    return "".concat(amount, " ").concat(manWomanCase[1]).concat(manWomanCase[2].replace("a", "e"));
+  }
+
+  var staySameExceptions = new Set(["sheep", "series", "species", "deer", "fish"]);
+
+  if (staySameExceptions.has(normalized)) {
+    return "".concat(amount, " ").concat(normalized);
+  }
+
+  var wordBase = normalized.slice(0, -2);
+  var irregularEndingWithA = new Set(["phenomenon", "datum", "criterion"]);
+
+  if (irregularEndingWithA.has(normalized)) {
+    return "".concat(amount, " ").concat(wordBase, "a");
+  }
+
+  var twoLastLetters = normalized.slice(-2);
+  var oneLastLetter = twoLastLetters.slice(-1);
+  var irregularEndingWithForFe = new Set(["roofs", "belief", "chef", "chief"]);
+
+  if (irregularEndingWithForFe.has(normalized)) {
+    return "".concat(amount, " ").concat(normalized, "s");
+  }
+
+  if (/(?:f|fe)$/.test(noun)) {
+    return "".concat(amount, " ").concat(normalized.replace(/(?:f|fe)$/, "ves"));
+  }
+
+  var twoLettersReplaceMap = {
+    "is": "es",
+    "us": "i"
+  };
+  var lastLettersReplace = twoLettersReplaceMap[twoLastLetters];
+
+  if (lastLettersReplace && wordBase.length > 1) {
+    return "".concat(amount, " ").concat(wordBase).concat(lastLettersReplace);
+  }
+
+  var twoLettersAddMap = new Set(["ch", "ss", "sh"]);
+
+  if (twoLettersAddMap.has(twoLastLetters)) {
+    return "".concat(amount, " ").concat(normalized, "es");
+  }
+
+  var oneLastLetterMap = new Set(["s", "x", "z"]);
+
+  if (oneLastLetterMap.has(oneLastLetter)) {
+    return "".concat(amount, " ").concat(normalized, "es");
+  }
+
+  var consonants = new Set(["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "x", "z", "w", "y"]);
+  var isLetterBeforeLastConsonant = consonants.has(normalized.slice(-2, -1));
+
+  if (oneLastLetter === "o" && isLetterBeforeLastConsonant) {
+    var lastOexceptions = new Set(["photo", "buro", "piano", "halo"]);
+    return "".concat(amount, " ").concat(normalized).concat(lastOexceptions.has(normalized) ? "s" : "es");
+  }
+
+  if (oneLastLetter === "y" && isLetterBeforeLastConsonant) {
+    return "".concat(amount, " ").concat(normalized.slice(0, -1), "ies");
+  }
+
+  return "".concat(amount, " ").concat(normalized, "s");
+};
+
+exports.pluralizeCountable = pluralizeCountable;
+
+var sentensify = function sentensify(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+};
+/**
+ * @summary makes word Sentence-case
+ * @param {string} word 
+ * @param {boolean} [isSentence]
+ * @returns {string}
+ */
+
+
+var sentenceCase = function sentenceCase(word) {
+  var isSentence = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+  if (isSentence) {
+    var _word$split = word.split(/\s+/),
+        _word$split2 = _toArray(_word$split),
+        first = _word$split2[0],
+        rest = _word$split2.slice(1);
+
+    return [sentensify(first)].concat(_toConsumableArray(rest.map(function (wd) {
+      return wd.toLowerCase();
+    }))).join(" ");
+  }
+
+  return sentensify(word);
+};
+/**
+ * @summary splits a string into sentences
+ * @param {string} paragraph 
+ * @returns {string[]}
+ */
+
+
+exports.sentenceCase = sentenceCase;
+
+var splitIntoSentences = function splitIntoSentences(paragraph) {
+  if (!paragraph) {
+    return [];
+  }
+
+  var splitRegExp = /([.?!]+)\s+/gim;
+  return paragraph.split(splitRegExp).reduce(function (acc, cur, i) {
+    i % 2 && (acc[acc.length - 1] += cur) || acc.push(cur);
+    return acc;
+  }, []);
+};
+/**
+ * @summary trims string and removes non-word chars
+ * 
+ * @example
+ *    "pineapple, apple (!); --juice" => "pineapple apple juice"
+ * 
+ * @param {string} [input] 
+ * @returns {string}
+ */
+
+
+exports.splitIntoSentences = splitIntoSentences;
+
+var trimAndRemoveSep = function trimAndRemoveSep() {
+  var input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+  return input.trim().replace(/[^\s\w]|_/g, '');
+};
+/**
+ * @summary makes paragraph sentence case
+ * @param {string} [paragraph]
+ * @returns {string}
+ */
+
+
+exports.trimAndRemoveSep = trimAndRemoveSep;
+
+var parToSentenceCase = function parToSentenceCase() {
+  var paragraph = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+  var sentences = splitIntoSentences(paragraph);
+  var normalized = sentences.map(function (sentence) {
+    return sentenceCase(sentence, true);
+  });
+  return normalized.join(" ");
+};
+
+exports.parToSentenceCase = parToSentenceCase;
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
