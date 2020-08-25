@@ -11,13 +11,21 @@ import {
 } from "../src/strings.mjs";
 
 describe('parToSentenceCase', function () {
-    
+
     it('should correctly normalize to sentene case', function () {
-        
+
         const par = "something changed... Has IT? deFInitely!";
-        const sc = parToSentenceCase(par);
+        const sc = parToSentenceCase({ text: par });
 
         expect(sc).to.equal("Something changed... Has it? Definitely!");
+    });
+
+    it('should exempt specified words', function () {
+
+        const par = "EXAMPLE INDIVIDUAL JSON PAYLOAD";
+        const sc = parToSentenceCase({ text: par, exempt: ["JSON"] });
+        
+        expect(sc).to.equal("Example individual JSON payload");
     });
 
 });
@@ -26,21 +34,21 @@ describe('sentenceCase', function () {
 
     it('should result in no-op for empty strings', function () {
 
-        const empty = sentenceCase("");
+        const empty = sentenceCase();
         expect(empty).to.equal("");
     });
 
     it('should not fail on single char', function () {
 
-        const single = sentenceCase("o");
+        const single = sentenceCase({ text: "o" });
         expect(single).to.equal("O");
     });
 
     it('should uppercase first char and lowercase others', function () {
 
-        const camel = sentenceCase("camelCase");
-        const allLow = sentenceCase("lowercase");
-        const allUp = sentenceCase("UPPERCASE");
+        const camel = sentenceCase({ text: "camelCase" });
+        const allLow = sentenceCase({ text: "lowercase" });
+        const allUp = sentenceCase({ text: "UPPERCASE" });
 
         expect(camel).to.equal("Camelcase");
         expect(allLow).to.equal("Lowercase");
@@ -74,18 +82,6 @@ describe('splitIntoSentences', function () {
                 .map((s, i, a) => `${s}${a[i + 1] || ""}`)
                 .filter((_, i) => !(i % 2))
         );
-    });
-
-});
-
-describe('allSentenceCase', function () {
-
-    it('should convert uppercase sentences correctly', function () {
-
-    });
-
-    it('should convert lowercase sentences correctly', function () {
-
     });
 
 });

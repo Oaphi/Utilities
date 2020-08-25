@@ -143,21 +143,32 @@ const sentensify = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowe
 
 /**
  * @summary makes word Sentence-case
- * @param {string} word 
- * @param {boolean} [isSentence]
+ * 
+ * @param {{
+ *  isSentence : (boolean|false),
+ *  text : string,
+ *  exempt : string[]
+ * }}
+ * 
  * @returns {string}
  */
-const sentenceCase = (word, isSentence = false) => {
+const sentenceCase = ({
+    text = "",
+    isSentence = false,
+    exempt = []
+} = {}) => {
 
     if (isSentence) {
-        const [first, ...rest] = word.split(/\s+/);
+        const [first, ...rest] = text.split(/\s+/);
         return [
-            sentensify(first),
-            ...rest.map(wd => wd.toLowerCase())
+            exempt.includes(first) ? first : sentensify(first),
+            ...rest.map(
+                wd => exempt.includes(wd) ? wd : wd.toLowerCase()
+            )
         ].join(" ");
     }
 
-    return sentensify(word);
+    return exempt.includes(text) ? text : sentensify(text);
 };
 
 /**
@@ -193,15 +204,26 @@ const trimAndRemoveSep = (input = "") => input.trim().replace(/[^\s\w]|_/g, '');
 
 /**
  * @summary makes paragraph sentence case
- * @param {string} [paragraph]
+ * 
+ * @param {{
+ *  text : string,
+ *  exempt : string[]
+ * }}
+ * 
  * @returns {string}
  */
-const parToSentenceCase = (paragraph = "") => {
+const parToSentenceCase = ({ text = "", exempt = [] } = {}) => {
 
-    const sentences = splitIntoSentences(paragraph);
+    const sentences = splitIntoSentences(text);
 
-    const normalized = sentences.map((sentence) => sentenceCase(sentence, true))
-        
+    const normalized = sentences.map(
+        (sentence) => sentenceCase({
+            isSentence: true,
+            text: sentence,
+            exempt
+        })
+    );
+
     return normalized.join(" ");
 };
 
