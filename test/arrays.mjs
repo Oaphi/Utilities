@@ -18,6 +18,7 @@ const {
     last,
     mergeOnto,
     reduceWithStep,
+    removeElements,
     shrinkGrid,
     spliceInto,
     splitIntoConseq
@@ -25,20 +26,39 @@ const {
 
 describe('Arrays', function () {
 
+    describe('removeElements', function () {
+
+        it('should remove correct elements', function () {
+            const input = [1, 2, 3, 4];
+            const output = removeElements(input, 2, 3);
+
+            expect(input).to.deep.equal(input);
+            expect(output).to.deep.equal([input[0], input[3]]);
+        });
+
+        it('should not remove anything if elements do not match', function () {
+            const input = ["Andy", "Orwell"];
+
+            const output = removeElements(input, "Amy");
+            expect(output).to.deep.equal(input);
+        });
+
+    });
+
     describe('closestValue', function () {
 
         it('should return null on no value', function () {
             const closest = closestValue();
             expect(closest).to.be.null;
         });
-        
+
         it('should return null on empty array', function () {
-            const closest = closestValue({ value : 1 });
+            const closest = closestValue({ value: 1 });
             expect(closest).to.be.null;
         });
 
         it('should find closest value', function () {
-            const closest = closestValue({ value: 1, values : [ 7,34,18,3,15 ] });
+            const closest = closestValue({ value: 1, values: [7, 34, 18, 3, 15] });
             expect(closest).to.equal(3);
         });
 
@@ -134,17 +154,17 @@ describe('Arrays', function () {
         });
 
         it('should count on key provided', function () {
-            
+
             const counted = countObjects({
                 source: [
                     { test: 1, prop: 2 },
                     { test: 1, prop: 2 },
                     { prop: 3 }
                 ],
-                onKey : "prop"
+                onKey: "prop"
             });
 
-            expect(counted).to.be.deep.equal({ "2" : 2, "3" : 1 });
+            expect(counted).to.be.deep.equal({ "2": 2, "3": 1 });
         });
 
     });

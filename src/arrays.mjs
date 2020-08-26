@@ -427,7 +427,7 @@ const closestValue = (config = {}) => {
 
     values.forEach((val, i) => {
         const diff = Math.abs(value - val);
-        
+
         if (currClosest > diff) {
             closestIndex = i;
             currClosest = diff;
@@ -436,6 +436,14 @@ const closestValue = (config = {}) => {
 
     return values[closestIndex];
 };
+
+/**
+ * @summary removes elements from an array
+ * @param {any[]} arr 
+ * @param {...any} elems
+ * @returns {any[]}
+ */
+const removeElements = (arr, ...elems) => arr.filter((elem) => !elems.includes(elem));
 
 export default {
     chunkify,
@@ -449,6 +457,7 @@ export default {
     last,
     mergeOnto,
     reduceWithStep,
+    removeElements,
     shrinkGrid,
     spliceInto,
     splitIntoConseq
