@@ -2605,27 +2605,38 @@ var sentensify = function sentensify(word) {
 };
 /**
  * @summary makes word Sentence-case
- * @param {string} word 
- * @param {boolean} [isSentence]
+ * 
+ * @param {{
+ *  isSentence : (boolean|false),
+ *  text : string,
+ *  exempt : string[]
+ * }}
+ * 
  * @returns {string}
  */
 
 
-var sentenceCase = function sentenceCase(word) {
-  var isSentence = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+var sentenceCase = function sentenceCase() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref$text = _ref.text,
+      text = _ref$text === void 0 ? "" : _ref$text,
+      _ref$isSentence = _ref.isSentence,
+      isSentence = _ref$isSentence === void 0 ? false : _ref$isSentence,
+      _ref$exempt = _ref.exempt,
+      exempt = _ref$exempt === void 0 ? [] : _ref$exempt;
 
   if (isSentence) {
-    var _word$split = word.split(/\s+/),
-        _word$split2 = _toArray(_word$split),
-        first = _word$split2[0],
-        rest = _word$split2.slice(1);
+    var _text$split = text.split(/\s+/),
+        _text$split2 = _toArray(_text$split),
+        first = _text$split2[0],
+        rest = _text$split2.slice(1);
 
-    return [sentensify(first)].concat(_toConsumableArray(rest.map(function (wd) {
-      return wd.toLowerCase();
+    return [exempt.includes(first) ? first : sentensify(first)].concat(_toConsumableArray(rest.map(function (wd) {
+      return exempt.includes(wd) ? wd : wd.toLowerCase();
     }))).join(" ");
   }
 
-  return sentensify(word);
+  return exempt.includes(text) ? text : sentensify(text);
 };
 /**
  * @summary splits a string into sentences
@@ -2666,7 +2677,12 @@ var trimAndRemoveSep = function trimAndRemoveSep() {
 };
 /**
  * @summary makes paragraph sentence case
- * @param {string} [paragraph]
+ * 
+ * @param {{
+ *  text : string,
+ *  exempt : string[]
+ * }}
+ * 
  * @returns {string}
  */
 
@@ -2674,10 +2690,19 @@ var trimAndRemoveSep = function trimAndRemoveSep() {
 exports.trimAndRemoveSep = trimAndRemoveSep;
 
 var parToSentenceCase = function parToSentenceCase() {
-  var paragraph = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-  var sentences = splitIntoSentences(paragraph);
+  var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref2$text = _ref2.text,
+      text = _ref2$text === void 0 ? "" : _ref2$text,
+      _ref2$exempt = _ref2.exempt,
+      exempt = _ref2$exempt === void 0 ? [] : _ref2$exempt;
+
+  var sentences = splitIntoSentences(text);
   var normalized = sentences.map(function (sentence) {
-    return sentenceCase(sentence, true);
+    return sentenceCase({
+      isSentence: true,
+      text: sentence,
+      exempt: exempt
+    });
   });
   return normalized.join(" ");
 };
