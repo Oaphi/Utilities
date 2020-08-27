@@ -2,7 +2,40 @@ import chai from "chai";
 const { expect } = chai;
 
 import * as asynchronous from "../src/async.mjs";
-const { waitAsync, forEachAwait, forAwait } = asynchronous;
+const { waitAsync, forEachAwait, forAwait, withInterval } = asynchronous;
+
+describe('withInterval', function () {
+
+    it('should delay execution correctly', async function () {
+        let i = 0;
+
+        const init = Date.now();
+
+        await withInterval({ interval: 1e3, callback: () => i++ });
+
+        const now = Date.now();
+
+        expect(now - init).to.be.above(1e3);
+        expect(i).to.equal(1);
+    });
+
+    it('should repeat specified number of times', async function () {
+
+        this.timeout(4e3);
+
+        let i = 0;
+
+        const init = Date.now();
+
+        await withInterval({ interval: 1e3, callback: () => i++, times : 3 });
+
+        const now = Date.now();
+
+        expect(now - init).to.be.above(3e3);
+        expect(i).to.equal(3);
+    });
+
+});
 
 describe('forAwait', function () {
 

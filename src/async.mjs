@@ -45,8 +45,50 @@ const forEachAwait = async (source, callback) => {
     return results.forEach((val, idx) => callback(val, idx, source));
 };
 
+/**
+ * @typedef {{
+ *  interval : number,
+ *  callback : function : Promise,
+ *  times : number
+ * }} IntervalConfig
+ * 
+ * @param {IntervalConfig}
+ */
+const withInterval = ({
+    interval = 4,
+    callback,
+    times = 1
+}) => {
+    if (!times) {
+        return Promise.resolve();
+    }
+
+    return new Promise(async (res, rej) => {
+
+        await callback();
+
+        console.log(new Date().toLocaleString());
+
+        const timesLeft = times - 1;
+
+        setTimeout(() => {
+
+            withInterval({
+                interval,
+                callback,
+                times: timesLeft
+            })
+            .then(res)
+            .catch(rej);
+
+        }, interval);
+
+    });
+};
+
 export {
     forAwait,
     forEachAwait,
-    waitAsync
+    waitAsync,
+    withInterval
 };
