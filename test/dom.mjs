@@ -1,9 +1,22 @@
-const { strictEqual, throws } = require('assert');
-const { expect } = require("chai");
+import chai from "chai";
+const { expect } = chai;
 
-const { jsonToDOMString, jsonToFormatString } = require('../src/utilities.js');
+import assert from "assert";
+const { strictEqual, throws } = assert;
 
-const { JSDOM } = require("jsdom");
+import jsdom from "jsdom";
+const { JSDOM } = jsdom;
+
+import utils from "../src/utilities.js";
+const { jsonToDOMString, jsonToFormatString } = utils;
+
+import * as dom_utils from "../src/DOM/DOM.mjs";
+const { 
+    emphasizeSelectedText,
+    elementsLeftUntil, 
+    elementsRightUntil, 
+    listContainsSome 
+} = dom_utils;
 
 function getMockDom(html) {
     const dom = new JSDOM(html);
@@ -15,9 +28,72 @@ function getMockDom(html) {
     };
 }
 
-const { elementsLeftUntil, elementsRightUntil, listContainsSome } = require("../src/DOM/DOM.js");
-
 describe('DOM Utilities', function () {
+
+    describe('emphasizeSelectedText', function () {
+        
+        const { document, body } = getMockDom();
+
+        it('should italicize by default', function () {
+
+            const elem = document.createElement("input");
+            elem.value = "Some emphasized text";
+            body.append(elem);
+
+            elem.focus();
+
+            elem.setSelectionRange(5,15);
+            
+            emphasizeSelectedText({ element: elem });
+
+            expect(elem.value).to.equal("Some <em>emphasized</em> text");
+        });
+
+        it('should boldify on "bold" type', function () {
+            const elem = document.createElement("textarea");
+            elem.value = "Some emphasized text";
+            body.append(elem);
+
+            elem.focus();
+
+            elem.setSelectionRange(5, 15);
+
+            emphasizeSelectedText({ element: elem, type : "bold" });
+
+            expect(elem.value).to.equal("Some <strong>emphasized</strong> text");
+        });
+
+        it('should strike out on "strike" type', function () {
+            const testText = "Some emphasized text";
+
+            const elem = document.createElement("input");
+            elem.value = testText;
+            body.append(elem);
+
+            elem.focus();
+
+            elem.setSelectionRange(testText.length - 4, testText.length);
+
+            emphasizeSelectedText({ element: elem, type: "strike" });
+
+            expect(elem.value).to.equal("Some emphasized <s>text</s>");
+        });
+
+        it('should underline on "underline" type', function () {
+            const elem = document.createElement("textarea");
+            elem.value = "Some emphasized text";
+            body.append(elem);
+
+            elem.focus();
+
+            elem.setSelectionRange(0, 4);
+
+            emphasizeSelectedText({ element: elem, type: "underline" });
+
+            expect(elem.value).to.equal("<u>Some</u> emphasized text");
+        });
+
+    });
 
     describe('elementsRightUntil', function () {
 
