@@ -1841,7 +1841,7 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.complement = void 0;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -1889,6 +1889,8 @@ var complement = function complement() {
  */
 
 
+exports.complement = complement;
+
 var deepGetByType = function deepGetByType() {
   var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return (
@@ -1918,6 +1920,8 @@ var deepGetByType = function deepGetByType() {
     }
   );
 };
+
+exports.deepGetByType = deepGetByType;
 
 var initArrOrObj = function initArrOrObj(entity) {
   return entity !== undefined ? [] : {};
@@ -1995,6 +1999,8 @@ var deepParseByPath = function deepParseByPath(source) {
  */
 
 
+exports.deepParseByPath = deepParseByPath;
+
 var getGetterDescriptors = function getGetterDescriptors() {
   var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return Object.entries(Object.getOwnPropertyDescriptors(obj)).filter(function (entry) {
@@ -2009,6 +2015,8 @@ var getGetterDescriptors = function getGetterDescriptors() {
  * @returns {any}
  */
 
+
+exports.getGetterDescriptors = getGetterDescriptors;
 
 var getOrInitProp = function getOrInitProp(obj, propName, callback) {
   if (propName in obj) {
@@ -2027,6 +2035,8 @@ var getOrInitProp = function getOrInitProp(obj, propName, callback) {
  */
 
 
+exports.getOrInitProp = getOrInitProp;
+
 var isObject = function isObject(obj) {
   return _typeof(obj) === 'object' && obj !== null && !Array.isArray(obj);
 };
@@ -2038,6 +2048,8 @@ var isObject = function isObject(obj) {
  * @returns {object}
  */
 
+
+exports.isObject = isObject;
 
 var pushOrInitProp = function pushOrInitProp(obj, key, value) {
   if (key in obj) {
@@ -2068,6 +2080,8 @@ var pushOrInitProp = function pushOrInitProp(obj, key, value) {
  * @returns {object}
  */
 
+
+exports.pushOrInitProp = pushOrInitProp;
 
 var setIf = function setIf(source, key) {
   var target = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -2109,6 +2123,8 @@ var setIf = function setIf(source, key) {
  */
 
 
+exports.setIf = setIf;
+
 var smartGetter = function smartGetter(context, propName, callback) {
   return Object.defineProperty(context, propName, {
     configurable: true,
@@ -2127,6 +2143,8 @@ var smartGetter = function smartGetter(context, propName, callback) {
  * @param {string} propName property name
  */
 
+
+exports.smartGetter = smartGetter;
 
 var switchIfDiffProp = function switchIfDiffProp(target, propName) {
   return (
@@ -2154,6 +2172,8 @@ var switchIfDiffProp = function switchIfDiffProp(target, propName) {
  * @returns {object}
  */
 
+
+exports.switchIfDiffProp = switchIfDiffProp;
 
 var union = function union(target) {
   var union = Object.assign({}, target);
@@ -2186,6 +2206,8 @@ var union = function union(target) {
  */
 
 
+exports.union = union;
+
 var whichKeyIsSet = function whichKeyIsSet(obj) {
   var matched = 0;
 
@@ -2216,6 +2238,8 @@ var whichKeyIsSet = function whichKeyIsSet(obj) {
  */
 
 
+exports.whichKeyIsSet = whichKeyIsSet;
+
 var whichKeysAreSet = function whichKeysAreSet(obj) {
   for (var _len4 = arguments.length, keys = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
     keys[_key4 - 1] = arguments[_key4];
@@ -2236,6 +2260,8 @@ var whichKeysAreSet = function whichKeysAreSet(obj) {
  * @returns {object|[]}
  */
 
+
+exports.whichKeysAreSet = whichKeysAreSet;
 
 var deepMap = function deepMap(obj, mapper) {
   var _ref5 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
@@ -2265,60 +2291,113 @@ var deepMap = function deepMap(obj, mapper) {
   return output;
 };
 /**
+ * @summary pushes or sets property
+ * @param {object|[]} arrOrObj 
+ * @param {string} key 
+ * @param {any} val 
+ * @returns {object|[]}
+ */
+
+
+exports.deepMap = deepMap;
+
+var pushOrSet = function pushOrSet(arrOrObj, key, val) {
+  Array.isArray(arrOrObj) ? arrOrObj.push(val) : arrOrObj[key] = val;
+  return arrOrObj;
+};
+/**
  * @typedef {object} DeepFilterConfig
  * @property {object} [accumulator] accumulates entities filtered out
  * @property {boolean|true} [opaqueArrays] if false, treats arrays as values
+ * @property {boolean|true} [opaqueObjects] if false, treats objects as values
  * 
  * @summary filters each object key with filterer
- * @param {object|[]} obj 
- * @param {function (string,any): boolean} filterer 
+ * 
+ * @description
+ *  Predicate in deep filter behaves similar built-in 
+ *  Array.prototype.filter method, but passes a key first
+ * 
+ * @param {any} input 
+ * @param {function (string,any, number, object|[], boolean): boolean} filterer 
  * @param {DeepFilterConfig} [options]
  * @returns {object|[]}
  */
 
 
-var deepFilter = function deepFilter(obj, filterer) {
-  var _ref8 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-      accumulator = _ref8.accumulator,
-      _ref8$opaqueArrays = _ref8.opaqueArrays,
-      opaqueArrays = _ref8$opaqueArrays === void 0 ? true : _ref8$opaqueArrays;
+var deepFilter = function deepFilter(input, filterer) {
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var accumulator = options.accumulator,
+      _options$opaqueArrays = options.opaqueArrays,
+      opaqueArrays = _options$opaqueArrays === void 0 ? true : _options$opaqueArrays,
+      _options$opaqueObject = options.opaqueObjects,
+      opaqueObjects = _options$opaqueObject === void 0 ? true : _options$opaqueObject;
+  var arrAsBase = Array.isArray(input);
+  var objAsBase = _typeof(input) === "object" && input;
+  var output = arrAsBase ? [] : objAsBase ? {} : input;
+  Object.entries(input).forEach(function (_ref8, index) {
+    var _ref9 = _slicedToArray(_ref8, 2),
+        key = _ref9[0],
+        val = _ref9[1];
 
-  var output = Array.isArray(obj) ? [] : {};
-  Object.entries(obj).forEach(function (_ref9) {
-    var _ref10 = _slicedToArray(_ref9, 2),
-        key = _ref10[0],
-        value = _ref10[1];
+    var arrAsVal = Array.isArray(val);
+    var objAsVal = _typeof(val) === "object" && val;
 
-    var canAdd = filterer(key, value);
+    if (opaqueArrays && arrAsVal || opaqueObjects && objAsVal) {
+      var filtered = deepFilter(val, filterer, options) || {};
+      var hasKeys = Object.keys(filtered).length;
 
-    if (opaqueArrays && Array.isArray(value) || isObject(value)) {
-      output[key] = deepFilter(value, filterer);
-      return;
+      if (hasKeys) {
+        return pushOrSet(output, key, filtered);
+      }
+
+      return accumulator && pushOrSet(accumulator, key, val);
     }
 
-    canAdd && (output[key] = value) || accumulator && (accumulator[key] = value);
+    var canAdd = filterer(key, val, index, input, arrAsBase);
+
+    if (canAdd) {
+      return pushOrSet(output, key, val);
+    }
+
+    return accumulator && pushOrSet(accumulator, key, val);
+  });
+  return output;
+};
+/**
+ * @typedef {object} ShallowFilterConfig
+ * @property {object[]|object} source
+ * @property {function (string,any) : boolean} [filter]
+ * @property {object[]|object} [accumulator]
+ * 
+ * @summary shallow filters an object or array of objects
+ * @param {ShallowFilterConfig}
+ * @returns {objct[]|object}
+ */
+
+
+exports.deepFilter = deepFilter;
+
+var shallowFilter = function shallowFilter(_ref10) {
+  var source = _ref10.source,
+      _ref10$filter = _ref10.filter,
+      filter = _ref10$filter === void 0 ? function () {
+    return true;
+  } : _ref10$filter,
+      accumulator = _ref10.accumulator;
+  var arrAsBase = Array.isArray(source);
+  var objAsBase = _typeof(source) === "object" && source;
+  var output = arrAsBase ? [] : objAsBase ? {} : source;
+  Object.entries(source).forEach(function (_ref11) {
+    var _ref12 = _slicedToArray(_ref11, 2),
+        k = _ref12[0],
+        v = _ref12[1];
+
+    filter(v, k, source) ? pushOrSet(output, k, v) : accumulator && pushOrSet(accumulator, k, v);
   });
   return output;
 };
 
-var _default = {
-  complement: complement,
-  deepFilter: deepFilter,
-  deepGetByType: deepGetByType,
-  deepMap: deepMap,
-  deepParseByPath: deepParseByPath,
-  getGetterDescriptors: getGetterDescriptors,
-  getOrInitProp: getOrInitProp,
-  isObject: isObject,
-  pushOrInitProp: pushOrInitProp,
-  setIf: setIf,
-  smartGetter: smartGetter,
-  switchIfDiffProp: switchIfDiffProp,
-  union: union,
-  whichKeyIsSet: whichKeyIsSet,
-  whichKeysAreSet: whichKeysAreSet
-};
-exports["default"] = _default;
+exports.shallowFilter = shallowFilter;
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
