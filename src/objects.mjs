@@ -393,45 +393,118 @@ const deepMap = (obj, mapper, { keyMapper, opaqueArrays = true } = {}) => {
 };
 
 /**
+ * @summary pushes or sets property
+ * @param {object|[]} arrOrObj 
+ * @param {string} key 
+ * @param {any} val 
+ * @returns {object|[]}
+ */
+const pushOrSet = (arrOrObj, key, val) => {
+    Array.isArray(arrOrObj) ?
+        arrOrObj.push(val) :
+        (arrOrObj[key] = val);
+    return arrOrObj;
+};
+
+/**
  * @typedef {object} DeepFilterConfig
  * @property {object} [accumulator] accumulates entities filtered out
  * @property {boolean|true} [opaqueArrays] if false, treats arrays as values
+ * @property {boolean|true} [opaqueObjects] if false, treats objects as values
  * 
  * @summary filters each object key with filterer
- * @param {object|[]} obj 
- * @param {function (string,any): boolean} filterer 
+ * 
+ * @description
+ *  Predicate in deep filter behaves similar built-in 
+ *  Array.prototype.filter method, but passes a key first
+ * 
+ * @param {any} input 
+ * @param {function (string,any, number, object|[], boolean): boolean} filterer 
  * @param {DeepFilterConfig} [options]
  * @returns {object|[]}
  */
 const deepFilter = (
-    obj,
+    input,
     filterer,
-    {
-        accumulator,
-        opaqueArrays = true
-    } = {}
+    options = {}
 ) => {
 
-    const output = Array.isArray(obj) ? [] : {};
+    const {
+        accumulator,
+        opaqueArrays = true,
+        opaqueObjects = true,
+    } = options;
 
-    Object
-        .entries(obj)
-        .forEach(([key, value]) => {
+    const arrAsBase = Array.isArray(input);
+    const objAsBase = typeof input === "object" && input;
 
-            let canAdd = filterer(key, value);
 
-            if ((opaqueArrays && Array.isArray(value)) || isObject(value)) {
-                output[key] = deepFilter(value, filterer);
-                return;
+    const output = arrAsBase ? [] : objAsBase ? {} : input;
+
+    Object.entries(input).forEach(([key, val], index) => {
+
+        const arrAsVal = Array.isArray(val);
+        const objAsVal = typeof val === "object" && val;
+
+        if (
+            opaqueArrays && arrAsVal ||
+            opaqueObjects && objAsVal
+        ) {
+            const filtered = deepFilter(val, filterer, options) || {};
+
+            const hasKeys = Object.keys(filtered).length;
+
+            if (hasKeys) {
+                return pushOrSet(output, key, filtered);
             }
 
-            canAdd && (output[key] = value) || (accumulator && (accumulator[key] = value));
-        });
+            return accumulator && pushOrSet(accumulator, key, val);
+        }
+
+        const canAdd = filterer(key, val, index, input, arrAsBase);
+
+        if (canAdd) {
+            return pushOrSet(output, key, val);
+        }
+
+        return accumulator && pushOrSet(accumulator, key, val);
+    });
 
     return output;
 };
 
-export default {
+/**
+ * @typedef {object} ShallowFilterConfig
+ * @property {object[]|object} source
+ * @property {function (string,any) : boolean} [filter]
+ * @property {object[]|object} [accumulator]
+ * 
+ * @summary shallow filters an object or array of objects
+ * @param {ShallowFilterConfig}
+ * @returns {objct[]|object}
+ */
+const shallowFilter = ({
+    source,
+    filter = () => true,
+    accumulator
+}) => {
+    const arrAsBase = Array.isArray(source);
+    const objAsBase = typeof source === "object" && source;
+
+    const output = arrAsBase ? [] : objAsBase ? {} : source;
+
+    Object.entries(source).forEach(([k, v]) => {
+        filter(v, k, source) ?
+            pushOrSet(output, k, v) :
+            accumulator && pushOrSet(accumulator, k, v);
+    });
+
+    return output;
+};
+
+
+
+export {
     complement,
     deepFilter,
     deepGetByType,
@@ -442,6 +515,7 @@ export default {
     isObject,
     pushOrInitProp,
     setIf,
+    shallowFilter,
     smartGetter,
     switchIfDiffProp,
     union,
