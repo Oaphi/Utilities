@@ -1,8 +1,7 @@
 import chai from "chai";
 const { expect } = chai;
 
-import json from "../src/JSON/json.mjs";
-const { JSONtoQuery } = json;
+import { JSONtoQuery } from "../src/JSON/json.mjs";
 
 describe('JSONtoQuery', function () {
 

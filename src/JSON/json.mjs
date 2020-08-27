@@ -70,6 +70,6 @@ function JSONtoQuery(
     return deep(paramOrder, ordered, encodeParams);
 }
 
-export default {
+export {
     JSONtoQuery
 };
