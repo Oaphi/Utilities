@@ -959,6 +959,23 @@ var closestValue = function closestValue() {
   });
   return values[closestIndex];
 };
+/**
+ * @summary removes elements from an array
+ * @param {any[]} arr 
+ * @param {...any} elems
+ * @returns {any[]}
+ */
+
+
+var removeElements = function removeElements(arr) {
+  for (var _len3 = arguments.length, elems = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+    elems[_key3 - 1] = arguments[_key3];
+  }
+
+  return arr.filter(function (elem) {
+    return !elems.includes(elem);
+  });
+};
 
 var _default = {
   chunkify: chunkify,
@@ -972,6 +989,7 @@ var _default = {
   last: last,
   mergeOnto: mergeOnto,
   reduceWithStep: reduceWithStep,
+  removeElements: removeElements,
   shrinkGrid: shrinkGrid,
   spliceInto: spliceInto,
   splitIntoConseq: splitIntoConseq
