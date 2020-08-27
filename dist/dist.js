@@ -135,166 +135,189 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 });
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define([], factory);
-  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
-    module.exports = factory();
-  } else {
-    root.utilsDOM = factory();
-  }
-})(typeof self !== 'undefined' ? self : void 0, function () {
-  /**
-   * @description traverses children left to right, calling comparator on each one
-   * until it evaluates to true, then calls the callback with first element passing 
-   * the condition or with root itself if none
-   * @param {HTMLElement} root 
-   * @param {number} [offset]
-   * @param {function(HTMLElement): boolean} comparator 
-   * @param {function(HTMLElement)} [callback] 
-   * @param {function(HTMLElement)} [fallback]
-   * @param {boolean} [strict]
-   */
-  function elementsRightUntil(root, offset, comparator, callback, fallback) {
-    var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
-
-    if (typeof offset === "function") {
-      fallback = callback;
-      callback = comparator;
-      comparator = offset;
-      offset = 0;
-    }
-
-    if (typeof callback === "boolean") {
-      strict = callback;
-      callback = null;
-    }
-
-    if (typeof fallback === "boolean") {
-      strict = fallback;
-      fallback = null;
-    }
-
-    var current = root.children[offset] || (strict ? null : root);
-    var matchedOnce = comparator(current) ? 1 : 0;
-    var index = offset;
-
-    if (!matchedOnce) {
-      while (current.nextElementSibling) {
-        index++;
-        current = current.nextElementSibling;
-
-        if (comparator(current)) {
-          matchedOnce |= 1;
-          break;
-        }
-      }
-    }
-
-    var use = matchedOnce ? callback : fallback;
-    return use ? use(current, index) : current;
-  }
-  /**
-   * @summary inverse of elementsRightUntil
-   * @param {HTMLElement} root
-   * @param {number} [offset]
-   * @param {function(HTMLElement): boolean} comparator
-   * @param {function(HTMLElement)} [callback]
-   * @param {function(HTMLElement)} [fallback]
-   * @param {boolean} [strict]
-   */
-
-
-  function elementsLeftUntil(root, offset, comparator, callback, fallback) {
-    var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
-
-    if (typeof offset === "function") {
-      fallback = callback;
-      callback = comparator;
-      comparator = offset;
-      offset = 0;
-    }
-
-    if (typeof callback === "boolean") {
-      strict = callback;
-      callback = null;
-    }
-
-    if (typeof fallback === "boolean") {
-      strict = fallback;
-      fallback = null;
-    }
-
-    var children = root.children;
-    var lastIndex = children.length - 1 - offset;
-    var current = children[lastIndex] || (strict ? null : root);
-    var matchedOnce = comparator(current) ? 1 : 0;
-    var index = lastIndex;
-
-    if (!matchedOnce) {
-      while (current.previousElementSibling) {
-        index--;
-        current = current.previousElementSibling;
-
-        if (comparator(current)) {
-          matchedOnce |= 1;
-          break;
-        }
-      }
-    }
-
-    var use = matchedOnce ? callback : fallback;
-    return use ? use(current, index) : current;
-  }
-  /**
-   * @summary checks if some tokens are contained
-   * @param {DOMTokenList} list
-   */
-
-
-  var listContainsSome = function listContainsSome(list) {
-    return (
-      /**
-       * @param {...string} [tokens]
-       * @returns {boolean}
-       */
-      function () {
-        var boundContains = list.contains.bind(list);
-
-        for (var _len = arguments.length, tokens = new Array(_len), _key = 0; _key < _len; _key++) {
-          tokens[_key] = arguments[_key];
-        }
-
-        return tokens.some(boundContains);
-      }
-    );
-  };
-  /**
-   * @summary removes last child of Element
-   * @param {Element} element
-   * @returns {void}
-   */
-
-
-  var removeLastChild = function removeLastChild(element) {
-    return element.lastChild && element.lastChild.remove();
-  };
-
-  return {
-    elementsRightUntil: elementsRightUntil,
-    elementsLeftUntil: elementsLeftUntil,
-    listContainsSome: listContainsSome,
-    removeLastChild: removeLastChild
-  };
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
+exports.elementsRightUntil = elementsRightUntil;
+exports.elementsLeftUntil = elementsLeftUntil;
+exports.removeLastChild = exports.listContainsSome = exports.emphasizeSelectedText = void 0;
+
+/**
+ * @typedef {object} EmphasisConfig
+ * @property {HTMLInputElement} element
+ * @property {("bold"|"italic"|"strike"|"underline")} type
+ * 
+ * @param {EmphasisConfig}
+ * @returns {HTMLInputElement}
+ */
+var emphasizeSelectedText = function emphasizeSelectedText(_ref) {
+  var element = _ref.element,
+      _ref$type = _ref.type,
+      type = _ref$type === void 0 ? "italic" : _ref$type;
+  var emphasis = new Map([["italic", "em"], ["bold", "strong"], ["underline", "u"], ["strike", "s"]]);
+  var tag = emphasis.get(type);
+
+  if (!tag) {
+    return element;
+  }
+
+  var selectionStart = element.selectionStart,
+      selectionEnd = element.selectionEnd,
+      value = element.value;
+  var selected = value.slice(selectionStart, selectionEnd);
+  element.value = value.replace(selected, "<".concat(tag, ">").concat(selected, "</").concat(tag, ">"));
+  return element;
+};
+/**
+ * @description traverses children left to right, calling comparator on each one
+ * until it evaluates to true, then calls the callback with first element passing 
+ * the condition or with root itself if none
+ * @param {HTMLElement} root 
+ * @param {number} [offset]
+ * @param {function(HTMLElement): boolean} comparator 
+ * @param {function(HTMLElement)} [callback] 
+ * @param {function(HTMLElement)} [fallback]
+ * @param {boolean} [strict]
+ */
+
+
+exports.emphasizeSelectedText = emphasizeSelectedText;
+
+function elementsRightUntil(root, offset, comparator, callback, fallback) {
+  var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
+
+  if (typeof offset === "function") {
+    fallback = callback;
+    callback = comparator;
+    comparator = offset;
+    offset = 0;
+  }
+
+  if (typeof callback === "boolean") {
+    strict = callback;
+    callback = null;
+  }
+
+  if (typeof fallback === "boolean") {
+    strict = fallback;
+    fallback = null;
+  }
+
+  var current = root.children[offset] || (strict ? null : root);
+  var matchedOnce = comparator(current) ? 1 : 0;
+  var index = offset;
+
+  if (!matchedOnce) {
+    while (current.nextElementSibling) {
+      index++;
+      current = current.nextElementSibling;
+
+      if (comparator(current)) {
+        matchedOnce |= 1;
+        break;
+      }
+    }
+  }
+
+  var use = matchedOnce ? callback : fallback;
+  return use ? use(current, index) : current;
+}
+/**
+ * @summary inverse of elementsRightUntil
+ * @param {HTMLElement} root
+ * @param {number} [offset]
+ * @param {function(HTMLElement): boolean} comparator
+ * @param {function(HTMLElement)} [callback]
+ * @param {function(HTMLElement)} [fallback]
+ * @param {boolean} [strict]
+ */
+
+
+function elementsLeftUntil(root, offset, comparator, callback, fallback) {
+  var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
+
+  if (typeof offset === "function") {
+    fallback = callback;
+    callback = comparator;
+    comparator = offset;
+    offset = 0;
+  }
+
+  if (typeof callback === "boolean") {
+    strict = callback;
+    callback = null;
+  }
+
+  if (typeof fallback === "boolean") {
+    strict = fallback;
+    fallback = null;
+  }
+
+  var children = root.children;
+  var lastIndex = children.length - 1 - offset;
+  var current = children[lastIndex] || (strict ? null : root);
+  var matchedOnce = comparator(current) ? 1 : 0;
+  var index = lastIndex;
+
+  if (!matchedOnce) {
+    while (current.previousElementSibling) {
+      index--;
+      current = current.previousElementSibling;
+
+      if (comparator(current)) {
+        matchedOnce |= 1;
+        break;
+      }
+    }
+  }
+
+  var use = matchedOnce ? callback : fallback;
+  return use ? use(current, index) : current;
+}
+/**
+ * @summary checks if some tokens are contained
+ * @param {DOMTokenList} list
+ */
+
+
+var listContainsSome = function listContainsSome(list) {
+  return (
+    /**
+     * @param {...string} [tokens]
+     * @returns {boolean}
+     */
+    function () {
+      var boundContains = list.contains.bind(list);
+
+      for (var _len = arguments.length, tokens = new Array(_len), _key = 0; _key < _len; _key++) {
+        tokens[_key] = arguments[_key];
+      }
+
+      return tokens.some(boundContains);
+    }
+  );
+};
+/**
+ * @summary removes last child of Element
+ * @param {Element} element
+ * @returns {void}
+ */
+
+
+exports.listContainsSome = listContainsSome;
+
+var removeLastChild = function removeLastChild(element) {
+  return element.lastChild && element.lastChild.remove();
+};
+
+exports.removeLastChild = removeLastChild;
+"use strict";
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.JSONtoQuery = JSONtoQuery;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -379,11 +402,6 @@ function JSONtoQuery(json) {
   });
   return deep(paramOrder, ordered, encodeParams);
 }
-
-var _default = {
-  JSONtoQuery: JSONtoQuery
-};
-exports["default"] = _default;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
