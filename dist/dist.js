@@ -1018,7 +1018,7 @@ exports["default"] = _default;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.waitAsync = exports.forEachAwait = exports.forAwait = void 0;
+exports.withInterval = exports.waitAsync = exports.forEachAwait = exports.forAwait = void 0;
 
 var _utilities = _interopRequireDefault(require("./utilities.js"));
 
@@ -1163,8 +1163,66 @@ var forEachAwait = /*#__PURE__*/function () {
     return _ref3.apply(this, arguments);
   };
 }();
+/**
+ * @typedef {{
+ *  interval : number,
+ *  callback : function : Promise,
+ *  times : number
+ * }} IntervalConfig
+ * 
+ * @param {IntervalConfig}
+ */
+
 
 exports.forEachAwait = forEachAwait;
+
+var withInterval = function withInterval(_ref4) {
+  var _ref4$interval = _ref4.interval,
+      interval = _ref4$interval === void 0 ? 4 : _ref4$interval,
+      callback = _ref4.callback,
+      _ref4$times = _ref4.times,
+      times = _ref4$times === void 0 ? 1 : _ref4$times;
+
+  if (!times) {
+    return Promise.resolve();
+  }
+
+  return new Promise( /*#__PURE__*/function () {
+    var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(res, rej) {
+      var timesLeft;
+      return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return callback();
+
+            case 2:
+              console.log(new Date().toLocaleString());
+              timesLeft = times - 1;
+              setTimeout(function () {
+                withInterval({
+                  interval: interval,
+                  callback: callback,
+                  times: timesLeft
+                }).then(res)["catch"](rej);
+              }, interval);
+
+            case 5:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3);
+    }));
+
+    return function (_x5, _x6) {
+      return _ref5.apply(this, arguments);
+    };
+  }());
+};
+
+exports.withInterval = withInterval;
 "use strict";
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
