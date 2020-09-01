@@ -445,7 +445,73 @@ const closestValue = (config = {}) => {
  */
 const removeElements = (arr, ...elems) => arr.filter((elem) => !elems.includes(elem));
 
-export default {
+/**
+ * @summary validates a grid of value
+ * 
+ * @param {{
+ *  without : (any|undefined),
+ *  grid : any[][],
+ *  has : (any|undefined),
+ *  minCols : (number|undefined),
+ *  minRows : (number|undefined),
+ *  notBlank : (boolean|false),
+ *  notEmpty : (boolean|false),
+ *  notFull : (boolean|false)
+ * }} 
+ * 
+ * @returns {boolean}
+ */
+const validateGrid = ({
+    grid = [[]],
+    has,
+    without,
+    blank,
+    notBlank = false,
+    notEmpty = false,
+    notFilled = false,
+    minCols,
+    minRows
+} = {}) => {
+
+    const { length } = grid;
+
+    if (!length) {
+        throw new RangeError("Grid must have at least one row");
+    }
+
+    const validRows = minRows || length;
+    if (length < validRows) { return false; }
+
+    const [{ length: firstRowLength }] = grid;
+    if (notEmpty && !firstRowLength) { return false; }
+
+    const validCols = minCols || firstRowLength;
+    if (firstRowLength < validCols) { return false; }
+
+    let numEmpty = 0, numFilled = 0, matchOnVal = 0;
+
+    const gridValidated = grid.every((row) => row.every((cell) => {
+
+        const notContains = without !== undefined ? cell !== without : true;
+
+        if (!notContains) { return false; }
+
+        cell === "" ? numEmpty++ : numFilled++;
+        cell === has && (matchOnVal |= 1);
+
+        return true;
+    }));
+
+    const blankValid = blank !== undefined ? !numFilled === blank : true;
+
+    return gridValidated && blankValid &&
+        (!notFilled || !!numEmpty) &&
+        (!notBlank || !!numFilled) &&
+        (has === undefined || !!matchOnVal);
+
+};
+
+export {
     chunkify,
     closestValue,
     countObjects,
@@ -460,5 +526,6 @@ export default {
     removeElements,
     shrinkGrid,
     spliceInto,
-    splitIntoConseq
+    splitIntoConseq,
+    validateGrid
 };

@@ -5,8 +5,7 @@ const { expect } = chai;
 
 import bench from "benchmark";
 
-import arrays from "../src/arrays.mjs";
-const {
+import {
     chunkify,
     closestValue,
     countObjects,
@@ -21,10 +20,130 @@ const {
     removeElements,
     shrinkGrid,
     spliceInto,
-    splitIntoConseq
-} = arrays;
+    splitIntoConseq,
+    validateGrid
+} from "../src/arrays.mjs";
+
 
 describe('Arrays', function () {
+
+    const fillGrid = ({ val = "", rows = 1, cells = 1 }) =>
+        new Array(rows).fill(val)
+            .map((val) => new Array(cells).fill(val));
+
+    describe('validateGrid', function () {
+
+        it('should return true if no criteria', function () {
+            const grid = fillGrid({ val: "", rows: 1, cells: 1 });
+            const isValid = validateGrid({ grid });
+            expect(isValid).to.be.true;
+        });
+
+        it('should throw RangeError on flat arrays', function () {
+            const validateEmpty = () => validateGrid({ grid: [] });
+            expect(validateEmpty).to.throw(RangeError);
+        });
+
+        it('should invalidate empty grid (one empty row) with "notEmpty" option', function () {
+            const invalid = validateGrid({ grid: [[]], notEmpty: true });
+            expect(invalid).to.be.false;
+
+            const valid = validateGrid({ grid: [[]] });
+            expect(valid).to.be.true;
+        });
+
+        it('should invalidate grids with non-blank value with "blank" option', function () {
+            const grid = fillGrid({ val: "", rows: 20, cells: 10 });
+
+            const valid = validateGrid({ grid, blank: true });
+            expect(valid).to.be.true;
+
+            grid[15][3] = "some value";
+
+            const invalid = validateGrid({ grid, blank: true });
+            expect(invalid).to.be.false;
+        });
+
+        it('should invalidate blank grids with "notBlank" option', function () {
+            const grid = fillGrid({ val: "", rows: 20, cells: 10 });
+            const isValid = validateGrid({ grid, notBlank: true });
+            expect(isValid).to.be.false;
+        });
+
+        it('should invalidate filled grids with "notFilled" option', function () {
+            const grid = fillGrid({ val: "value", rows: 5, cells: 5 });
+            const invalid = validateGrid({ grid, notFilled: true });
+            expect(invalid).to.be.false;
+
+            grid[3][3] = "";
+
+            const valid = validateGrid({ grid, notFilled: true });
+            expect(valid).to.be.true;
+        });
+
+        it('should validate only non-blank non-full grids with "notBlank" & "notFilled"', function () {
+            const grid = fillGrid({ val: "value", rows: 5, cells: 5 });
+            grid[3][3] = "";
+
+            const combined = validateGrid({ grid, notFilled: true, notBlank: true });
+            expect(combined).to.be.true;
+        });
+
+        it('should invalidate grids without value with "has" option', function () {
+            const tgtVal = "target", notVal = 42;
+
+            const grid = fillGrid({ val: "", rows: 6, cells: 10 });
+            grid[2][7] = tgtVal;
+
+            const valid = validateGrid({ grid, has: tgtVal });
+            expect(valid).to.be.true;
+
+            const invalid = validateGrid({ grid, has: notVal });
+            expect(invalid).to.be.false;
+        });
+
+        it('should invalidate grids with value with "without" option', function () {
+            const tgtVal = null, notVal = true;
+
+            const grid = fillGrid({ val: "true", rows: 6, cells: 10 });
+            grid[2][7] = tgtVal;
+
+            const invalid = validateGrid({ grid, without: tgtVal });
+            expect(invalid).to.be.false;
+
+            const valid = validateGrid({ grid, without: notVal });
+            expect(valid).to.be.true;
+        });
+
+        it('should invalidate grids with num rows smaller than "minRows" option', function () {
+            const minRows = 2;
+
+            const grid = fillGrid({ val: "", rows: 2, cells: 3 });
+
+            const valid = validateGrid({ grid, minRows });
+            expect(valid).to.be.true;
+
+            grid.pop();
+
+            const invalid = validateGrid({ grid, minRows });
+            expect(invalid).to.be.false;
+        });
+
+        it('should invalidate grids with num cols smaller than "minCols" option', function () {
+            const minCols = 5;
+
+            const grid = fillGrid({ val: "", rows: 2, cells: 3 });
+
+            const invalid = validateGrid({ grid, minCols });
+            expect(invalid).to.be.false;
+
+            grid.forEach(row => row.push(...[1, 2, 3, 4]));
+
+            const valid = validateGrid({ grid, minCols });
+            expect(valid).to.be.true;
+        });
+
+    });
 
     describe('removeElements', function () {
 
