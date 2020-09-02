@@ -502,10 +502,24 @@ const shallowFilter = ({
     return output;
 };
 
+const deepCopy = ({ source = {}, skip = [] }) => {
 
+    const output = Array.isArray(source) ? [] : {};
+
+    Object.entries(source).forEach(([key, val]) => {
+
+        if(skip.includes(key)) { return; }
+
+        const isObj = typeof val === "object" && val;
+        output[key] = isObj ? deepCopy({ source : val, skip }) : val;
+    });
+
+    return output;
+};
 
 export {
     complement,
+    deepCopy,
     deepFilter,
     deepGetByType,
     deepMap,

@@ -3,6 +3,7 @@ const { expect } = chai;
 
 import {
     complement,
+    deepCopy,
     deepFilter,
     deepMap,
     deepParseByPath,
@@ -20,62 +21,90 @@ import {
     whichKeysAreSet
 } from '../src/objects.mjs';
 
-describe('shallowFilter', function () {
-    
-    it('should return empty object for empty objects and arrays', function () {
-        const obj = shallowFilter({ source : {} });
-        expect(obj).to.be.empty;
+describe('Objects', function () {
+    describe('deepCopy', function () {
 
-        const arr = shallowFilter({ source : [] });
-        expect(arr).to.be.empty;
+        it('should copy with dereferencing', function () {
+            
+            const source = { name : "Andy", age : 42, children : [ "Amy", "Sonny" ] };
+
+            const copy = deepCopy({ source });
+
+            delete copy.children;
+
+            expect(source).to.have.property("children");
+            expect(copy).to.have.property("name").equal("Andy");
+        });
+
+        it('should deep skip properties in "skip" option', function () {
+            
+            const source = { name: "Andy", age: 42, children: ["Amy", "Sonny"] };
+
+            const copy = deepCopy({ source, skip : [ "age" ] });
+            
+            expect(copy).to.not.have.property("age");
+            expect(copy).to.have.property("children").deep.equal(source.children);
+        });
+
     });
 
-    describe('should filter values correctly', function () {
-        it('on objects', function () {
+    describe('shallowFilter', function () {
+
+        it('should return empty object for empty objects and arrays', function () {
+            const obj = shallowFilter({ source: {} });
+            expect(obj).to.be.empty;
+
+            const arr = shallowFilter({ source: [] });
+            expect(arr).to.be.empty;
+        });
+
+        describe('should filter values correctly', function () {
+            it('on objects', function () {
+                const obj = shallowFilter({
+                    source: { one: 1, two: 2, three: 3 },
+                    filter: (v) => v === 2
+                });
+
+                expect(obj).to.deep.equal({ two: 2 });
+            });
+
+            it('on arrays', function () {
+                const source = [{ id: 1 }, { id: 2 }, { id: 3 }];
+
+                const arr = shallowFilter({
+                    source, filter: (v) => v.id > 2
+                });
+
+                expect(arr).to.deep.equal(source.slice(2));
+            });
+        });
+
+        it('should filter keys with values correctly', function () {
             const obj = shallowFilter({
                 source: { one: 1, two: 2, three: 3 },
-                filter: (v) => v === 2
+                filter: (v, k) => k === "one" || v === 3
             });
 
-            expect(obj).to.deep.equal({ two: 2 });
+            expect(obj).to.deep.equal({ one: 1, three: 3 });
         });
 
-        it('on arrays', function () {
-            const source = [{ id: 1 }, { id: 2 }, { id: 3 }];
+        it('should accumulate values if provided', function () {
 
-            const arr = shallowFilter({
-                source, filter : (v) => v.id > 2
+            it('on arrays', function () {
+                const source = [{ id: 1 }, { id: 2 }, { id: 3 }];
+
+                const accumulator = [];
+
+                shallowFilter({
+                    source, filter: ({ id }) => [1, 3].includes(id), accumulator
+                });
+
+                expect(accumulator).to.deep.equal([source[0], source[2]]);
             });
 
-            expect(arr).to.deep.equal(source.slice(2));
-        });
-    });
-
-    it('should filter keys with values correctly', function () {
-        const obj = shallowFilter({
-            source: { one: 1, two: 2, three: 3 },
-            filter: (v, k) => k === "one" || v === 3
-        });
-
-        expect(obj).to.deep.equal({ one: 1, three: 3 });
-    });
-
-    it('should accumulate values if provided', function () {
-        
-        it('on arrays', function () {
-            const source = [{ id: 1 }, { id: 2 }, { id: 3 }];
-
-            const accumulator = [];
-
-            shallowFilter({
-                source, filter: ({ id }) => [1,3].includes(id), accumulator 
-            });
-
-            expect(accumulator).to.deep.equal( [ source[0], source[2] ] );
         });
 
     });
-
 });
 
 describe('deepFilter', function () {
