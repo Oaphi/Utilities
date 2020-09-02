@@ -407,7 +407,7 @@ function JSONtoQuery(json) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -485,6 +485,8 @@ var chunkify = function chunkify(source) {
  */
 
 
+exports.chunkify = chunkify;
+
 var filterMap = function filterMap() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   return function () {
@@ -523,6 +525,8 @@ var filterMap = function filterMap() {
  * @returns {function(function):function(function):any[]}
  */
 
+
+exports.filterMap = filterMap;
 
 var filterMapped = function filterMapped() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -564,6 +568,8 @@ var filterMapped = function filterMapped() {
  */
 
 
+exports.filterMapped = filterMapped;
+
 var last = function last(array) {
   return array[array.length - 1];
 };
@@ -574,6 +580,8 @@ var last = function last(array) {
  * @returns {function(function):void} 
  */
 
+
+exports.last = last;
 
 var forAll = function forAll() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -605,6 +613,8 @@ var forAll = function forAll() {
  */
 
 
+exports.forAll = forAll;
+
 var keyMap = function keyMap() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   return function (key) {
@@ -620,6 +630,8 @@ var keyMap = function keyMap() {
  * @returns {any[]}
  */
 
+
+exports.keyMap = keyMap;
 
 var mergeOnto = function mergeOnto(source) {
   var output = [];
@@ -668,6 +680,8 @@ var mergeOnto = function mergeOnto(source) {
  */
 
 
+exports.mergeOnto = mergeOnto;
+
 var reduceWithStep = function reduceWithStep(_ref2) {
   var _ref2$source = _ref2.source,
       source = _ref2$source === void 0 ? [] : _ref2$source,
@@ -699,6 +713,8 @@ var reduceWithStep = function reduceWithStep(_ref2) {
  * @param {ShrinkConfig} [source]
  */
 
+
+exports.reduceWithStep = reduceWithStep;
 
 var shrinkGrid = function shrinkGrid() {
   var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -764,6 +780,8 @@ var shrinkGrid = function shrinkGrid() {
  */
 
 
+exports.shrinkGrid = shrinkGrid;
+
 var spliceInto = function spliceInto(source) {
   var output = source.map(function (item) {
     return item;
@@ -790,6 +808,8 @@ var spliceInto = function spliceInto(source) {
  * @returns {any[][]}
  */
 
+
+exports.spliceInto = spliceInto;
 
 var splitIntoConseq = function splitIntoConseq() {
   var source = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -836,6 +856,8 @@ var splitIntoConseq = function splitIntoConseq() {
  */
 
 
+exports.splitIntoConseq = splitIntoConseq;
+
 var countObjects = function countObjects() {
   var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
       _ref4$source = _ref4.source,
@@ -876,6 +898,8 @@ var countObjects = function countObjects() {
  * @returns {object[]}
  */
 
+
+exports.countObjects = countObjects;
 
 var deduplicate = function deduplicate() {
   var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -950,6 +974,8 @@ var deduplicate = function deduplicate() {
  */
 
 
+exports.deduplicate = deduplicate;
+
 var closestValue = function closestValue() {
   var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -985,6 +1011,8 @@ var closestValue = function closestValue() {
  */
 
 
+exports.closestValue = closestValue;
+
 var removeElements = function removeElements(arr) {
   for (var _len3 = arguments.length, elems = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
     elems[_key3 - 1] = arguments[_key3];
@@ -994,25 +1022,88 @@ var removeElements = function removeElements(arr) {
     return !elems.includes(elem);
   });
 };
+/**
+ * @summary validates a grid of value
+ * 
+ * @param {{
+ *  without : (any|undefined),
+ *  grid : any[][],
+ *  has : (any|undefined),
+ *  minCols : (number|undefined),
+ *  minRows : (number|undefined),
+ *  notBlank : (boolean|false),
+ *  notEmpty : (boolean|false),
+ *  notFull : (boolean|false)
+ * }} 
+ * 
+ * @returns {boolean}
+ */
 
-var _default = {
-  chunkify: chunkify,
-  closestValue: closestValue,
-  countObjects: countObjects,
-  deduplicate: deduplicate,
-  filterMap: filterMap,
-  filterMapped: filterMapped,
-  forAll: forAll,
-  keyMap: keyMap,
-  last: last,
-  mergeOnto: mergeOnto,
-  reduceWithStep: reduceWithStep,
-  removeElements: removeElements,
-  shrinkGrid: shrinkGrid,
-  spliceInto: spliceInto,
-  splitIntoConseq: splitIntoConseq
+
+exports.removeElements = removeElements;
+
+var validateGrid = function validateGrid() {
+  var _ref16 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref16$grid = _ref16.grid,
+      grid = _ref16$grid === void 0 ? [[]] : _ref16$grid,
+      has = _ref16.has,
+      without = _ref16.without,
+      blank = _ref16.blank,
+      _ref16$notBlank = _ref16.notBlank,
+      notBlank = _ref16$notBlank === void 0 ? false : _ref16$notBlank,
+      _ref16$notEmpty = _ref16.notEmpty,
+      notEmpty = _ref16$notEmpty === void 0 ? false : _ref16$notEmpty,
+      _ref16$notFilled = _ref16.notFilled,
+      notFilled = _ref16$notFilled === void 0 ? false : _ref16$notFilled,
+      minCols = _ref16.minCols,
+      minRows = _ref16.minRows;
+
+  var length = grid.length;
+
+  if (!length) {
+    throw new RangeError("Grid must have at least one row");
+  }
+
+  var validRows = minRows || length;
+
+  if (length < validRows) {
+    return false;
+  }
+
+  var _grid = _slicedToArray(grid, 1),
+      firstRowLength = _grid[0].length;
+
+  if (notEmpty && !firstRowLength) {
+    return false;
+  }
+
+  var validCols = minCols || firstRowLength;
+
+  if (firstRowLength < validCols) {
+    return false;
+  }
+
+  var numEmpty = 0,
+      numFilled = 0,
+      matchOnVal = 0;
+  var gridValidated = grid.every(function (row) {
+    return row.every(function (cell) {
+      var notContains = without !== undefined ? cell !== without : true;
+
+      if (!notContains) {
+        return false;
+      }
+
+      cell === "" ? numEmpty++ : numFilled++;
+      cell === has && (matchOnVal |= 1);
+      return true;
+    });
+  });
+  var blankValid = blank !== undefined ? !numFilled === blank : true;
+  return gridValidated && blankValid && (!notFilled || !!numEmpty) && (!notBlank || !!numFilled) && (has === undefined || !!matchOnVal);
 };
-exports["default"] = _default;
+
+exports.validateGrid = validateGrid;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1380,6 +1471,390 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     makeEnum: makeEnum
   };
 });
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.FetchConfig = FetchConfig;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+/**
+ * @typedef {{
+ *  contentType : ("application/json"),
+ *  domain : string,
+ *  method : ("GET"|"POST"|"PUT"|"DELETE"|"OPTIONS"),
+ *  redirect : (boolean|true),
+ *  paths : string[],
+ *  payload : (Object.<string, any>|undefined),
+ *  subdomains : string[],
+ *  query : Object.<string, string>
+ * }} FetchSettings
+ * 
+ * @typedef {{
+ *  base : string,
+ *  domain : string,
+ *  method : ("GET"|"POST"|"PUT"|"DELETE"|"OPTIONS"),
+ *  path : string,
+ *  paths : string[],
+ *  payload : (string|object|null),
+ *  search : string,
+ *  subdomains : string[],
+ *  type : ("application/json"|"multipart/form-data"|"text/plain"|"application/x-www-form-urlencoded"),
+ *  query : Object.<string, string>,
+ *  url : string,
+ *  addHeader : function (string, string) : FetchConfigurer,
+ *  addHeaders : function (Object.<string, string>) : FetchConfigurer,
+ *  addParam : function (string, any) : FetchConfigurer,
+ *  addPaths : function (...string) : FetchConfigurer,
+ *  getJSONPayload : function () : string,
+ *  getUrlPayload : function () : string, 
+ *  removeHeader : function (string) : FetchConfigurer,
+ *  json : function (Object.<string, string>) : object
+ * }} FetchConfigurer
+ * 
+ * @summary configures request
+ * @param {FetchSettings}
+ * @returns {FetchConfigurer}
+ */
+function FetchConfig() {
+  var _this = this;
+
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref$contentType = _ref.contentType,
+      contentType = _ref$contentType === void 0 ? "application/json" : _ref$contentType,
+      domain = _ref.domain,
+      _ref$method = _ref.method,
+      method = _ref$method === void 0 ? "GET" : _ref$method,
+      _ref$subdomains = _ref.subdomains,
+      subdomains = _ref$subdomains === void 0 ? [] : _ref$subdomains,
+      _ref$payload = _ref.payload,
+      payload = _ref$payload === void 0 ? null : _ref$payload,
+      _ref$redirect = _ref.redirect,
+      redirect = _ref$redirect === void 0 ? true : _ref$redirect,
+      _ref$paths = _ref.paths,
+      paths = _ref$paths === void 0 ? [] : _ref$paths,
+      query = _ref.query;
+
+  var AllowedMethods = new Set(["GET", "POST", "PUT", "DELETE", "OPTIONS"]);
+  var AllowedTypes = new Set(["application/json", "multipart/form-data", "text/plain", "application/x-www-form-urlencoded"]);
+  var fetch = {
+    method: method,
+    payload: payload,
+    redirect: redirect,
+    type: contentType
+  };
+  var headers = new Map([["Content-Type", contentType]]);
+  /**
+   * @summary generic configurer prepare utility
+   * @param {FetchConfigurer} configurer
+   * @param {Object.<string,string>} mapping 
+   * @returns {object}
+   */
+
+  var prepareConfig = function prepareConfig(configurer, mapping) {
+    var method = configurer.method,
+        url = configurer.url;
+    var redirect = fetch.redirect;
+    var config = {};
+
+    if (!mapping) {
+      config.method = method;
+      config.headers = Object.fromEntries(headers);
+      config.redirect = redirect ? "follow" : "manual"; //default to Fetch API choice
+
+      config.url = url;
+      return config;
+    }
+
+    Object.entries(mapping).forEach(function (_ref2) {
+      var _ref3 = _slicedToArray(_ref2, 2),
+          mappedKey = _ref3[0],
+          mapTo = _ref3[1];
+
+      return config[mapTo] = mappedKey in _this ? _this[mappedKey] : fetch[mappedKey];
+    });
+    return config;
+  };
+
+  var configurer = Object.seal({
+    domain: domain,
+    headers: headers,
+    paths: paths,
+    subdomains: subdomains,
+    query: query,
+
+    /**
+     * @summary getter for full base URI
+     * @returns {string}
+     */
+    get base() {
+      var subdomains = this.subdomains,
+          domain = this.domain;
+      var base = [].concat(_toConsumableArray(subdomains), [domain]);
+      return base.join(".");
+    },
+
+    /**
+     * @summary getter for method
+     * @returns {string}
+     */
+    get method() {
+      var method = fetch.method;
+      return method;
+    },
+
+    /**
+     * @summary setter for method
+     * @param {("GET"|"POST"|"PUT"|"DELETE"|"OPTIONS")} newMethod
+     * @returns {string}
+     */
+    set method(newMethod) {
+      var ucased = newMethod.toUpperCase();
+      var validated = AllowedMethods.has(ucased) ? ucased : "GET";
+      return fetch.method = validated;
+    },
+
+    /**
+     * @summary getter for full path
+     * @returns {string}
+     */
+    get path() {
+      var paths = this.paths;
+      var path = paths.join("/");
+      return path ? "/".concat(path) : "";
+    },
+
+    /**
+     * @summary payload getter (if method is not GET)
+     * @returns {?(string|object)}
+     */
+    get payload() {
+      var method = fetch.method,
+          payload = fetch.payload;
+      return method !== "GET" ? payload : null;
+    },
+
+    /**
+     * @summary setter for payload
+     * @param {object} value
+     * @returns {object}
+     */
+    set payload(value) {
+      if (value === undefined || value === null) {
+        return value;
+      }
+
+      var method = this.method;
+      fetch.payload = value;
+
+      if (method === "GET") {
+        this.method = "POST";
+      }
+
+      return value;
+    },
+
+    /**
+     * @summary getter for query string (including "?")
+     * @returns {string}
+     */
+    get search() {
+      var query = this.query;
+      return query ? "?".concat(FetchConfig.toQuery(query)) : "";
+    },
+
+    /**
+     * @summary getter for content type
+     * @returns {string}
+     */
+    get type() {
+      var type = fetch.type;
+      return type;
+    },
+
+    /**
+     * @summary setter for content type
+     * @param {string} value
+     * @returns {string}
+     */
+    set type(value) {
+      var validType = AllowedTypes.has(value) ? value : "application/json";
+      fetch.type = validType;
+      headers.set("Content-Type", validType);
+      return value;
+    },
+
+    /**
+     * @summary getter for full URI (https only)
+     * @returns {string}
+     */
+    get url() {
+      var base = this.base,
+          path = this.path,
+          search = this.search;
+      var protocol = /^https:\/\//.test(base) ? "" : "https://";
+      return "".concat(protocol).concat(base).concat(path).concat(search);
+    },
+
+    /**
+     * @summary add header to list of headers
+     * @param {string} key 
+     * @param {string} value
+     */
+    addHeader: function addHeader(key, value) {
+      headers.set(key, value);
+      return this;
+    },
+
+    /**
+     * @summary adds headers from map
+     * @param {object} [mapper] 
+     */
+    addHeaders: function addHeaders() {
+      var mapper = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      Object.entries(mapper).forEach(function (_ref4) {
+        var _ref5 = _slicedToArray(_ref4, 2),
+            name = _ref5[0],
+            val = _ref5[1];
+
+        headers.set(name, val);
+      });
+      return this;
+    },
+
+    /**
+     * @summary removes a header
+     * @param {string} key 
+     */
+    removeHeader: function removeHeader(key) {
+      headers["delete"](key);
+      return this;
+    },
+
+    /**
+     * @summary gets payload as x-www-form-urlencoded
+     * @returns {string}
+     */
+    getUrlPayload: function getUrlPayload() {
+      var payload = this.payload;
+      var form = FetchConfig.toQuery(payload);
+      var encoded = encodeURI(form);
+      /** @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI} */
+
+      return encoded.replace(/\%5(B|D)/g, function (full, type) {
+        return type === "B" ? "[" : "]";
+      });
+    },
+
+    /**
+     * @summary gets payload as application/json
+     * @returns {string}
+     */
+    getJSONPayload: function getJSONPayload() {
+      var payload = this.payload;
+      return payload ? JSON.stringify(payload) : "";
+    },
+
+    /**
+     * @summary adds parameter to query
+     * @param {string} key 
+     * @param {*} value 
+     * @returns {FetchAppConfigurer}
+     */
+    addParam: function addParam(key, value) {
+      var query = this.query;
+      this.query = FetchConfig.union(query, _defineProperty({}, key, value));
+      return this;
+    },
+
+    /**
+     * @summary adds path part
+     * @param {...string} pathsToAdd 
+     * @returns {FetchAppConfigurer}
+     */
+    addPaths: function addPaths() {
+      var paths = this.paths;
+      paths.push.apply(paths, arguments);
+      return this;
+    },
+
+    /**
+     * @summary prepares config as JSON
+     * @param {Object.<string, string>} [mapping]
+     * @returns {object}
+     */
+    json: function json(mapping) {
+      var config = prepareConfig(this, mapping);
+      var method = this.method;
+
+      if (method === "GET") {
+        return config;
+      }
+
+      var payload = this.getJSONPayload();
+      var shouldMap = mapping && "payload" in mapping;
+      shouldMap && (config[mapping.payload] = payload) || (config.body = payload);
+      return config;
+    }
+  });
+  configurer.method = method;
+  configurer.payload = payload;
+  return configurer;
+}
+/**
+ * @summary sets object union utility
+ * @param {function (object, ...object) : object} unionizer
+ * @returns {FetchConfig}
+ */
+
+
+FetchConfig.setUnionizer = function (unionizer) {
+  console.log("injected object union dependency");
+  Object.defineProperty(FetchConfig, "union", {
+    configurable: false,
+    writable: false,
+    value: unionizer
+  });
+  return FetchConfig;
+};
+/**
+ * @summary sets JSON to query dependency
+ * @param {function (object) : string} jsonToQueryUtil 
+ * @returns {FetchConfig}
+ */
+
+
+FetchConfig.setToQuery = function (jsonToQueryUtil) {
+  console.log("injected JSON to query dependency");
+  Object.defineProperty(FetchConfig, "toQuery", {
+    configurable: false,
+    writable: false,
+    value: jsonToQueryUtil
+  });
+  return FetchConfig;
+};
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
