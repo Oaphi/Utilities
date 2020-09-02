@@ -2392,7 +2392,7 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.complement = void 0;
+exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.complement = void 0;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -2949,6 +2949,32 @@ var shallowFilter = function shallowFilter(_ref10) {
 };
 
 exports.shallowFilter = shallowFilter;
+
+var deepCopy = function deepCopy(_ref13) {
+  var _ref13$source = _ref13.source,
+      source = _ref13$source === void 0 ? {} : _ref13$source,
+      _ref13$skip = _ref13.skip,
+      skip = _ref13$skip === void 0 ? [] : _ref13$skip;
+  var output = Array.isArray(source) ? [] : {};
+  Object.entries(source).forEach(function (_ref14) {
+    var _ref15 = _slicedToArray(_ref14, 2),
+        key = _ref15[0],
+        val = _ref15[1];
+
+    if (skip.includes(key)) {
+      return;
+    }
+
+    var isObj = _typeof(val) === "object" && val;
+    output[key] = isObj ? deepCopy({
+      source: val,
+      skip: skip
+    }) : val;
+  });
+  return output;
+};
+
+exports.deepCopy = deepCopy;
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
