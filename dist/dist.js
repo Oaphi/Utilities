@@ -318,6 +318,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.JSONtoQuery = JSONtoQuery;
+exports.objectToQuery = void 0;
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -402,6 +411,209 @@ function JSONtoQuery(json) {
   });
   return deep(paramOrder, ordered, encodeParams);
 }
+/**
+ * @typedef {{
+ *  key : string,
+ *  obj : object,
+ *  objectNotation : ("bracket"|"dot"),
+ *  arrType : ("bracket"|"empty_bracket"|"comma")
+ * }} ExpandParams
+ * 
+ * @summary expands object to parameter array
+ * @param {ExpandParams}
+ * @returns {string[]}
+ */
+
+
+var expandObjectToParams = function expandObjectToParams(_ref2) {
+  var key = _ref2.key,
+      obj = _ref2.obj,
+      _ref2$encode = _ref2.encode,
+      encode = _ref2$encode === void 0 ? true : _ref2$encode,
+      _ref2$objectNotation = _ref2.objectNotation,
+      objectNotation = _ref2$objectNotation === void 0 ? "bracket" : _ref2$objectNotation,
+      _ref2$arrayNotation = _ref2.arrayNotation,
+      arrayNotation = _ref2$arrayNotation === void 0 ? "bracket" : _ref2$arrayNotation;
+  var paramMap = new Map([["bracket", function (k, v) {
+    return "".concat(key, "[").concat(k, "]=").concat(v);
+  }], ["comma", function (k, v) {
+    return v;
+  }], ["dot", function (k, v) {
+    return "".concat(key, ".").concat(k, "=").concat(v);
+  }], ["empty_bracket", function (k, v) {
+    return "".concat(key, "[]=").concat(v);
+  }]]);
+  var isArr = Array.isArray(obj);
+
+  if (isArr && arrayNotation === "comma") {
+    return ["".concat(key, "=").concat(obj.map(function (elem) {
+      return _typeof(elem) === "object" && elem ? expandObjectToParams({
+        key: key,
+        obj: elem,
+        objectNotation: objectNotation,
+        arrayNotation: arrayNotation
+      }) : elem;
+    }).flat().join(","))];
+  }
+
+  var ambientParamType = isArr ? arrayNotation : objectNotation;
+  return Object.entries(obj).map(function (_ref3) {
+    var _ref4 = _slicedToArray(_ref3, 2),
+        k = _ref4[0],
+        v = _ref4[1];
+
+    if (v === null || v === undefined) {
+      return;
+    }
+
+    var isObj = _typeof(v) === "object" && v;
+
+    if (isObj) {
+      return expandObjectToParams({
+        key: k,
+        obj: v,
+        objectNotation: objectNotation,
+        arrayNotation: arrayNotation
+      });
+    }
+
+    var encoded = encode ? encodeURIComponent(v) : v;
+    return paramMap.has(ambientParamType) ? paramMap.get(ambientParamType)(k, encoded) : encoded;
+  }).flat();
+};
+/**
+ * @summary customizable converter from object to query string
+ * 
+ * @param {object} source
+ * @param {{
+ *  arrayNotation : ("comma"|"bracket"|"empty_bracket"),
+ *  objectNotation : ("bracket"|"dot")
+ * }}
+ * 
+ * @returns {string}
+ */
+
+
+var objectToQuery = function objectToQuery(source) {
+  var _ref5 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref5$arrayNotation = _ref5.arrayNotation,
+      arrayNotation = _ref5$arrayNotation === void 0 ? "bracket" : _ref5$arrayNotation,
+      _ref5$objectNotation = _ref5.objectNotation,
+      objectNotation = _ref5$objectNotation === void 0 ? "bracket" : _ref5$objectNotation;
+
+  var output = [];
+  Object.entries(source).forEach(function (_ref6) {
+    var _ref7 = _slicedToArray(_ref6, 2),
+        key = _ref7[0],
+        val = _ref7[1];
+
+    if (val === null || val === undefined) {
+      return;
+    }
+
+    var isObj = _typeof(val) === "object" && val;
+
+    if (isObj) {
+      var objParams = expandObjectToParams({
+        key: key,
+        obj: val,
+        objectNotation: objectNotation,
+        arrayNotation: arrayNotation
+      });
+      return output.push.apply(output, _toConsumableArray(objParams));
+    }
+
+    output.push("".concat(key, "=").concat(val));
+  });
+  return output.join("&");
+};
+
+exports.objectToQuery = objectToQuery;
+"use strict";
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.Validator = factory();
+  }
+})(typeof self !== 'undefined' ? self : void 0, function () {
+  /**
+   * @summary validates JSON object
+   * @param {object} schema
+   */
+  var validateJSON = function validateJSON(schema) {
+    return (
+      /**
+       * @param {object} json
+       * @returns {boolean}
+       */
+      function (json) {
+        try {
+          //draft 1: validates only top-level property
+          return Object.entries(json).every(function (entry) {
+            var _entry = _slicedToArray(entry, 2),
+                key = _entry[0],
+                val = _entry[1];
+
+            if (_typeof(val) === "object" && val !== null) {
+              return validateJSON(schema)(val);
+            }
+
+            var _schema$additionalPro = schema.additionalProperties,
+                additionalProperties = _schema$additionalPro === void 0 ? true : _schema$additionalPro,
+                properties = schema.properties;
+            var descriptor = properties[key]; //no descriptor and disallowed extra props -> invalid
+
+            if (!descriptor && !additionalProperties) {
+              return false;
+            } //no descriptor and extra prop -> any valid
+
+
+            if (!descriptor) {
+              return true;
+            }
+
+            var enumerable = descriptor["enum"],
+                maxLength = descriptor.maxLength,
+                minLength = descriptor.minLength,
+                type = descriptor.type;
+            var isEnumValid = enumerable ? enumerable.some(function (v) {
+              return v === val;
+            }) : true;
+            var isNullValid = type === null ? val === null : true;
+            var isTypeValid = type ? _typeof(val) === type : true;
+            var isMinMaxValid = typeof val === "string" ? (!minLength || val.length >= minLength) && (!maxLength || val.length <= maxLength) : true;
+            var isValid = isTypeValid && isNullValid && isEnumValid && isMinMaxValid;
+            return isValid;
+          });
+        } catch (error) {
+          return false;
+        }
+      }
+    );
+  };
+
+  return {
+    validateJSON: validateJSON
+  };
+});
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
