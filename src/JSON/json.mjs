@@ -45,9 +45,9 @@ function JSONtoQuery(
         encodeParams,
         paramOrder = []
     } = {
-        encodeParams: false,
-        paramOrder: []
-    }
+            encodeParams: false,
+            paramOrder: []
+        }
 ) {
 
     const ordered = [];
@@ -70,6 +70,112 @@ function JSONtoQuery(
     return deep(paramOrder, ordered, encodeParams);
 }
 
+/**
+ * @typedef {{
+ *  key : string,
+ *  obj : object,
+ *  objectNotation : ("bracket"|"dot"),
+ *  arrType : ("bracket"|"empty_bracket"|"comma")
+ * }} ExpandParams
+ * 
+ * @summary expands object to parameter array
+ * @param {ExpandParams}
+ * @returns {string[]}
+ */
+const expandObjectToParams = ({
+    key, obj,
+    encode = true,
+    objectNotation = "bracket",
+    arrayNotation = "bracket"
+}) => {
+
+    const paramMap = new Map([
+        ["bracket", (k, v) => `${key}[${k}]=${v}`],
+        ["comma", (k, v) => v],
+        ["dot", (k, v) => `${key}.${k}=${v}`],
+        ["empty_bracket", (k, v) => `${key}[]=${v}`]
+    ]);
+
+    const isArr = Array.isArray(obj);
+
+    if (isArr && arrayNotation === "comma") {
+        return [`${key}=${obj.map(
+            elem => typeof elem === "object" && elem ?
+                expandObjectToParams({ 
+                    key, obj: elem, 
+                    objectNotation, 
+                    arrayNotation 
+                }) :
+                elem
+        ).flat().join(",")}`];
+    }
+
+    const ambientParamType = isArr ? arrayNotation : objectNotation;
+
+    return Object.entries(obj)
+        .map(([k, v]) => {
+
+            if (v === null || v === undefined) { return; }
+
+            const isObj = typeof v === "object" && v;
+
+            if (isObj) {
+                return expandObjectToParams({
+                    key: k, obj: v,
+                    objectNotation,
+                    arrayNotation
+                });
+            }
+
+            const encoded = encode ? encodeURIComponent(v) : v;
+
+            return paramMap.has(ambientParamType) ?
+                paramMap.get(ambientParamType)(k, encoded) :
+                encoded;
+        })
+        .flat();
+};
+
+/**
+ * @summary customizable converter from object to query string
+ * 
+ * @param {object} source
+ * @param {{
+ *  arrayNotation : ("comma"|"bracket"|"empty_bracket"),
+ *  objectNotation : ("bracket"|"dot")
+ * }}
+ * 
+ * @returns {string}
+ */
+const objectToQuery = (source, {
+    arrayNotation = "bracket",
+    objectNotation = "bracket"
+} = {}) => {
+
+    const output = [];
+
+    Object.entries(source).forEach(([key, val]) => {
+
+        if (val === null || val === undefined) { return; }
+
+        const isObj = typeof val === "object" && val;
+
+        if (isObj) {
+            const objParams = expandObjectToParams({
+                key, obj : val, 
+                objectNotation, 
+                arrayNotation
+            });
+            return output.push(...objParams);
+        }
+
+        output.push(`${key}=${val}`);
+    });
+
+    return output.join("&");
+};
+
 export {
+    objectToQuery,
     JSONtoQuery
 };
