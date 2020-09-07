@@ -35,6 +35,23 @@ describe('withInterval', function () {
         expect(i).to.equal(3);
     });
 
+    it('should stop upon matching condition', async function () {
+        
+        this.timeout(4e3);
+
+        let i = 0;
+
+        await withInterval({ 
+            interval : 1e3, 
+            callback : () => ++i, 
+            times : Infinity,
+            stopIf : (r) => r > 1 
+        });
+
+        expect(i).to.equal(2);
+
+    });
+
 });
 
 describe('forAwait', function () {

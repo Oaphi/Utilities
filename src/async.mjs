@@ -47,42 +47,42 @@ const forEachAwait = async (source, callback) => {
 
 /**
  * @typedef {{
- *  interval : number,
+ *  interval? : number,
  *  callback : function : Promise,
- *  times : number
+ *  stopIf? : boolean,
+ *  times? : number
  * }} IntervalConfig
  * 
  * @param {IntervalConfig}
  */
-const withInterval = ({
+const withInterval = async ({
     interval = 4,
     callback,
-    times = 1
+    times = 1,
+    stopIf = () => false
 }) => {
     if (!times) {
-        return Promise.resolve();
+        return;
     }
 
-    return new Promise(async (res, rej) => {
+    const result = await callback();
 
-        await callback();
+    if (stopIf(result)) {
+        return result;
+    }
 
-        console.log(new Date().toLocaleString());
+    return new Promise((res, rej) => {
 
         const timesLeft = times - 1;
 
-        setTimeout(() => {
-
-            withInterval({
+        setTimeout(
+            () => withInterval({
                 interval,
                 callback,
-                times: timesLeft
-            })
-            .then(res)
-            .catch(rej);
-
-        }, interval);
-
+                times: timesLeft,
+                stopIf
+            }).then(res).catch(rej),
+            interval);
     });
 };
 
