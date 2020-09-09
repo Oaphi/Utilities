@@ -180,6 +180,36 @@ const reduceWithStep = ({
         }, initial || source[0]);
 };
 
+const unionGrids = ({
+    sources = [],
+    hasher = (v) => v === "" ? "" : JSON.stringify(v)
+} = {}) => {
+
+    const hashes = new Set();
+
+    const output = sources.reduce((acc, cur) => {
+
+        const added = cur.reduce((a, row) => {
+            const h = hasher(row);
+
+            if (!hashes.has(h)) {
+                a.push(row);
+                hashes.add(h);
+            }
+
+            return a;
+
+        }, []);
+
+        return [...acc, ...added];
+
+    }, []);
+
+    if (!output.length) { output.push([]); }
+
+    return output;
+};
+
 /**
  * @typedef {object} ShrinkConfig
  * @property {any[][]} [source]
@@ -527,5 +557,6 @@ export {
     shrinkGrid,
     spliceInto,
     splitIntoConseq,
-    validateGrid
+    validateGrid,
+    unionGrids
 };

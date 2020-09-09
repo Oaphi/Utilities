@@ -13,6 +13,7 @@ import {
     filterMap,
     filterMapped,
     forAll,
+    unionGrids,
     keyMap,
     last,
     mergeOnto,
@@ -24,12 +25,55 @@ import {
     validateGrid
 } from "../src/arrays.mjs";
 
-
 describe('Arrays', function () {
 
     const fillGrid = ({ val = "", rows = 1, cells = 1 }) =>
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
+
+    describe('unionGrids', function () {
+
+        it('should return empy grid by default', function () {
+            const output = unionGrids();
+            const [firstRow] = output;
+            expect(output).to.be.of.length(1);
+            expect(firstRow).to.be.empty;
+        });
+
+        it('should add only unique values', function () {
+            const grid1 = [[1, 2, 3], [4, 5, 6]];
+            const grid2 = [[4, 5, 6], [7, 8, 9]];
+
+            const output = unionGrids({ sources: [grid1, grid2] });
+
+            expect(output).to.deep.equal([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+        });
+
+        it('should accept custom hash function', function () {
+            const grid1 = [[2,4], [6,0]];
+            const grid2 = [[3,3], [5,1]];
+
+            const output = unionGrids({ 
+                sources: [grid1, grid2], 
+                hasher : (v) => v.reduce((a,b) => a + b)
+            });
+
+            expect(output).to.deep.equal([ grid1[0] ]);
+        });
+
+        it('should work on string data', function () {
+            
+            const g1 = [["one", "two"]];
+            const g2 = [["three", "four"], ["one", "two"]];
+
+            const output = unionGrids({ 
+                sources : [ g1, g2 ]
+            });
+
+            expect(output).to.deep.equal([ ...g1, g2[0] ]);
+        });
+
+    });
 
     describe('validateGrid', function () {
 
