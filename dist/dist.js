@@ -1468,9 +1468,10 @@ var forEachAwait = /*#__PURE__*/function () {
 }();
 /**
  * @typedef {{
- *  interval : number,
+ *  interval? : number,
  *  callback : function : Promise,
- *  times : number
+ *  stopIf? : boolean,
+ *  times? : number
  * }} IntervalConfig
  * 
  * @param {IntervalConfig}
@@ -1479,53 +1480,96 @@ var forEachAwait = /*#__PURE__*/function () {
 
 exports.forEachAwait = forEachAwait;
 
-var withInterval = function withInterval(_ref4) {
-  var _ref4$interval = _ref4.interval,
-      interval = _ref4$interval === void 0 ? 4 : _ref4$interval,
-      callback = _ref4.callback,
-      _ref4$times = _ref4.times,
-      times = _ref4$times === void 0 ? 1 : _ref4$times;
+var withInterval = /*#__PURE__*/function () {
+  var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(_ref4) {
+    var _ref4$interval, interval, callback, _ref4$times, times, _ref4$stopIf, stopIf, result;
 
-  if (!times) {
-    return Promise.resolve();
-  }
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _ref4$interval = _ref4.interval, interval = _ref4$interval === void 0 ? 4 : _ref4$interval, callback = _ref4.callback, _ref4$times = _ref4.times, times = _ref4$times === void 0 ? 1 : _ref4$times, _ref4$stopIf = _ref4.stopIf, stopIf = _ref4$stopIf === void 0 ? function () {
+              return false;
+            } : _ref4$stopIf;
 
-  return new Promise( /*#__PURE__*/function () {
-    var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(res, rej) {
-      var timesLeft;
-      return regeneratorRuntime.wrap(function _callee3$(_context3) {
-        while (1) {
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              _context3.next = 2;
-              return callback();
+            if (times) {
+              _context3.next = 3;
+              break;
+            }
 
-            case 2:
-              console.log(new Date().toLocaleString());
-              timesLeft = times - 1;
+            return _context3.abrupt("return");
+
+          case 3:
+            _context3.next = 5;
+            return callback();
+
+          case 5:
+            result = _context3.sent;
+
+            if (!stopIf(result)) {
+              _context3.next = 8;
+              break;
+            }
+
+            return _context3.abrupt("return", result);
+
+          case 8:
+            return _context3.abrupt("return", new Promise(function (res, rej) {
+              var timesLeft = times - 1;
               setTimeout(function () {
-                withInterval({
+                return withInterval({
                   interval: interval,
                   callback: callback,
-                  times: timesLeft
+                  times: timesLeft,
+                  stopIf: stopIf
                 }).then(res)["catch"](rej);
               }, interval);
+            }));
 
-            case 5:
-            case "end":
-              return _context3.stop();
-          }
+          case 9:
+          case "end":
+            return _context3.stop();
         }
-      }, _callee3);
-    }));
+      }
+    }, _callee3);
+  }));
 
-    return function (_x5, _x6) {
-      return _ref5.apply(this, arguments);
-    };
-  }());
-};
+  return function withInterval(_x5) {
+    return _ref5.apply(this, arguments);
+  };
+}();
 
 exports.withInterval = withInterval;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.toISO8601Timestamp = void 0;
+
+/**
+ * @fileoverview Date utility functions
+ * @author Oleg Valter
+ * @license MIT
+ */
+
+/**
+ * @summary converts a date-like value to ISO 8601 timestamp
+ * @param {number|string|Date} [date] 
+ * @returns {string}
+ */
+var toISO8601Timestamp = function toISO8601Timestamp() {
+  var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Date.now();
+  var parsed = new Date(date);
+  var MIN_IN_HOUR = 60;
+  var hours = parsed.getTimezoneOffset() / MIN_IN_HOUR;
+  var fraction = (hours - Number.parseInt(hours)) * MIN_IN_HOUR;
+  var sign = hours < 0 ? "-" : "+";
+  var offset = "".concat(sign).concat("".concat(Math.abs(hours)).padStart(2, "0"), ":").concat("".concat(fraction).padEnd(2, "0"));
+  return parsed.toISOString().slice(0, -5) + offset;
+};
+
+exports.toISO8601Timestamp = toISO8601Timestamp;
 "use strict";
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
