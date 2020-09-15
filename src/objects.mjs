@@ -553,9 +553,9 @@ const deepAssign = ({ source = {}, updates = [], onError = console.warn } = {}) 
 
             Object.assign(source, Object.fromEntries(restEntries));
 
-            objEntries.reduce((a, [k, v]) => a[k] = deepAssign({ 
-                source: a[k] || {}, 
-                updates: [v] 
+            objEntries.reduce((a, [k, v]) => a[k] = deepAssign({
+                source: a[k] || {},
+                updates: [v]
             }), ac);
 
             return ac;
@@ -567,7 +567,20 @@ const deepAssign = ({ source = {}, updates = [], onError = console.warn } = {}) 
     }
 
     return source;
+};
 
+const fromPath = (options = {}) => {
+
+    const { path = "", value } = options;
+
+    const output = {};
+
+    path.split(/\/|\\/).reduce(
+        (a, c, i, paths) => a[c] = i < paths.length - 1 || !("value" in options) ? {} : value,
+        output
+    );
+
+    return output;
 };
 
 export {
@@ -578,6 +591,7 @@ export {
     deepGetByType,
     deepMap,
     deepParseByPath,
+    fromPath,
     getGetterDescriptors,
     getOrInitProp,
     isObj,

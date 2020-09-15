@@ -9,6 +9,7 @@ import {
     deepMap,
     deepParseByPath,
     deepGetByType,
+    fromPath,
     getGetterDescriptors,
     getOrInitProp,
     isObject,
@@ -23,6 +24,32 @@ import {
 } from '../src/objects.mjs';
 
 describe('Objects', function () {
+
+    describe('fromPath', function () {
+        
+        it('should correctly parse path', function () {
+            const output = fromPath({ path : "main/sub/prop" });
+            expect(output).to.deep.equal({
+                main : {
+                    sub : {
+                        prop : {
+
+                        }
+                    }
+                }
+            });
+        });
+
+        it('should correctly assign value to the deepest obj', function () {
+            const output = fromPath({ path: "main/prop", value : true });
+            expect(output).to.deep.equal({
+                main : {
+                    prop : true
+                }
+            });
+        });
+
+    });
 
     describe('deepAssign', function () {
         
