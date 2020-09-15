@@ -619,7 +619,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -628,6 +628,14 @@ function _nonIterableRest() { throw new TypeError("Invalid attempt to destructur
 function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -905,6 +913,39 @@ var reduceWithStep = function reduceWithStep(_ref2) {
     return i % step ? acc : callback(acc, curr, i + step - 1, source);
   }, initial || source[0]);
 };
+
+exports.reduceWithStep = reduceWithStep;
+
+var unionGrids = function unionGrids() {
+  var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref3$sources = _ref3.sources,
+      sources = _ref3$sources === void 0 ? [] : _ref3$sources,
+      _ref3$hasher = _ref3.hasher,
+      hasher = _ref3$hasher === void 0 ? function (v) {
+    return v === "" ? "" : JSON.stringify(v);
+  } : _ref3$hasher;
+
+  var hashes = new Set();
+  var output = sources.reduce(function (acc, cur) {
+    var added = cur.reduce(function (a, row) {
+      var h = hasher(row);
+
+      if (!hashes.has(h)) {
+        a.push(row);
+        hashes.add(h);
+      }
+
+      return a;
+    }, []);
+    return [].concat(_toConsumableArray(acc), _toConsumableArray(added));
+  }, []);
+
+  if (!output.length) {
+    output.push([]);
+  }
+
+  return output;
+};
 /**
  * @typedef {object} ShrinkConfig
  * @property {any[][]} [source]
@@ -926,32 +967,32 @@ var reduceWithStep = function reduceWithStep(_ref2) {
  */
 
 
-exports.reduceWithStep = reduceWithStep;
+exports.unionGrids = unionGrids;
 
 var shrinkGrid = function shrinkGrid() {
-  var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref3$vertically = _ref3.vertically,
-      vertically = _ref3$vertically === void 0 ? 0 : _ref3$vertically,
-      source = _ref3.source,
-      _ref3$top = _ref3.top,
-      top = _ref3$top === void 0 ? 0 : _ref3$top,
-      _ref3$right = _ref3.right,
-      right = _ref3$right === void 0 ? 0 : _ref3$right,
-      _ref3$left = _ref3.left,
-      left = _ref3$left === void 0 ? 0 : _ref3$left,
-      _ref3$leave = _ref3.leave,
-      leave = _ref3$leave === void 0 ? {
+  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref4$vertically = _ref4.vertically,
+      vertically = _ref4$vertically === void 0 ? 0 : _ref4$vertically,
+      source = _ref4.source,
+      _ref4$top = _ref4.top,
+      top = _ref4$top === void 0 ? 0 : _ref4$top,
+      _ref4$right = _ref4.right,
+      right = _ref4$right === void 0 ? 0 : _ref4$right,
+      _ref4$left = _ref4.left,
+      left = _ref4$left === void 0 ? 0 : _ref4$left,
+      _ref4$leave = _ref4.leave,
+      leave = _ref4$leave === void 0 ? {
     top: 0,
     right: 0,
     bottom: 0,
     left: 0
-  } : _ref3$leave,
-      _ref3$horizontally = _ref3.horizontally,
-      horizontally = _ref3$horizontally === void 0 ? 0 : _ref3$horizontally,
-      _ref3$bottom = _ref3.bottom,
-      bottom = _ref3$bottom === void 0 ? 0 : _ref3$bottom,
-      _ref3$all = _ref3.all,
-      all = _ref3$all === void 0 ? 0 : _ref3$all;
+  } : _ref4$leave,
+      _ref4$horizontally = _ref4.horizontally,
+      horizontally = _ref4$horizontally === void 0 ? 0 : _ref4$horizontally,
+      _ref4$bottom = _ref4.bottom,
+      bottom = _ref4$bottom === void 0 ? 0 : _ref4$bottom,
+      _ref4$all = _ref4.all,
+      all = _ref4$all === void 0 ? 0 : _ref4$all;
 
   if (!source || !source.length) {
     return [[]];
@@ -1071,10 +1112,10 @@ var splitIntoConseq = function splitIntoConseq() {
 exports.splitIntoConseq = splitIntoConseq;
 
 var countObjects = function countObjects() {
-  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref4$source = _ref4.source,
-      source = _ref4$source === void 0 ? [] : _ref4$source,
-      onKey = _ref4.onKey;
+  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref5$source = _ref5.source,
+      source = _ref5$source === void 0 ? [] : _ref5$source,
+      onKey = _ref5.onKey;
 
   var validObjects = source.filter(Boolean);
   var length = validObjects.length;
@@ -1114,13 +1155,13 @@ var countObjects = function countObjects() {
 exports.countObjects = countObjects;
 
 var deduplicate = function deduplicate() {
-  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref5$ignore = _ref5.ignore,
-      ignore = _ref5$ignore === void 0 ? {} : _ref5$ignore,
-      _ref5$source = _ref5.source,
-      source = _ref5$source === void 0 ? [] : _ref5$source,
-      _ref5$type = _ref5.type,
-      type = _ref5$type === void 0 ? "entries" : _ref5$type;
+  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref6$ignore = _ref6.ignore,
+      ignore = _ref6$ignore === void 0 ? {} : _ref6$ignore,
+      _ref6$source = _ref6.source,
+      source = _ref6$source === void 0 ? [] : _ref6$source,
+      _ref6$type = _ref6.type,
+      type = _ref6$type === void 0 ? "entries" : _ref6$type;
 
   var toDedupe = source.map(function (obj) {
     return obj;
@@ -1129,16 +1170,16 @@ var deduplicate = function deduplicate() {
   var _ignore$keys = ignore.keys,
       keys = _ignore$keys === void 0 ? [] : _ignore$keys;
   return source.filter(function (srcObj, srcIdx) {
-    var srcEntries = Object.entries(srcObj).filter(function (_ref6) {
-      var _ref7 = _slicedToArray(_ref6, 1),
-          k = _ref7[0];
+    var srcEntries = Object.entries(srcObj).filter(function (_ref7) {
+      var _ref8 = _slicedToArray(_ref7, 1),
+          k = _ref8[0];
 
       return !keys.includes(k);
     });
     var lastIdx = toDedupe.findIndex(function (tgtObj) {
-      var tgtEntries = Object.entries(tgtObj).filter(function (_ref8) {
-        var _ref9 = _slicedToArray(_ref8, 1),
-            k = _ref9[0];
+      var tgtEntries = Object.entries(tgtObj).filter(function (_ref9) {
+        var _ref10 = _slicedToArray(_ref9, 1),
+            k = _ref10[0];
 
         return !keys.includes(k);
       });
@@ -1147,24 +1188,24 @@ var deduplicate = function deduplicate() {
         return false;
       }
 
-      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref10) {
-        var _ref11 = _slicedToArray(_ref10, 2),
-            key = _ref11[0],
-            val = _ref11[1];
+      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref11) {
+        var _ref12 = _slicedToArray(_ref11, 2),
+            key = _ref12[0],
+            val = _ref12[1];
 
         return srcObj[key] === val;
       });
-      var sameOnValues = type === "values" && tgtEntries.map(function (_ref12) {
-        var _ref13 = _slicedToArray(_ref12, 2),
-            v = _ref13[1];
+      var sameOnValues = type === "values" && tgtEntries.map(function (_ref13) {
+        var _ref14 = _slicedToArray(_ref13, 2),
+            v = _ref14[1];
 
         return v;
       }).every(function (tgtVal) {
         return Object.values(srcObj).includes(tgtVal);
       });
-      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref14) {
-        var _ref15 = _slicedToArray(_ref14, 1),
-            k = _ref15[0];
+      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref15) {
+        var _ref16 = _slicedToArray(_ref15, 1),
+            k = _ref16[0];
 
         return k;
       }).every(function (tgtKey) {
@@ -1255,20 +1296,20 @@ var removeElements = function removeElements(arr) {
 exports.removeElements = removeElements;
 
 var validateGrid = function validateGrid() {
-  var _ref16 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref16$grid = _ref16.grid,
-      grid = _ref16$grid === void 0 ? [[]] : _ref16$grid,
-      has = _ref16.has,
-      without = _ref16.without,
-      blank = _ref16.blank,
-      _ref16$notBlank = _ref16.notBlank,
-      notBlank = _ref16$notBlank === void 0 ? false : _ref16$notBlank,
-      _ref16$notEmpty = _ref16.notEmpty,
-      notEmpty = _ref16$notEmpty === void 0 ? false : _ref16$notEmpty,
-      _ref16$notFilled = _ref16.notFilled,
-      notFilled = _ref16$notFilled === void 0 ? false : _ref16$notFilled,
-      minCols = _ref16.minCols,
-      minRows = _ref16.minRows;
+  var _ref17 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref17$grid = _ref17.grid,
+      grid = _ref17$grid === void 0 ? [[]] : _ref17$grid,
+      has = _ref17.has,
+      without = _ref17.without,
+      blank = _ref17.blank,
+      _ref17$notBlank = _ref17.notBlank,
+      notBlank = _ref17$notBlank === void 0 ? false : _ref17$notBlank,
+      _ref17$notEmpty = _ref17.notEmpty,
+      notEmpty = _ref17$notEmpty === void 0 ? false : _ref17$notEmpty,
+      _ref17$notFilled = _ref17.notFilled,
+      notFilled = _ref17$notFilled === void 0 ? false : _ref17$notFilled,
+      minCols = _ref17.minCols,
+      minRows = _ref17.minRows;
 
   var length = grid.length;
 
