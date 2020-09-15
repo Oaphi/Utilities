@@ -3,6 +3,7 @@ const { expect } = chai;
 
 import {
     complement,
+    deepAssign,
     deepCopy,
     deepFilter,
     deepMap,
@@ -22,6 +23,69 @@ import {
 } from '../src/objects.mjs';
 
 describe('Objects', function () {
+
+    describe('deepAssign', function () {
+        
+        it('should copy non-obj values', function () {
+            const source = {};
+
+            deepAssign({ source, updates : [ { one : 1, two : 2 } ] });
+
+            expect(source).to.have.property("one").equal(1);
+            expect(source).to.have.property("two").equal(2);
+        });
+
+        it('should keep non-updated props', function () {
+            const source = { keep : true };
+
+            deepAssign({ source, updates : [ { renew : false } ] });
+
+            expect(source).to.have.property("keep").equal(true);
+            expect(source).to.have.property("renew").equal(false);
+        });
+
+        it('should correctly assign object properties', function () {
+            const source = {};
+
+            const updates = [{ nested: { prop: false } }];
+
+            deepAssign({ source, updates });
+
+            expect(source).to.deep.equal({
+                ...updates[0]
+            });
+        });
+
+        it('should keep nested properties', function () {
+            const source = { nested : { prop : false } };
+
+            const updates = [{ nested: { newest: "yes" } }];
+
+            deepAssign({ source, updates });
+
+            expect(source).to.deep.equal({
+                nested : {
+                    prop : false,
+                    newest : "yes"
+                }
+            });
+        });
+
+        it('should process multiple updates', function () {
+            const source = { main : 0, sub : 1, nested: { prop: 1, sub : 2 } };
+
+            const updates = [{ main : 1, nested : { prop : 2 } }];
+
+            deepAssign({ source, updates });
+
+            expect(source).to.deep.equal({
+                main : 1, sub : 1, 
+                nested : { prop : 2, sub : 2 }
+            });
+        });
+
+    });
+
     describe('deepCopy', function () {
 
         it('should copy with dereferencing', function () {

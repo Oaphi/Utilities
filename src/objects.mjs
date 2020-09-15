@@ -502,23 +502,77 @@ const shallowFilter = ({
     return output;
 };
 
-const deepCopy = ({ source = {}, skip = [] }) => {
+/**
+ * @summary type guard for proper objects
+ * @param {any} [obj]
+ * @returns {boolean}
+ */
+const isObj = (obj) => typeof obj === "object" && obj;
+
+/**
+ * @summary deep copies an object
+ * @param {{ 
+ *   source : object|Array, 
+ *   skip? : string[] 
+ * }}
+ * @returns {object|Array}
+ */
+const deepCopy = ({ source = {}, skip = [] } = {}) => {
 
     const output = Array.isArray(source) ? [] : {};
 
     Object.entries(source).forEach(([key, val]) => {
 
-        if(skip.includes(key)) { return; }
+        if (skip.includes(key)) { return; }
 
-        const isObj = typeof val === "object" && val;
-        output[key] = isObj ? deepCopy({ source : val, skip }) : val;
+        output[key] = isObj(val) ? deepCopy({ source: val, skip }) : val;
     });
 
     return output;
 };
 
+/**
+ * @summary deep assigns object props
+ * @param {{
+ *  source?  : object,
+ *  updates? : object[],
+ *  onError? : console.warn
+ * }} 
+ * @returns {object}
+ */
+const deepAssign = ({ source = {}, updates = [], onError = console.warn } = {}) => {
+
+    try {
+
+        return updates.reduce((ac, up) => {
+
+            const entries = Object.entries(up);
+
+            const objEntries = entries.filter(([_, v]) => isObj(v));
+            const restEntries = entries.filter(([_, v]) => !isObj(v));
+
+            Object.assign(source, Object.fromEntries(restEntries));
+
+            objEntries.reduce((a, [k, v]) => a[k] = deepAssign({ 
+                source: a[k] || {}, 
+                updates: [v] 
+            }), ac);
+
+            return ac;
+
+        }, source);
+
+    } catch (error) {
+        onError(error);
+    }
+
+    return source;
+
+};
+
 export {
     complement,
+    deepAssign,
     deepCopy,
     deepFilter,
     deepGetByType,
@@ -526,6 +580,7 @@ export {
     deepParseByPath,
     getGetterDescriptors,
     getOrInitProp,
+    isObj,
     isObject,
     pushOrInitProp,
     setIf,
