@@ -2689,7 +2689,7 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.complement = void 0;
+exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.isObj = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.deepAssign = exports.complement = void 0;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -3244,14 +3244,37 @@ var shallowFilter = function shallowFilter(_ref10) {
   });
   return output;
 };
+/**
+ * @summary type guard for proper objects
+ * @param {any} [obj]
+ * @returns {boolean}
+ */
+
 
 exports.shallowFilter = shallowFilter;
 
-var deepCopy = function deepCopy(_ref13) {
-  var _ref13$source = _ref13.source,
+var isObj = function isObj(obj) {
+  return _typeof(obj) === "object" && obj;
+};
+/**
+ * @summary deep copies an object
+ * @param {{ 
+ *   source : object|Array, 
+ *   skip? : string[] 
+ * }}
+ * @returns {object|Array}
+ */
+
+
+exports.isObj = isObj;
+
+var deepCopy = function deepCopy() {
+  var _ref13 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref13$source = _ref13.source,
       source = _ref13$source === void 0 ? {} : _ref13$source,
       _ref13$skip = _ref13.skip,
       skip = _ref13$skip === void 0 ? [] : _ref13$skip;
+
   var output = Array.isArray(source) ? [] : {};
   Object.entries(source).forEach(function (_ref14) {
     var _ref15 = _slicedToArray(_ref14, 2),
@@ -3262,16 +3285,73 @@ var deepCopy = function deepCopy(_ref13) {
       return;
     }
 
-    var isObj = _typeof(val) === "object" && val;
-    output[key] = isObj ? deepCopy({
+    output[key] = isObj(val) ? deepCopy({
       source: val,
       skip: skip
     }) : val;
   });
   return output;
 };
+/**
+ * @summary deep assigns object props
+ * @param {{
+ *  source?  : object,
+ *  updates? : object[],
+ *  onError? : console.warn
+ * }} 
+ * @returns {object}
+ */
+
 
 exports.deepCopy = deepCopy;
+
+var deepAssign = function deepAssign() {
+  var _ref16 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref16$source = _ref16.source,
+      source = _ref16$source === void 0 ? {} : _ref16$source,
+      _ref16$updates = _ref16.updates,
+      updates = _ref16$updates === void 0 ? [] : _ref16$updates,
+      _ref16$onError = _ref16.onError,
+      onError = _ref16$onError === void 0 ? console.warn : _ref16$onError;
+
+  try {
+    return updates.reduce(function (ac, up) {
+      var entries = Object.entries(up);
+      var objEntries = entries.filter(function (_ref17) {
+        var _ref18 = _slicedToArray(_ref17, 2),
+            _ = _ref18[0],
+            v = _ref18[1];
+
+        return isObj(v);
+      });
+      var restEntries = entries.filter(function (_ref19) {
+        var _ref20 = _slicedToArray(_ref19, 2),
+            _ = _ref20[0],
+            v = _ref20[1];
+
+        return !isObj(v);
+      });
+      Object.assign(source, Object.fromEntries(restEntries));
+      objEntries.reduce(function (a, _ref21) {
+        var _ref22 = _slicedToArray(_ref21, 2),
+            k = _ref22[0],
+            v = _ref22[1];
+
+        return a[k] = deepAssign({
+          source: a[k] || {},
+          updates: [v]
+        });
+      }, ac);
+      return ac;
+    }, source);
+  } catch (error) {
+    onError(error);
+  }
+
+  return source;
+};
+
+exports.deepAssign = deepAssign;
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
