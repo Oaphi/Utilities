@@ -2689,7 +2689,7 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.isObj = exports.getOrInitProp = exports.getGetterDescriptors = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.deepAssign = exports.complement = void 0;
+exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.isObj = exports.getOrInitProp = exports.getGetterDescriptors = exports.fromPath = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.deepAssign = exports.complement = void 0;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -3352,6 +3352,20 @@ var deepAssign = function deepAssign() {
 };
 
 exports.deepAssign = deepAssign;
+
+var fromPath = function fromPath() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var _options$path = options.path,
+      path = _options$path === void 0 ? "" : _options$path,
+      value = options.value;
+  var output = {};
+  path.split(/\/|\\/).reduce(function (a, c, i, paths) {
+    return a[c] = i < paths.length - 1 || !("value" in options) ? {} : value;
+  }, output);
+  return output;
+};
+
+exports.fromPath = fromPath;
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
