@@ -534,13 +534,19 @@ const deepCopy = ({ source = {}, skip = [] } = {}) => {
 /**
  * @summary deep assigns object props
  * @param {{
- *  source?  : object,
- *  updates? : object[],
- *  onError? : console.warn
+ *  source?   : object,
+ *  updates?  : object[],
+ *  objGuard? : (any) => boolean,
+ *  onError?  : console.warn
  * }} 
  * @returns {object}
  */
-const deepAssign = ({ source = {}, updates = [], onError = console.warn } = {}) => {
+const deepAssign = ({ 
+    source = {}, 
+    updates = [],
+    objGuard = (obj) => typeof obj === "object" && obj,
+    onError = console.warn
+} = {}) => {
 
     try {
 
@@ -548,8 +554,8 @@ const deepAssign = ({ source = {}, updates = [], onError = console.warn } = {}) 
 
             const entries = Object.entries(up);
 
-            const objEntries = entries.filter(([_, v]) => isObj(v));
-            const restEntries = entries.filter(([_, v]) => !isObj(v));
+            const objEntries = entries.filter(([_, v]) => objGuard(v));
+            const restEntries = entries.filter(([_, v]) => !objGuard(v));
 
             Object.assign(source, Object.fromEntries(restEntries));
 
@@ -569,6 +575,14 @@ const deepAssign = ({ source = {}, updates = [], onError = console.warn } = {}) 
     return source;
 };
 
+/**
+ * @summary parse an object from path and value
+ * @param {{
+ *  path   : string,
+ *  value ?: any
+ * }} [options]
+ * @return {object} 
+ */
 const fromPath = (options = {}) => {
 
     const { path = "", value } = options;
