@@ -59,7 +59,7 @@ const chunkify = (source, { limits = [], size } = {}) => {
  * @param {any[]} [array]
  * @returns {function(function):function(function):any[]}
  */
-const filterMap = (array = []) => (filter = e => true) => (mapper = e => e) => {
+const filterMap = (array = []) => (filter = () => true) => (mapper = e => e) => {
     const mappedArr = [];
 
     let initialIndex = 0, filteredIndex = 0;
@@ -211,7 +211,38 @@ const unionGrids = ({
 };
 
 /**
- * @typedef {object} ShrinkConfig
+ * @typedef {object} ExpandGridOptions
+ * @property {any[][]} source
+ * @property {number|string|boolean|undefined|null} fill
+ * @property {number} [horizontally]
+ * @property {number} [vertically]
+ * 
+ * @param {ExpandGridOptions}
+ */
+const expandGrid = ({
+    source,
+    vertically = 0,
+    horizontally = 0,
+    fill
+} = {}) => {
+
+    
+
+};
+
+/**
+ * 
+ */
+const insertInGrid = ({
+    source
+} = {}) => {
+
+
+
+};
+
+/**
+ * @typedef {object} ShrinkGridOptions
  * @property {any[][]} [source]
  * @property {{ 
  *  top : number, 
@@ -227,7 +258,7 @@ const unionGrids = ({
  * @property {number} [vertically]
  * 
  * @summary shirnks a grid
- * @param {ShrinkConfig} [source]
+ * @param {ShrinkGridOptions} [source]
  */
 const shrinkGrid = ({
     vertically = 0,
@@ -541,6 +572,20 @@ const validateGrid = ({
 
 };
 
+/**
+ * @summary finds longest array in a grid
+ * @param {any[][]} grid
+ * @returns {number}
+ */
+const longest = (grid) => Math.max( ...grid.map(({ length }) => length) );
+
+/**
+ * @summary leaves only unique elements (shallow)
+ * @param {any[]} [arr]
+ * @returns {any[]}
+ */
+const uniqify = (arr = []) => [...new Set(arr).values()];
+
 export {
     chunkify,
     closestValue,
@@ -551,6 +596,7 @@ export {
     forAll,
     keyMap,
     last,
+    longest,
     mergeOnto,
     reduceWithStep,
     removeElements,
@@ -558,5 +604,6 @@ export {
     spliceInto,
     splitIntoConseq,
     validateGrid,
-    unionGrids
+    unionGrids,
+    uniqify
 };

@@ -22,6 +22,7 @@ import {
     shrinkGrid,
     spliceInto,
     splitIntoConseq,
+    uniqify,
     validateGrid
 } from "../src/arrays.mjs";
 
@@ -30,6 +31,20 @@ describe('Arrays', function () {
     const fillGrid = ({ val = "", rows = 1, cells = 1 }) =>
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
+
+    describe('uniqify', function () {
+
+        it('should default to empty array', function () {
+            const output = uniqify();
+            expect(output).to.be.an.instanceof(Array).and.be.empty;
+        });
+        
+        it('should leave only unique elements', function () {
+            const output = uniqify([ 2,2, "menu", "menu", false, false ]);
+            expect(output).to.be.deep.equal([ 2, "menu", false ]);
+        });
+
+    });
 
     describe('unionGrids', function () {
 
