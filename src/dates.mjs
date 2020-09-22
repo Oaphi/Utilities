@@ -12,6 +12,27 @@
 const dateDiff = (a, b) => Math.abs(Math.floor((new Date(a) - new Date(b)) / 864e5));
 
 /**
+ * @summary builds time string from hours and minutes config
+ * @param {{
+ *  hours?   : number
+ *  minutes? : number
+ * }}
+ * @returns {string}
+ */
+const buildTime = ({
+    hours = 0, 
+    minutes = 0
+} = {}) => {
+    const over = minutes > 59 ? Math.floor(minutes / 60) || 1 : 0;
+
+    const hh = hours + over;
+
+    const mm = over ? minutes - ( over * 60 ) : minutes;
+
+    return `${hh < 10 ? `0${hh}` : hh}:${mm < 10 ? `0${mm}` : mm}`;
+};
+
+/**
  * @summary converts a date-like value to ISO 8601 timestamp
  * @param {number|string|Date} [date] 
  * @returns {string}
@@ -44,6 +65,7 @@ const yesterday = (date = Date.now()) => {
 };
 
 export {
+    buildTime,
     dateDiff,
     toISO8601Timestamp,
     yesterday
