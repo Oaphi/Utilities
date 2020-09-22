@@ -1586,7 +1586,7 @@ exports.withInterval = withInterval;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.toISO8601Timestamp = void 0;
+exports.yesterday = exports.toISO8601Timestamp = exports.dateDiff = exports.buildTime = void 0;
 
 /**
  * @fileoverview Date utility functions
@@ -1595,10 +1595,46 @@ exports.toISO8601Timestamp = void 0;
  */
 
 /**
+ * @summary calculates difference between 2 dates (in 24-hour based days)
+ * @param {Date|number|string} a 
+ * @param {Date|number|string} b 
+ */
+var dateDiff = function dateDiff(a, b) {
+  return Math.abs(Math.floor((new Date(a) - new Date(b)) / 864e5));
+};
+/**
+ * @summary builds time string from hours and minutes config
+ * @param {{
+ *  hours?   : number
+ *  minutes? : number
+ * }}
+ * @returns {string}
+ */
+
+
+exports.dateDiff = dateDiff;
+
+var buildTime = function buildTime() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref$hours = _ref.hours,
+      hours = _ref$hours === void 0 ? 0 : _ref$hours,
+      _ref$minutes = _ref.minutes,
+      minutes = _ref$minutes === void 0 ? 0 : _ref$minutes;
+
+  var over = minutes > 59 ? Math.floor(minutes / 60) || 1 : 0;
+  var hh = hours + over;
+  var mm = over ? minutes - over * 60 : minutes;
+  return "".concat(hh < 10 ? "0".concat(hh) : hh, ":").concat(mm < 10 ? "0".concat(mm) : mm);
+};
+/**
  * @summary converts a date-like value to ISO 8601 timestamp
  * @param {number|string|Date} [date] 
  * @returns {string}
  */
+
+
+exports.buildTime = buildTime;
+
 var toISO8601Timestamp = function toISO8601Timestamp() {
   var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Date.now();
   var parsed = new Date(date);
@@ -1609,8 +1645,23 @@ var toISO8601Timestamp = function toISO8601Timestamp() {
   var offset = "".concat(sign).concat("".concat(Math.abs(hours)).padStart(2, "0"), ":").concat("".concat(fraction).padEnd(2, "0"));
   return parsed.toISOString().slice(0, -5) + offset;
 };
+/**
+ * @summary offsets a date-like value to day before
+ * @param {number|string|Date} [date]
+ * @returns {Date}
+ */
+
 
 exports.toISO8601Timestamp = toISO8601Timestamp;
+
+var yesterday = function yesterday() {
+  var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Date.now();
+  var parsed = new Date(date);
+  var MIL_IN_DAY = 864e5;
+  return new Date(parsed - MIL_IN_DAY);
+};
+
+exports.yesterday = yesterday;
 "use strict";
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
@@ -3295,9 +3346,10 @@ var deepCopy = function deepCopy() {
 /**
  * @summary deep assigns object props
  * @param {{
- *  source?  : object,
- *  updates? : object[],
- *  onError? : console.warn
+ *  source?   : object,
+ *  updates?  : object[],
+ *  objGuard? : (any) => boolean,
+ *  onError?  : console.warn
  * }} 
  * @returns {object}
  */
@@ -3311,6 +3363,10 @@ var deepAssign = function deepAssign() {
       source = _ref16$source === void 0 ? {} : _ref16$source,
       _ref16$updates = _ref16.updates,
       updates = _ref16$updates === void 0 ? [] : _ref16$updates,
+      _ref16$objGuard = _ref16.objGuard,
+      objGuard = _ref16$objGuard === void 0 ? function (obj) {
+    return _typeof(obj) === "object" && obj;
+  } : _ref16$objGuard,
       _ref16$onError = _ref16.onError,
       onError = _ref16$onError === void 0 ? console.warn : _ref16$onError;
 
@@ -3322,14 +3378,14 @@ var deepAssign = function deepAssign() {
             _ = _ref18[0],
             v = _ref18[1];
 
-        return isObj(v);
+        return objGuard(v);
       });
       var restEntries = entries.filter(function (_ref19) {
         var _ref20 = _slicedToArray(_ref19, 2),
             _ = _ref20[0],
             v = _ref20[1];
 
-        return !isObj(v);
+        return !objGuard(v);
       });
       Object.assign(source, Object.fromEntries(restEntries));
       objEntries.reduce(function (a, _ref21) {
@@ -3350,6 +3406,15 @@ var deepAssign = function deepAssign() {
 
   return source;
 };
+/**
+ * @summary parse an object from path and value
+ * @param {{
+ *  path   : string,
+ *  value ?: any
+ * }} [options]
+ * @return {object} 
+ */
+
 
 exports.deepAssign = deepAssign;
 
