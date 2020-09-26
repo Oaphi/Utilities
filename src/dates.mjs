@@ -20,14 +20,14 @@ const dateDiff = (a, b) => Math.abs(Math.floor((new Date(a) - new Date(b)) / 864
  * @returns {string}
  */
 const buildTime = ({
-    hours = 0, 
+    hours = 0,
     minutes = 0
 } = {}) => {
     const over = minutes > 59 ? Math.floor(minutes / 60) || 1 : 0;
 
     const hh = hours + over;
 
-    const mm = over ? minutes - ( over * 60 ) : minutes;
+    const mm = over ? minutes - (over * 60) : minutes;
 
     return `${hh < 10 ? `0${hh}` : hh}:${mm < 10 ? `0${mm}` : mm}`;
 };
@@ -64,9 +64,49 @@ const yesterday = (date = Date.now()) => {
     return new Date(parsed - MIL_IN_DAY);
 };
 
+/**
+ * @typedef {{
+ *  date?   : number|string|Date,
+ *  numberOf?: number,
+ *  onError?: (err : Error) => void,
+ *  period?: "days"|"months"|"years"
+ * }} OffsetOptions
+ * 
+ * @param {OffsetOptions}
+ * @returns {Date}
+ */
+const offset = ({
+    date = Date.now(),
+    numberOf = 1,
+    period = "days",
+    onError = (err) => console.warn(err)
+} = {}) => {
+
+    try {
+        const parsed = new Date(date);
+
+        const MIL_IN_DAY = 864e5;
+
+        /** @type {Map<string,(d : Date, n : number) => Date>} */
+        const periodMap = new Map([
+            ["days", (date, n) => new Date(date.valueOf() - MIL_IN_DAY * n)],
+            ["months", (date, n) => new Date(date.getFullYear(), date.getMonth() - n, date.getDate())],
+            ["years", (date, n) => new Date(date.getFullYear() - n, date.getMonth(), date.getDate())]
+        ]);
+
+        return periodMap.get(period)(parsed, numberOf);
+    }
+    catch (error) {
+        onError(error);
+        return new Date(date);
+    }
+
+};
+
 export {
     buildTime,
     dateDiff,
+    offset,
     toISO8601Timestamp,
     yesterday
 };
