@@ -486,8 +486,9 @@ var expandObjectToParams = function expandObjectToParams(_ref2) {
  * 
  * @param {object} source
  * @param {{
- *  arrayNotation : ("comma"|"bracket"|"empty_bracket"),
- *  objectNotation : ("bracket"|"dot")
+ *  arrayNotation? : ("comma"|"bracket"|"empty_bracket"),
+ *  encode?        : boolean,
+ *  objectNotation?: ("bracket"|"dot")
  * }}
  * 
  * @returns {string}
@@ -499,7 +500,9 @@ var objectToQuery = function objectToQuery(source) {
       _ref5$arrayNotation = _ref5.arrayNotation,
       arrayNotation = _ref5$arrayNotation === void 0 ? "bracket" : _ref5$arrayNotation,
       _ref5$objectNotation = _ref5.objectNotation,
-      objectNotation = _ref5$objectNotation === void 0 ? "bracket" : _ref5$objectNotation;
+      objectNotation = _ref5$objectNotation === void 0 ? "bracket" : _ref5$objectNotation,
+      _ref5$encode = _ref5.encode,
+      encode = _ref5$encode === void 0 ? true : _ref5$encode;
 
   var output = [];
   Object.entries(source).forEach(function (_ref6) {
@@ -518,7 +521,8 @@ var objectToQuery = function objectToQuery(source) {
         key: key,
         obj: val,
         objectNotation: objectNotation,
-        arrayNotation: arrayNotation
+        arrayNotation: arrayNotation,
+        encode: encode
       });
       return output.push.apply(output, _toConsumableArray(objParams));
     }
@@ -1643,7 +1647,7 @@ exports.withInterval = withInterval;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.yesterday = exports.toISO8601Timestamp = exports.dateDiff = exports.buildTime = void 0;
+exports.yesterday = exports.toISO8601Timestamp = exports.offset = exports.dateDiff = exports.buildTime = void 0;
 
 /**
  * @fileoverview Date utility functions
@@ -1717,8 +1721,54 @@ var yesterday = function yesterday() {
   var MIL_IN_DAY = 864e5;
   return new Date(parsed - MIL_IN_DAY);
 };
+/**
+ * @typedef {{
+ *  date?   : number|string|Date,
+ *  numberOf?: number,
+ *  onError?: (err : Error) => void,
+ *  period?: "days"|"months"|"years"
+ * }} OffsetOptions
+ * 
+ * @param {OffsetOptions}
+ * @returns {Date}
+ */
+
 
 exports.yesterday = yesterday;
+
+var offset = function offset() {
+  var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref2$date = _ref2.date,
+      date = _ref2$date === void 0 ? Date.now() : _ref2$date,
+      _ref2$numberOf = _ref2.numberOf,
+      numberOf = _ref2$numberOf === void 0 ? 1 : _ref2$numberOf,
+      _ref2$period = _ref2.period,
+      period = _ref2$period === void 0 ? "days" : _ref2$period,
+      _ref2$onError = _ref2.onError,
+      onError = _ref2$onError === void 0 ? function (err) {
+    return console.warn(err);
+  } : _ref2$onError;
+
+  try {
+    var parsed = new Date(date);
+    var MIL_IN_DAY = 864e5;
+    /** @type {Map<string,(d : Date, n : number) => Date>} */
+
+    var periodMap = new Map([["days", function (date, n) {
+      return new Date(date.valueOf() - MIL_IN_DAY * n);
+    }], ["months", function (date, n) {
+      return new Date(date.getFullYear(), date.getMonth() - n, date.getDate());
+    }], ["years", function (date, n) {
+      return new Date(date.getFullYear() - n, date.getMonth(), date.getDate());
+    }]]);
+    return periodMap.get(period)(parsed, numberOf);
+  } catch (error) {
+    onError(error);
+    return new Date(date);
+  }
+};
+
+exports.offset = offset;
 "use strict";
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
