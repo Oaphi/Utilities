@@ -619,7 +619,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.uniqify = exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -710,7 +710,7 @@ exports.chunkify = chunkify;
 var filterMap = function filterMap() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   return function () {
-    var filter = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (e) {
+    var filter = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function () {
       return true;
     };
     return function () {
@@ -947,7 +947,38 @@ var unionGrids = function unionGrids() {
   return output;
 };
 /**
- * @typedef {object} ShrinkConfig
+ * @typedef {object} ExpandGridOptions
+ * @property {any[][]} source
+ * @property {number|string|boolean|undefined|null} fill
+ * @property {number} [horizontally]
+ * @property {number} [vertically]
+ * 
+ * @param {ExpandGridOptions}
+ */
+
+
+exports.unionGrids = unionGrids;
+
+var expandGrid = function expandGrid() {
+  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref4.source,
+      _ref4$vertically = _ref4.vertically,
+      vertically = _ref4$vertically === void 0 ? 0 : _ref4$vertically,
+      _ref4$horizontally = _ref4.horizontally,
+      horizontally = _ref4$horizontally === void 0 ? 0 : _ref4$horizontally,
+      fill = _ref4.fill;
+};
+/**
+ * 
+ */
+
+
+var insertInGrid = function insertInGrid() {
+  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref5.source;
+};
+/**
+ * @typedef {object} ShrinkGridOptions
  * @property {any[][]} [source]
  * @property {{ 
  *  top : number, 
@@ -963,36 +994,34 @@ var unionGrids = function unionGrids() {
  * @property {number} [vertically]
  * 
  * @summary shirnks a grid
- * @param {ShrinkConfig} [source]
+ * @param {ShrinkGridOptions} [source]
  */
 
 
-exports.unionGrids = unionGrids;
-
 var shrinkGrid = function shrinkGrid() {
-  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref4$vertically = _ref4.vertically,
-      vertically = _ref4$vertically === void 0 ? 0 : _ref4$vertically,
-      source = _ref4.source,
-      _ref4$top = _ref4.top,
-      top = _ref4$top === void 0 ? 0 : _ref4$top,
-      _ref4$right = _ref4.right,
-      right = _ref4$right === void 0 ? 0 : _ref4$right,
-      _ref4$left = _ref4.left,
-      left = _ref4$left === void 0 ? 0 : _ref4$left,
-      _ref4$leave = _ref4.leave,
-      leave = _ref4$leave === void 0 ? {
+  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref6$vertically = _ref6.vertically,
+      vertically = _ref6$vertically === void 0 ? 0 : _ref6$vertically,
+      source = _ref6.source,
+      _ref6$top = _ref6.top,
+      top = _ref6$top === void 0 ? 0 : _ref6$top,
+      _ref6$right = _ref6.right,
+      right = _ref6$right === void 0 ? 0 : _ref6$right,
+      _ref6$left = _ref6.left,
+      left = _ref6$left === void 0 ? 0 : _ref6$left,
+      _ref6$leave = _ref6.leave,
+      leave = _ref6$leave === void 0 ? {
     top: 0,
     right: 0,
     bottom: 0,
     left: 0
-  } : _ref4$leave,
-      _ref4$horizontally = _ref4.horizontally,
-      horizontally = _ref4$horizontally === void 0 ? 0 : _ref4$horizontally,
-      _ref4$bottom = _ref4.bottom,
-      bottom = _ref4$bottom === void 0 ? 0 : _ref4$bottom,
-      _ref4$all = _ref4.all,
-      all = _ref4$all === void 0 ? 0 : _ref4$all;
+  } : _ref6$leave,
+      _ref6$horizontally = _ref6.horizontally,
+      horizontally = _ref6$horizontally === void 0 ? 0 : _ref6$horizontally,
+      _ref6$bottom = _ref6.bottom,
+      bottom = _ref6$bottom === void 0 ? 0 : _ref6$bottom,
+      _ref6$all = _ref6.all,
+      all = _ref6$all === void 0 ? 0 : _ref6$all;
 
   if (!source || !source.length) {
     return [[]];
@@ -1112,10 +1141,10 @@ var splitIntoConseq = function splitIntoConseq() {
 exports.splitIntoConseq = splitIntoConseq;
 
 var countObjects = function countObjects() {
-  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref5$source = _ref5.source,
-      source = _ref5$source === void 0 ? [] : _ref5$source,
-      onKey = _ref5.onKey;
+  var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref7$source = _ref7.source,
+      source = _ref7$source === void 0 ? [] : _ref7$source,
+      onKey = _ref7.onKey;
 
   var validObjects = source.filter(Boolean);
   var length = validObjects.length;
@@ -1155,13 +1184,13 @@ var countObjects = function countObjects() {
 exports.countObjects = countObjects;
 
 var deduplicate = function deduplicate() {
-  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref6$ignore = _ref6.ignore,
-      ignore = _ref6$ignore === void 0 ? {} : _ref6$ignore,
-      _ref6$source = _ref6.source,
-      source = _ref6$source === void 0 ? [] : _ref6$source,
-      _ref6$type = _ref6.type,
-      type = _ref6$type === void 0 ? "entries" : _ref6$type;
+  var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref8$ignore = _ref8.ignore,
+      ignore = _ref8$ignore === void 0 ? {} : _ref8$ignore,
+      _ref8$source = _ref8.source,
+      source = _ref8$source === void 0 ? [] : _ref8$source,
+      _ref8$type = _ref8.type,
+      type = _ref8$type === void 0 ? "entries" : _ref8$type;
 
   var toDedupe = source.map(function (obj) {
     return obj;
@@ -1170,16 +1199,16 @@ var deduplicate = function deduplicate() {
   var _ignore$keys = ignore.keys,
       keys = _ignore$keys === void 0 ? [] : _ignore$keys;
   return source.filter(function (srcObj, srcIdx) {
-    var srcEntries = Object.entries(srcObj).filter(function (_ref7) {
-      var _ref8 = _slicedToArray(_ref7, 1),
-          k = _ref8[0];
+    var srcEntries = Object.entries(srcObj).filter(function (_ref9) {
+      var _ref10 = _slicedToArray(_ref9, 1),
+          k = _ref10[0];
 
       return !keys.includes(k);
     });
     var lastIdx = toDedupe.findIndex(function (tgtObj) {
-      var tgtEntries = Object.entries(tgtObj).filter(function (_ref9) {
-        var _ref10 = _slicedToArray(_ref9, 1),
-            k = _ref10[0];
+      var tgtEntries = Object.entries(tgtObj).filter(function (_ref11) {
+        var _ref12 = _slicedToArray(_ref11, 1),
+            k = _ref12[0];
 
         return !keys.includes(k);
       });
@@ -1188,24 +1217,24 @@ var deduplicate = function deduplicate() {
         return false;
       }
 
-      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref11) {
-        var _ref12 = _slicedToArray(_ref11, 2),
-            key = _ref12[0],
-            val = _ref12[1];
+      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref13) {
+        var _ref14 = _slicedToArray(_ref13, 2),
+            key = _ref14[0],
+            val = _ref14[1];
 
         return srcObj[key] === val;
       });
-      var sameOnValues = type === "values" && tgtEntries.map(function (_ref13) {
-        var _ref14 = _slicedToArray(_ref13, 2),
-            v = _ref14[1];
+      var sameOnValues = type === "values" && tgtEntries.map(function (_ref15) {
+        var _ref16 = _slicedToArray(_ref15, 2),
+            v = _ref16[1];
 
         return v;
       }).every(function (tgtVal) {
         return Object.values(srcObj).includes(tgtVal);
       });
-      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref15) {
-        var _ref16 = _slicedToArray(_ref15, 1),
-            k = _ref16[0];
+      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref17) {
+        var _ref18 = _slicedToArray(_ref17, 1),
+            k = _ref18[0];
 
         return k;
       }).every(function (tgtKey) {
@@ -1296,20 +1325,20 @@ var removeElements = function removeElements(arr) {
 exports.removeElements = removeElements;
 
 var validateGrid = function validateGrid() {
-  var _ref17 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref17$grid = _ref17.grid,
-      grid = _ref17$grid === void 0 ? [[]] : _ref17$grid,
-      has = _ref17.has,
-      without = _ref17.without,
-      blank = _ref17.blank,
-      _ref17$notBlank = _ref17.notBlank,
-      notBlank = _ref17$notBlank === void 0 ? false : _ref17$notBlank,
-      _ref17$notEmpty = _ref17.notEmpty,
-      notEmpty = _ref17$notEmpty === void 0 ? false : _ref17$notEmpty,
-      _ref17$notFilled = _ref17.notFilled,
-      notFilled = _ref17$notFilled === void 0 ? false : _ref17$notFilled,
-      minCols = _ref17.minCols,
-      minRows = _ref17.minRows;
+  var _ref19 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref19$grid = _ref19.grid,
+      grid = _ref19$grid === void 0 ? [[]] : _ref19$grid,
+      has = _ref19.has,
+      without = _ref19.without,
+      blank = _ref19.blank,
+      _ref19$notBlank = _ref19.notBlank,
+      notBlank = _ref19$notBlank === void 0 ? false : _ref19$notBlank,
+      _ref19$notEmpty = _ref19.notEmpty,
+      notEmpty = _ref19$notEmpty === void 0 ? false : _ref19$notEmpty,
+      _ref19$notFilled = _ref19.notFilled,
+      notFilled = _ref19$notFilled === void 0 ? false : _ref19$notFilled,
+      minCols = _ref19.minCols,
+      minRows = _ref19.minRows;
 
   var length = grid.length;
 
@@ -1355,8 +1384,36 @@ var validateGrid = function validateGrid() {
   var blankValid = blank !== undefined ? !numFilled === blank : true;
   return gridValidated && blankValid && (!notFilled || !!numEmpty) && (!notBlank || !!numFilled) && (has === undefined || !!matchOnVal);
 };
+/**
+ * @summary finds longest array in a grid
+ * @param {any[][]} grid
+ * @returns {number}
+ */
+
 
 exports.validateGrid = validateGrid;
+
+var longest = function longest(grid) {
+  return Math.max.apply(Math, _toConsumableArray(grid.map(function (_ref20) {
+    var length = _ref20.length;
+    return length;
+  })));
+};
+/**
+ * @summary leaves only unique elements (shallow)
+ * @param {any[]} [arr]
+ * @returns {any[]}
+ */
+
+
+exports.longest = longest;
+
+var uniqify = function uniqify() {
+  var arr = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  return _toConsumableArray(new Set(arr).values());
+};
+
+exports.uniqify = uniqify;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
