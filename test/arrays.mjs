@@ -573,6 +573,12 @@ describe('Arrays', function () {
             expect(output).to.deep.equal([[]]);
         });
 
+        it('should work on strings', function () {
+            const source = "1234567890123";
+            const output = chunkify(source, { size: 4 });
+            expect(output).to.deep.equal([ "1234", "5678", "9012", "3" ]);
+        });
+
     });
 
     describe('splitIntoConseq', function () {
