@@ -104,7 +104,7 @@ const expandObjectToParams = ({
                 expandObjectToParams({ 
                     key, obj: elem, 
                     objectNotation, 
-                    arrayNotation 
+                    arrayNotation
                 }) :
                 elem
         ).flat().join(",")}`];
@@ -141,15 +141,17 @@ const expandObjectToParams = ({
  * 
  * @param {object} source
  * @param {{
- *  arrayNotation : ("comma"|"bracket"|"empty_bracket"),
- *  objectNotation : ("bracket"|"dot")
+ *  arrayNotation? : ("comma"|"bracket"|"empty_bracket"),
+ *  encode?        : boolean,
+ *  objectNotation?: ("bracket"|"dot")
  * }}
  * 
  * @returns {string}
  */
 const objectToQuery = (source, {
     arrayNotation = "bracket",
-    objectNotation = "bracket"
+    objectNotation = "bracket",
+    encode = true
 } = {}) => {
 
     const output = [];
@@ -164,7 +166,8 @@ const objectToQuery = (source, {
             const objParams = expandObjectToParams({
                 key, obj : val, 
                 objectNotation, 
-                arrayNotation
+                arrayNotation,
+                encode
             });
             return output.push(...objParams);
         }
