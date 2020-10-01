@@ -226,8 +226,42 @@ const expandGrid = ({
     fill
 } = {}) => {
 
-    
 
+
+};
+
+/**
+ * @typedef {{
+ *  source ?: any[][],
+ *  accumulator ?: any,
+ *  callback ?: (acc : any, cur : any) => any,
+ *  overColumn ?: number
+ * }} FoldGridOptions
+ * 
+ * @param {FoldGridOptions}
+ */
+const foldGrid = ({
+    source = [[]],
+    accumulator = 0,
+    callback = (acc) => acc += 1,
+    overColumn = 0,
+    matching = () => true,
+    onError = (err) => console.warn(err)
+} = {}) => {
+    try {
+
+        const column = source.map((row) => row[overColumn]);
+
+        return column.reduce((acc, cur) => {
+            if (matching(cur, column)) { 
+                return callback(acc, cur); 
+            }
+            return acc;
+        }, accumulator);
+    }
+    catch (error) {
+        onError(error);
+    }
 };
 
 /**
@@ -577,7 +611,7 @@ const validateGrid = ({
  * @param {any[][]} grid
  * @returns {number}
  */
-const longest = (grid) => Math.max( ...grid.map(({ length }) => length) );
+const longest = (grid) => Math.max(...grid.map(({ length }) => length));
 
 /**
  * @summary leaves only unique elements (shallow)
@@ -593,6 +627,7 @@ export {
     deduplicate,
     filterMap,
     filterMapped,
+    foldGrid,
     forAll,
     keyMap,
     last,

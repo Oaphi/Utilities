@@ -12,6 +12,7 @@ import {
     deduplicate,
     filterMap,
     filterMapped,
+    foldGrid,
     forAll,
     unionGrids,
     keyMap,
@@ -31,6 +32,52 @@ describe('Arrays', function () {
     const fillGrid = ({ val = "", rows = 1, cells = 1 }) =>
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
+
+    describe('foldGrid', function () {
+        it('should fold to 1 on no params', function () {
+            const folded = foldGrid();
+            expect(folded).to.equal(1);
+        });
+
+        it('should 1-increment on no callback', function () {
+            const folded = foldGrid({ source : [[1],[2],[3]] });
+            expect(folded).to.equal(3);
+        });
+
+        it('should correctly match condition', function () {
+            const source = [[1], [2], [3], [4]];
+            
+            const folded = foldGrid({ 
+                source, 
+                matching : (v) => v > 2
+            });
+
+            expect(folded).to.equal(2);
+        });
+        
+        it('should correctly invoke callback', function () {
+            const source = [[1], [2], [3], [4]];
+
+            const folded = foldGrid({
+                source,
+                matching: (v) => v < 4,
+                callback : (a,c) => a + c
+            });
+
+            expect(folded).to.equal(6);
+        });
+
+        it('should correctly determine column', function () {
+            const source = [[1, 5], [2, 3], [8, 2]];
+            const folded = foldGrid({
+                source,
+                accumulator : 1,
+                overColumn: 1,
+                callback: (a, c) => a * c
+            });
+            expect(folded).to.equal(30);
+        });
+    });
 
     describe('uniqify', function () {
 
