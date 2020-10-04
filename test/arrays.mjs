@@ -77,6 +77,15 @@ describe('Arrays', function () {
             });
             expect(folded).to.equal(30);
         });
+
+        it('should expose full row to callback', function () {
+            const source = [[1, 5], [2, 3], [8, 2]];
+            const folded = foldGrid({ 
+                source,
+                callback: (a, __, r) => a + r.reduce((a,c) => a + c)
+            });
+            expect(folded).to.equal(21);
+        });
     });
 
     describe('uniqify', function () {

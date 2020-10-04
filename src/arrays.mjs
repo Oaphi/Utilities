@@ -252,9 +252,9 @@ const foldGrid = ({
 
         const column = source.map((row) => row[overColumn]);
 
-        return column.reduce((acc, cur) => {
+        return column.reduce((acc, cur, ri) => {
             if (matching(cur, column)) { 
-                return callback(acc, cur); 
+                return callback(acc, cur, source[ri]); 
             }
             return acc;
         }, accumulator);
