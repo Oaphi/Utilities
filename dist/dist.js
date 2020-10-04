@@ -623,7 +623,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.uniqify = exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.uniqify = exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -973,13 +973,63 @@ var expandGrid = function expandGrid() {
       fill = _ref4.fill;
 };
 /**
+ * @typedef {{
+ *  source ?: any[][],
+ *  accumulator ?: any,
+ *  callback ?: (acc : any, cur : any) => any,
+ *  overColumn ?: number
+ * }} FoldGridOptions
+ * 
+ * @param {FoldGridOptions}
+ */
+
+
+var foldGrid = function foldGrid() {
+  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref5$source = _ref5.source,
+      source = _ref5$source === void 0 ? [[]] : _ref5$source,
+      _ref5$accumulator = _ref5.accumulator,
+      accumulator = _ref5$accumulator === void 0 ? 0 : _ref5$accumulator,
+      _ref5$callback = _ref5.callback,
+      callback = _ref5$callback === void 0 ? function (acc) {
+    return acc += 1;
+  } : _ref5$callback,
+      _ref5$overColumn = _ref5.overColumn,
+      overColumn = _ref5$overColumn === void 0 ? 0 : _ref5$overColumn,
+      _ref5$matching = _ref5.matching,
+      matching = _ref5$matching === void 0 ? function () {
+    return true;
+  } : _ref5$matching,
+      _ref5$onError = _ref5.onError,
+      onError = _ref5$onError === void 0 ? function (err) {
+    return console.warn(err);
+  } : _ref5$onError;
+
+  try {
+    var column = source.map(function (row) {
+      return row[overColumn];
+    });
+    return column.reduce(function (acc, cur, ri) {
+      if (matching(cur, column)) {
+        return callback(acc, cur, source[ri]);
+      }
+
+      return acc;
+    }, accumulator);
+  } catch (error) {
+    onError(error);
+  }
+};
+/**
  * 
  */
 
 
+exports.foldGrid = foldGrid;
+
 var insertInGrid = function insertInGrid() {
-  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      source = _ref5.source;
+  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref6.source;
 };
 /**
  * @typedef {object} ShrinkGridOptions
@@ -1003,29 +1053,29 @@ var insertInGrid = function insertInGrid() {
 
 
 var shrinkGrid = function shrinkGrid() {
-  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref6$vertically = _ref6.vertically,
-      vertically = _ref6$vertically === void 0 ? 0 : _ref6$vertically,
-      source = _ref6.source,
-      _ref6$top = _ref6.top,
-      top = _ref6$top === void 0 ? 0 : _ref6$top,
-      _ref6$right = _ref6.right,
-      right = _ref6$right === void 0 ? 0 : _ref6$right,
-      _ref6$left = _ref6.left,
-      left = _ref6$left === void 0 ? 0 : _ref6$left,
-      _ref6$leave = _ref6.leave,
-      leave = _ref6$leave === void 0 ? {
+  var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref7$vertically = _ref7.vertically,
+      vertically = _ref7$vertically === void 0 ? 0 : _ref7$vertically,
+      source = _ref7.source,
+      _ref7$top = _ref7.top,
+      top = _ref7$top === void 0 ? 0 : _ref7$top,
+      _ref7$right = _ref7.right,
+      right = _ref7$right === void 0 ? 0 : _ref7$right,
+      _ref7$left = _ref7.left,
+      left = _ref7$left === void 0 ? 0 : _ref7$left,
+      _ref7$leave = _ref7.leave,
+      leave = _ref7$leave === void 0 ? {
     top: 0,
     right: 0,
     bottom: 0,
     left: 0
-  } : _ref6$leave,
-      _ref6$horizontally = _ref6.horizontally,
-      horizontally = _ref6$horizontally === void 0 ? 0 : _ref6$horizontally,
-      _ref6$bottom = _ref6.bottom,
-      bottom = _ref6$bottom === void 0 ? 0 : _ref6$bottom,
-      _ref6$all = _ref6.all,
-      all = _ref6$all === void 0 ? 0 : _ref6$all;
+  } : _ref7$leave,
+      _ref7$horizontally = _ref7.horizontally,
+      horizontally = _ref7$horizontally === void 0 ? 0 : _ref7$horizontally,
+      _ref7$bottom = _ref7.bottom,
+      bottom = _ref7$bottom === void 0 ? 0 : _ref7$bottom,
+      _ref7$all = _ref7.all,
+      all = _ref7$all === void 0 ? 0 : _ref7$all;
 
   if (!source || !source.length) {
     return [[]];
@@ -1145,10 +1195,10 @@ var splitIntoConseq = function splitIntoConseq() {
 exports.splitIntoConseq = splitIntoConseq;
 
 var countObjects = function countObjects() {
-  var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref7$source = _ref7.source,
-      source = _ref7$source === void 0 ? [] : _ref7$source,
-      onKey = _ref7.onKey;
+  var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref8$source = _ref8.source,
+      source = _ref8$source === void 0 ? [] : _ref8$source,
+      onKey = _ref8.onKey;
 
   var validObjects = source.filter(Boolean);
   var length = validObjects.length;
@@ -1188,13 +1238,13 @@ var countObjects = function countObjects() {
 exports.countObjects = countObjects;
 
 var deduplicate = function deduplicate() {
-  var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref8$ignore = _ref8.ignore,
-      ignore = _ref8$ignore === void 0 ? {} : _ref8$ignore,
-      _ref8$source = _ref8.source,
-      source = _ref8$source === void 0 ? [] : _ref8$source,
-      _ref8$type = _ref8.type,
-      type = _ref8$type === void 0 ? "entries" : _ref8$type;
+  var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref9$ignore = _ref9.ignore,
+      ignore = _ref9$ignore === void 0 ? {} : _ref9$ignore,
+      _ref9$source = _ref9.source,
+      source = _ref9$source === void 0 ? [] : _ref9$source,
+      _ref9$type = _ref9.type,
+      type = _ref9$type === void 0 ? "entries" : _ref9$type;
 
   var toDedupe = source.map(function (obj) {
     return obj;
@@ -1203,16 +1253,16 @@ var deduplicate = function deduplicate() {
   var _ignore$keys = ignore.keys,
       keys = _ignore$keys === void 0 ? [] : _ignore$keys;
   return source.filter(function (srcObj, srcIdx) {
-    var srcEntries = Object.entries(srcObj).filter(function (_ref9) {
-      var _ref10 = _slicedToArray(_ref9, 1),
-          k = _ref10[0];
+    var srcEntries = Object.entries(srcObj).filter(function (_ref10) {
+      var _ref11 = _slicedToArray(_ref10, 1),
+          k = _ref11[0];
 
       return !keys.includes(k);
     });
     var lastIdx = toDedupe.findIndex(function (tgtObj) {
-      var tgtEntries = Object.entries(tgtObj).filter(function (_ref11) {
-        var _ref12 = _slicedToArray(_ref11, 1),
-            k = _ref12[0];
+      var tgtEntries = Object.entries(tgtObj).filter(function (_ref12) {
+        var _ref13 = _slicedToArray(_ref12, 1),
+            k = _ref13[0];
 
         return !keys.includes(k);
       });
@@ -1221,24 +1271,24 @@ var deduplicate = function deduplicate() {
         return false;
       }
 
-      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref13) {
-        var _ref14 = _slicedToArray(_ref13, 2),
-            key = _ref14[0],
-            val = _ref14[1];
+      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref14) {
+        var _ref15 = _slicedToArray(_ref14, 2),
+            key = _ref15[0],
+            val = _ref15[1];
 
         return srcObj[key] === val;
       });
-      var sameOnValues = type === "values" && tgtEntries.map(function (_ref15) {
-        var _ref16 = _slicedToArray(_ref15, 2),
-            v = _ref16[1];
+      var sameOnValues = type === "values" && tgtEntries.map(function (_ref16) {
+        var _ref17 = _slicedToArray(_ref16, 2),
+            v = _ref17[1];
 
         return v;
       }).every(function (tgtVal) {
         return Object.values(srcObj).includes(tgtVal);
       });
-      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref17) {
-        var _ref18 = _slicedToArray(_ref17, 1),
-            k = _ref18[0];
+      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref18) {
+        var _ref19 = _slicedToArray(_ref18, 1),
+            k = _ref19[0];
 
         return k;
       }).every(function (tgtKey) {
@@ -1329,20 +1379,20 @@ var removeElements = function removeElements(arr) {
 exports.removeElements = removeElements;
 
 var validateGrid = function validateGrid() {
-  var _ref19 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref19$grid = _ref19.grid,
-      grid = _ref19$grid === void 0 ? [[]] : _ref19$grid,
-      has = _ref19.has,
-      without = _ref19.without,
-      blank = _ref19.blank,
-      _ref19$notBlank = _ref19.notBlank,
-      notBlank = _ref19$notBlank === void 0 ? false : _ref19$notBlank,
-      _ref19$notEmpty = _ref19.notEmpty,
-      notEmpty = _ref19$notEmpty === void 0 ? false : _ref19$notEmpty,
-      _ref19$notFilled = _ref19.notFilled,
-      notFilled = _ref19$notFilled === void 0 ? false : _ref19$notFilled,
-      minCols = _ref19.minCols,
-      minRows = _ref19.minRows;
+  var _ref20 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref20$grid = _ref20.grid,
+      grid = _ref20$grid === void 0 ? [[]] : _ref20$grid,
+      has = _ref20.has,
+      without = _ref20.without,
+      blank = _ref20.blank,
+      _ref20$notBlank = _ref20.notBlank,
+      notBlank = _ref20$notBlank === void 0 ? false : _ref20$notBlank,
+      _ref20$notEmpty = _ref20.notEmpty,
+      notEmpty = _ref20$notEmpty === void 0 ? false : _ref20$notEmpty,
+      _ref20$notFilled = _ref20.notFilled,
+      notFilled = _ref20$notFilled === void 0 ? false : _ref20$notFilled,
+      minCols = _ref20.minCols,
+      minRows = _ref20.minRows;
 
   var length = grid.length;
 
@@ -1398,8 +1448,8 @@ var validateGrid = function validateGrid() {
 exports.validateGrid = validateGrid;
 
 var longest = function longest(grid) {
-  return Math.max.apply(Math, _toConsumableArray(grid.map(function (_ref20) {
-    var length = _ref20.length;
+  return Math.max.apply(Math, _toConsumableArray(grid.map(function (_ref21) {
+    var length = _ref21.length;
     return length;
   })));
 };
@@ -2847,7 +2897,7 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.isObj = exports.getOrInitProp = exports.getGetterDescriptors = exports.fromPath = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.deepAssign = exports.complement = void 0;
+exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.isObj = exports.getOrInitProp = exports.getGetterDescriptors = exports.fromPath = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.deepAssign = exports.complement = exports.objectArrayToDict = void 0;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -3536,8 +3586,48 @@ var fromPath = function fromPath() {
   }, output);
   return output;
 };
+/**
+ * @typedef {{
+ *  
+ * }} ArrayToDictoptions
+ * 
+ * @param {ArrayToDictoptions}
+ */
+
 
 exports.fromPath = fromPath;
+
+var objectArrayToDict = function objectArrayToDict() {
+  var _ref23 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref23$source = _ref23.source,
+      source = _ref23$source === void 0 ? [] : _ref23$source,
+      keys = _ref23.keys,
+      values = _ref23.values,
+      _ref23$onError = _ref23.onError,
+      onError = _ref23$onError === void 0 ? function (err) {
+    return console.warn(err);
+  } : _ref23$onError;
+
+  var output = {};
+
+  try {
+    source.forEach(function (elem) {
+      var _Object$entries$ = _slicedToArray(Object.entries(elem)[0], 2),
+          defaultKey = _Object$entries$[0],
+          defaultVal = _Object$entries$[1];
+
+      var key = elem[keys || defaultKey];
+      var val = values ? elem[values] : defaultVal;
+      output[key] = val;
+    });
+  } catch (error) {
+    onError(error);
+  }
+
+  return output;
+};
+
+exports.objectArrayToDict = objectArrayToDict;
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
