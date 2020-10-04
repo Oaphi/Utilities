@@ -13,6 +13,7 @@ import {
     getGetterDescriptors,
     getOrInitProp,
     isObject,
+    objectArrayToDict,
     pushOrInitProp,
     smartGetter,
     switchIfDiffProp,
@@ -24,6 +25,27 @@ import {
 } from '../src/objects.mjs';
 
 describe('Objects', function () {
+
+    describe('objectArrayToDict', function () {
+        
+        it('should return empty object on no params', function () {
+            const output = objectArrayToDict();
+            expect(output).to.be.an.instanceof(Object).and.be.empty;
+        });
+
+        it('should default to first key and value', function () {
+            const source = [{ id : 1, name : 2, volume : 3 }, { id : 11, volume : 33 }];
+            const output = objectArrayToDict({ source });
+            expect(output).to.deep.equal({ "1" : 1, "11" : 11 });
+        });
+
+        it('should correctly convert to dict when keys are provided', function () {
+            const source = [{ id: 1, name: 2, volume: 3 }, { id: 11, volume: 33 }];
+            const output = objectArrayToDict({ source, keys: "id", values : "name" });
+            expect(output).to.deep.equal({ "1" : 2, "11" : undefined });
+        });
+
+    });
 
     describe('fromPath', function () {
         

@@ -597,7 +597,43 @@ const fromPath = (options = {}) => {
     return output;
 };
 
+/**
+ * @typedef {{
+ *  
+ * }} ArrayToDictoptions
+ * 
+ * @param {ArrayToDictoptions}
+ */
+const objectArrayToDict = ({
+    source = [],
+    keys,
+    values,
+    onError = (err) => console.warn(err)
+} = {}) => {
+
+    const output = {};
+
+    try {
+
+        source.forEach((elem) => {
+            const [ defaultKey, defaultVal ] = Object.entries(elem)[0];
+
+            const key = elem[ keys || defaultKey ];
+            const val = values ? elem[values] : defaultVal;
+
+            output[key] = val;
+        });
+
+    }
+    catch(error) {
+        onError(error);
+    }
+
+    return output;
+};
+
 export {
+    objectArrayToDict,
     complement,
     deepAssign,
     deepCopy,
