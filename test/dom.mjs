@@ -10,13 +10,12 @@ const { JSDOM } = jsdom;
 import utils from "../src/utilities.js";
 const { jsonToDOMString, jsonToFormatString } = utils;
 
-import * as dom_utils from "../src/DOM/DOM.mjs";
-const { 
+import {
     emphasizeSelectedText,
-    elementsLeftUntil, 
-    elementsRightUntil, 
-    listContainsSome 
-} = dom_utils;
+    elementsLeftUntil,
+    elementsRightUntil,
+    listContainsSome
+} from "../src/DOM/dom.mjs";
 
 function getMockDom(html) {
     const dom = new JSDOM(html);
@@ -31,7 +30,7 @@ function getMockDom(html) {
 describe('DOM Utilities', function () {
 
     describe('emphasizeSelectedText', function () {
-        
+
         const { document, body } = getMockDom();
 
         it('should italicize by default', function () {
@@ -42,8 +41,8 @@ describe('DOM Utilities', function () {
 
             elem.focus();
 
-            elem.setSelectionRange(5,15);
-            
+            elem.setSelectionRange(5, 15);
+
             emphasizeSelectedText({ element: elem });
 
             expect(elem.value).to.equal("Some <em>emphasized</em> text");
@@ -58,7 +57,7 @@ describe('DOM Utilities', function () {
 
             elem.setSelectionRange(5, 15);
 
-            emphasizeSelectedText({ element: elem, type : "bold" });
+            emphasizeSelectedText({ element: elem, type: "bold" });
 
             expect(elem.value).to.equal("Some <strong>emphasized</strong> text");
         });
@@ -91,6 +90,31 @@ describe('DOM Utilities', function () {
             emphasizeSelectedText({ element: elem, type: "underline" });
 
             expect(elem.value).to.equal("<u>Some</u> emphasized text");
+        });
+
+        it('should set a link on "link" type', function () {
+            const testText = "check example.com for info";
+
+            const elem = document.createElement("input");
+            elem.value = testText;
+            body.append(elem);
+
+            elem.focus();
+
+            const { length } = testText;
+
+            elem.setSelectionRange(6, length - 9);
+
+            emphasizeSelectedText({
+                element: elem,
+                type: "link",
+                target: "_top",
+                link: "https://example.com"
+            });
+
+            expect(elem.value).to.equal(
+                "check <a target=\"_top\" href=\"https://example.com\">example.com</a> for info"
+            );
         });
 
     });
@@ -144,7 +168,7 @@ describe('DOM Utilities', function () {
         });
 
         describe('callback', function () {
-            
+
             it('should execute callback provided', function () {
                 let counter = 0;
                 elementsRightUntil(elem1, () => true, elem => counter++);
@@ -244,7 +268,7 @@ describe('DOM Utilities', function () {
             });
 
             it('should expose index correctly', function () {
-                const times = ["4 AM","12 PM", "4 PM"];
+                const times = ["4 AM", "12 PM", "4 PM"];
                 const time = elementsLeftUntil(elem1, elem => elem === elem1.children[1], (elem, i) => times[i]);
                 expect(time).to.equal(times[1]);
             });
@@ -329,19 +353,19 @@ describe('DOM Utilities', function () {
     describe('listContainsSome', function () {
 
         const { document } = getMockDom();
-        
+
         it('should return true if some tokens contained', function () {
             const img = document.createElement("img");
 
-            img.classList.add("A","B","C");
+            img.classList.add("A", "B", "C");
 
-            const checked = listContainsSome(img.classList)("B","D");
+            const checked = listContainsSome(img.classList)("B", "D");
             expect(checked).to.be.true;
         });
 
         it('should return false if no tokens contained', function () {
             const par = document.createElement("p");
-            const checked = listContainsSome(par.classList)("A","N");
+            const checked = listContainsSome(par.classList)("A", "N");
             expect(checked).to.be.false;
         });
 

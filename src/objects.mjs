@@ -599,7 +599,10 @@ const fromPath = (options = {}) => {
 
 /**
  * @typedef {{
- *  
+ *  source  ?: any[],
+ *  keys    ?: string,
+ *  values  ?: string,
+ *  onError ?: (err : Error) => void
  * }} ArrayToDictoptions
  * 
  * @param {ArrayToDictoptions}
@@ -610,11 +613,9 @@ const objectArrayToDict = ({
     values,
     onError = (err) => console.warn(err)
 } = {}) => {
-
     const output = {};
 
     try {
-
         source.forEach((elem) => {
             const [ defaultKey, defaultVal ] = Object.entries(elem)[0];
 
@@ -623,7 +624,6 @@ const objectArrayToDict = ({
 
             output[key] = val;
         });
-
     }
     catch(error) {
         onError(error);

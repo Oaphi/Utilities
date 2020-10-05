@@ -124,7 +124,13 @@ describe('FetchConfig', function () {
             expect(url).to.equal("https://example.org/test?alpha=1&beta=2");
         });
 
+        it('should use mapper correctly', function () {
+            
+            const config = new FetchConfig(params);
 
+            const { payload, body, redirect, followRedirects } = config.json();
+
+        });
 
     });
 

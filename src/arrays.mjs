@@ -93,6 +93,44 @@ const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) =
 };
 
 /**
+ * @typedef {{
+ *  upToMatching ?: (any) => boolean,
+ *  upToIndex    ?: number,
+ *  source       ?: any[],
+ *  mapper       ?: function,
+ *  onError      ?: (err : Error) => void
+ * }} MapUntilOptions
+ * 
+ * @param {MapUntilOptions}
+ * @returns {any[]}
+ */
+const mapUntil = ({
+    upToMatching,
+    upToIndex,
+    source = [],
+    mapper = (v) => v,
+    onError = (err) => console.warn(err)
+} = {}) => {
+    try {
+        const mapped = [];
+
+        for (let i = 0; i < source.length; i++) {
+            const element = source[i];
+
+            if (i >= upToIndex || typeof upToMatching === "function" && upToMatching(element)) { break; }
+
+            mapped[i] = mapper(element);
+        }
+
+        return mapped;
+    }
+    catch (error) {
+        onError(error);
+        return source;
+    }
+};
+
+/**
  * @summary returns last element of array
  * @param {any[]} array
  * @returns {any} 
@@ -225,9 +263,16 @@ const expandGrid = ({
     horizontally = 0,
     fill
 } = {}) => {
+    //TODO: add utility
+};
 
-
-
+/**
+ * @typedef {} InsertInGridOptions
+ */
+const insertInGrid = ({
+    source
+} = {}) => {
+    //TODO: add utility
 };
 
 /**
@@ -253,8 +298,8 @@ const foldGrid = ({
         const column = source.map((row) => row[overColumn]);
 
         return column.reduce((acc, cur, ri) => {
-            if (matching(cur, column)) { 
-                return callback(acc, cur, source[ri]); 
+            if (matching(cur, column)) {
+                return callback(acc, cur, source[ri]);
             }
             return acc;
         }, accumulator);
@@ -262,17 +307,6 @@ const foldGrid = ({
     catch (error) {
         onError(error);
     }
-};
-
-/**
- * 
- */
-const insertInGrid = ({
-    source
-} = {}) => {
-
-
-
 };
 
 /**
@@ -632,6 +666,7 @@ export {
     keyMap,
     last,
     longest,
+    mapUntil,
     mergeOnto,
     reduceWithStep,
     removeElements,

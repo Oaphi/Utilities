@@ -17,6 +17,7 @@ import {
     unionGrids,
     keyMap,
     last,
+    mapUntil,
     mergeOnto,
     reduceWithStep,
     removeElements,
@@ -33,6 +34,33 @@ describe('Arrays', function () {
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
 
+    describe('mapUntil', function () {
+
+        it('should return empty array by default', function () {
+            const output = mapUntil();
+            expect(output).to.be.an.instanceof(Array).and.be.empty;
+        });
+
+        it('should map to the same element by default', function () {
+            const source = [1, 2, 3, 4];
+            const output = mapUntil({ source });
+            expect(output).to.deep.equal(source);
+        });
+
+        it('should stop upon reaching specified index', function () {
+            const source = [0, 1, 2, 4, 8, 16, 32];
+            const output = mapUntil({ source, upToIndex: 5 });
+            expect(output).to.deep.equal([0, 1, 2, 4, 8]);
+        });
+
+        it('should stop upon reaching row matching condition', function () {
+            const source = [0, 1, 2, 4, 8, 16, 32, 64, 128];
+            const output = mapUntil({ source, upToMatching: (v) => v >= 32 });
+            expect(output).to.deep.equal([0, 1, 2, 4, 8, 16]);
+        });
+
+    });
+
     describe('foldGrid', function () {
         it('should fold to 1 on no params', function () {
             const folded = foldGrid();
@@ -40,28 +68,28 @@ describe('Arrays', function () {
         });
 
         it('should 1-increment on no callback', function () {
-            const folded = foldGrid({ source : [[1],[2],[3]] });
+            const folded = foldGrid({ source: [[1], [2], [3]] });
             expect(folded).to.equal(3);
         });
 
         it('should correctly match condition', function () {
             const source = [[1], [2], [3], [4]];
-            
-            const folded = foldGrid({ 
-                source, 
-                matching : (v) => v > 2
+
+            const folded = foldGrid({
+                source,
+                matching: (v) => v > 2
             });
 
             expect(folded).to.equal(2);
         });
-        
+
         it('should correctly invoke callback', function () {
             const source = [[1], [2], [3], [4]];
 
             const folded = foldGrid({
                 source,
                 matching: (v) => v < 4,
-                callback : (a,c) => a + c
+                callback: (a, c) => a + c
             });
 
             expect(folded).to.equal(6);
@@ -71,7 +99,7 @@ describe('Arrays', function () {
             const source = [[1, 5], [2, 3], [8, 2]];
             const folded = foldGrid({
                 source,
-                accumulator : 1,
+                accumulator: 1,
                 overColumn: 1,
                 callback: (a, c) => a * c
             });
@@ -80,9 +108,9 @@ describe('Arrays', function () {
 
         it('should expose full row to callback', function () {
             const source = [[1, 5], [2, 3], [8, 2]];
-            const folded = foldGrid({ 
+            const folded = foldGrid({
                 source,
-                callback: (a, __, r) => a + r.reduce((a,c) => a + c)
+                callback: (a, __, r) => a + r.reduce((a, c) => a + c)
             });
             expect(folded).to.equal(21);
         });
@@ -94,10 +122,10 @@ describe('Arrays', function () {
             const output = uniqify();
             expect(output).to.be.an.instanceof(Array).and.be.empty;
         });
-        
+
         it('should leave only unique elements', function () {
-            const output = uniqify([ 2,2, "menu", "menu", false, false ]);
-            expect(output).to.be.deep.equal([ 2, "menu", false ]);
+            const output = uniqify([2, 2, "menu", "menu", false, false]);
+            expect(output).to.be.deep.equal([2, "menu", false]);
         });
 
     });
@@ -121,27 +149,27 @@ describe('Arrays', function () {
         });
 
         it('should accept custom hash function', function () {
-            const grid1 = [[2,4], [6,0]];
-            const grid2 = [[3,3], [5,1]];
+            const grid1 = [[2, 4], [6, 0]];
+            const grid2 = [[3, 3], [5, 1]];
 
-            const output = unionGrids({ 
-                sources: [grid1, grid2], 
-                hasher : (v) => v.reduce((a,b) => a + b)
+            const output = unionGrids({
+                sources: [grid1, grid2],
+                hasher: (v) => v.reduce((a, b) => a + b)
             });
 
-            expect(output).to.deep.equal([ grid1[0] ]);
+            expect(output).to.deep.equal([grid1[0]]);
         });
 
         it('should work on string data', function () {
-            
+
             const g1 = [["one", "two"]];
             const g2 = [["three", "four"], ["one", "two"]];
 
-            const output = unionGrids({ 
-                sources : [ g1, g2 ]
+            const output = unionGrids({
+                sources: [g1, g2]
             });
 
-            expect(output).to.deep.equal([ ...g1, g2[0] ]);
+            expect(output).to.deep.equal([...g1, g2[0]]);
         });
 
     });
@@ -632,7 +660,7 @@ describe('Arrays', function () {
         it('should work on strings', function () {
             const source = "1234567890123";
             const output = chunkify(source, { size: 4 });
-            expect(output).to.deep.equal([ "1234", "5678", "9012", "3" ]);
+            expect(output).to.deep.equal(["1234", "5678", "9012", "3"]);
         });
 
     });

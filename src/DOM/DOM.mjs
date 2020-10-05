@@ -1,16 +1,24 @@
 /**
  * @typedef {object} EmphasisConfig
  * @property {HTMLInputElement} element
- * @property {("bold"|"italic"|"strike"|"underline")} type
+ * @property {string} [link]
+ * @property {string} [target]
+ * @property {("bold"|"italic"|"link"|"strike"|"underline")} type
  * 
  * @param {EmphasisConfig}
  * @returns {HTMLInputElement}
  */
-const emphasizeSelectedText = ({ element, type = "italic" }) => {
+const emphasizeSelectedText = ({ 
+    element, 
+    type = "italic", 
+    target = "_self", 
+    link 
+}) => {
 
     const emphasis = new Map([
         ["italic", "em"],
         ["bold", "strong"],
+        ["link", "a"],
         ["underline", "u"],
         ["strike", "s"]
     ]);
@@ -21,11 +29,13 @@ const emphasizeSelectedText = ({ element, type = "italic" }) => {
         return element;
     }
 
+    const linkAttrs = type === "link" ? ` target="${target}" href="${link}"` : "";
+
     const { selectionStart, selectionEnd, value } = element;
 
     const selected = value.slice(selectionStart, selectionEnd);
 
-    element.value = value.replace(selected, `<${tag}>${selected}</${tag}>`);
+    element.value = value.replace(selected, `<${tag}${linkAttrs}>${selected}</${tag}>`);
     
     return element;
 };
