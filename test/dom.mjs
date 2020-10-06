@@ -15,7 +15,7 @@ import {
     elementsLeftUntil,
     elementsRightUntil,
     listContainsSome
-} from "../src/DOM/dom.mjs";
+} from "../src/DOM/elements.mjs";
 
 function getMockDom(html) {
     const dom = new JSDOM(html);

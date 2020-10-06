@@ -27,7 +27,7 @@ describe('withInterval', function () {
 
         const init = Date.now();
 
-        await withInterval({ interval: 1e3, callback: () => i++, times : 3 });
+        await withInterval({ interval: 1001, callback: () => i++, times : 3 });
 
         const now = Date.now();
 

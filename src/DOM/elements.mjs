@@ -51,7 +51,7 @@ const emphasizeSelectedText = ({
  * @param {function(HTMLElement)} [fallback]
  * @param {boolean} [strict]
  */
-function elementsRightUntil(root, offset, comparator, callback, fallback, strict = false) {
+const elementsRightUntil = (root, offset, comparator, callback, fallback, strict = false) => {
 
     if (typeof offset === "function") {
         fallback = callback;
@@ -101,7 +101,7 @@ function elementsRightUntil(root, offset, comparator, callback, fallback, strict
  * @param {function(HTMLElement)} [fallback]
  * @param {boolean} [strict]
  */
-function elementsLeftUntil(root, offset, comparator, callback, fallback, strict = false) {
+const elementsLeftUntil = (root, offset, comparator, callback, fallback, strict = false) => {
 
     if (typeof offset === "function") {
         fallback = callback;
