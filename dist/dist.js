@@ -134,18 +134,19 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   return AsyncAppendQueue;
 });
 "use strict";
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.elementsRightUntil = elementsRightUntil;
-exports.elementsLeftUntil = elementsLeftUntil;
-exports.removeLastChild = exports.listContainsSome = exports.emphasizeSelectedText = void 0;
+exports.removeLastChild = exports.listContainsSome = exports.elementsLeftUntil = exports.elementsRightUntil = exports.emphasizeSelectedText = void 0;
 
 /**
  * @typedef {object} EmphasisConfig
  * @property {HTMLInputElement} element
- * @property {("bold"|"italic"|"strike"|"underline")} type
+ * @property {string} [link]
+ * @property {string} [target]
+ * @property {("bold"|"italic"|"link"|"strike"|"underline")} type
  * 
  * @param {EmphasisConfig}
  * @returns {HTMLInputElement}
@@ -153,19 +154,23 @@ exports.removeLastChild = exports.listContainsSome = exports.emphasizeSelectedTe
 var emphasizeSelectedText = function emphasizeSelectedText(_ref) {
   var element = _ref.element,
       _ref$type = _ref.type,
-      type = _ref$type === void 0 ? "italic" : _ref$type;
-  var emphasis = new Map([["italic", "em"], ["bold", "strong"], ["underline", "u"], ["strike", "s"]]);
+      type = _ref$type === void 0 ? "italic" : _ref$type,
+      _ref$target = _ref.target,
+      target = _ref$target === void 0 ? "_self" : _ref$target,
+      link = _ref.link;
+  var emphasis = new Map([["italic", "em"], ["bold", "strong"], ["link", "a"], ["underline", "u"], ["strike", "s"]]);
   var tag = emphasis.get(type);
 
   if (!tag) {
     return element;
   }
 
+  var linkAttrs = type === "link" ? " target=\"".concat(target, "\" href=\"").concat(link, "\"") : "";
   var selectionStart = element.selectionStart,
       selectionEnd = element.selectionEnd,
       value = element.value;
   var selected = value.slice(selectionStart, selectionEnd);
-  element.value = value.replace(selected, "<".concat(tag, ">").concat(selected, "</").concat(tag, ">"));
+  element.value = value.replace(selected, "<".concat(tag).concat(linkAttrs, ">").concat(selected, "</").concat(tag, ">"));
   return element;
 };
 /**
@@ -183,7 +188,7 @@ var emphasizeSelectedText = function emphasizeSelectedText(_ref) {
 
 exports.emphasizeSelectedText = emphasizeSelectedText;
 
-function elementsRightUntil(root, offset, comparator, callback, fallback) {
+var elementsRightUntil = function elementsRightUntil(root, offset, comparator, callback, fallback) {
   var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
 
   if (typeof offset === "function") {
@@ -221,7 +226,7 @@ function elementsRightUntil(root, offset, comparator, callback, fallback) {
 
   var use = matchedOnce ? callback : fallback;
   return use ? use(current, index) : current;
-}
+};
 /**
  * @summary inverse of elementsRightUntil
  * @param {HTMLElement} root
@@ -233,7 +238,9 @@ function elementsRightUntil(root, offset, comparator, callback, fallback) {
  */
 
 
-function elementsLeftUntil(root, offset, comparator, callback, fallback) {
+exports.elementsRightUntil = elementsRightUntil;
+
+var elementsLeftUntil = function elementsLeftUntil(root, offset, comparator, callback, fallback) {
   var strict = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
 
   if (typeof offset === "function") {
@@ -273,12 +280,14 @@ function elementsLeftUntil(root, offset, comparator, callback, fallback) {
 
   var use = matchedOnce ? callback : fallback;
   return use ? use(current, index) : current;
-}
+};
 /**
  * @summary checks if some tokens are contained
  * @param {DOMTokenList} list
  */
 
+
+exports.elementsLeftUntil = elementsLeftUntil;
 
 var listContainsSome = function listContainsSome(list) {
   return (
@@ -311,7 +320,6 @@ var removeLastChild = function removeLastChild(element) {
 };
 
 exports.removeLastChild = removeLastChild;
-"use strict";
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -623,7 +631,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.uniqify = exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.uniqify = exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -786,13 +794,63 @@ var filterMapped = function filterMapped() {
   };
 };
 /**
+ * @typedef {{
+ *  upToMatching ?: (any) => boolean,
+ *  upToIndex    ?: number,
+ *  source       ?: any[],
+ *  mapper       ?: function,
+ *  onError      ?: (err : Error) => void
+ * }} MapUntilOptions
+ * 
+ * @param {MapUntilOptions}
+ * @returns {any[]}
+ */
+
+
+exports.filterMapped = filterMapped;
+
+var mapUntil = function mapUntil() {
+  var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      upToMatching = _ref2.upToMatching,
+      upToIndex = _ref2.upToIndex,
+      _ref2$source = _ref2.source,
+      source = _ref2$source === void 0 ? [] : _ref2$source,
+      _ref2$mapper = _ref2.mapper,
+      mapper = _ref2$mapper === void 0 ? function (v) {
+    return v;
+  } : _ref2$mapper,
+      _ref2$onError = _ref2.onError,
+      onError = _ref2$onError === void 0 ? function (err) {
+    return console.warn(err);
+  } : _ref2$onError;
+
+  try {
+    var mapped = [];
+
+    for (var i = 0; i < source.length; i++) {
+      var element = source[i];
+
+      if (i >= upToIndex || typeof upToMatching === "function" && upToMatching(element)) {
+        break;
+      }
+
+      mapped[i] = mapper(element);
+    }
+
+    return mapped;
+  } catch (error) {
+    onError(error);
+    return source;
+  }
+};
+/**
  * @summary returns last element of array
  * @param {any[]} array
  * @returns {any} 
  */
 
 
-exports.filterMapped = filterMapped;
+exports.mapUntil = mapUntil;
 
 var last = function last(array) {
   return array[array.length - 1];
@@ -906,13 +964,13 @@ var mergeOnto = function mergeOnto(source) {
 
 exports.mergeOnto = mergeOnto;
 
-var reduceWithStep = function reduceWithStep(_ref2) {
-  var _ref2$source = _ref2.source,
-      source = _ref2$source === void 0 ? [] : _ref2$source,
-      callback = _ref2.callback,
-      _ref2$step = _ref2.step,
-      step = _ref2$step === void 0 ? 1 : _ref2$step,
-      initial = _ref2.initial;
+var reduceWithStep = function reduceWithStep(_ref3) {
+  var _ref3$source = _ref3.source,
+      source = _ref3$source === void 0 ? [] : _ref3$source,
+      callback = _ref3.callback,
+      _ref3$step = _ref3.step,
+      step = _ref3$step === void 0 ? 1 : _ref3$step,
+      initial = _ref3.initial;
   return source.reduce(function (acc, curr, i) {
     return i % step ? acc : callback(acc, curr, i + step - 1, source);
   }, initial || source[0]);
@@ -921,13 +979,13 @@ var reduceWithStep = function reduceWithStep(_ref2) {
 exports.reduceWithStep = reduceWithStep;
 
 var unionGrids = function unionGrids() {
-  var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref3$sources = _ref3.sources,
-      sources = _ref3$sources === void 0 ? [] : _ref3$sources,
-      _ref3$hasher = _ref3.hasher,
-      hasher = _ref3$hasher === void 0 ? function (v) {
+  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref4$sources = _ref4.sources,
+      sources = _ref4$sources === void 0 ? [] : _ref4$sources,
+      _ref4$hasher = _ref4.hasher,
+      hasher = _ref4$hasher === void 0 ? function (v) {
     return v === "" ? "" : JSON.stringify(v);
-  } : _ref3$hasher;
+  } : _ref4$hasher;
 
   var hashes = new Set();
   var output = sources.reduce(function (acc, cur) {
@@ -963,14 +1021,25 @@ var unionGrids = function unionGrids() {
 
 exports.unionGrids = unionGrids;
 
-var expandGrid = function expandGrid() {
-  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      source = _ref4.source,
-      _ref4$vertically = _ref4.vertically,
-      vertically = _ref4$vertically === void 0 ? 0 : _ref4$vertically,
-      _ref4$horizontally = _ref4.horizontally,
-      horizontally = _ref4$horizontally === void 0 ? 0 : _ref4$horizontally,
-      fill = _ref4.fill;
+var expandGrid = function expandGrid() {//TODO: add utility
+
+  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref5.source,
+      _ref5$vertically = _ref5.vertically,
+      vertically = _ref5$vertically === void 0 ? 0 : _ref5$vertically,
+      _ref5$horizontally = _ref5.horizontally,
+      horizontally = _ref5$horizontally === void 0 ? 0 : _ref5$horizontally,
+      fill = _ref5.fill;
+};
+/**
+ * @typedef {} InsertInGridOptions
+ */
+
+
+var insertInGrid = function insertInGrid() {//TODO: add utility
+
+  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref6.source;
 };
 /**
  * @typedef {{
@@ -985,25 +1054,25 @@ var expandGrid = function expandGrid() {
 
 
 var foldGrid = function foldGrid() {
-  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref5$source = _ref5.source,
-      source = _ref5$source === void 0 ? [[]] : _ref5$source,
-      _ref5$accumulator = _ref5.accumulator,
-      accumulator = _ref5$accumulator === void 0 ? 0 : _ref5$accumulator,
-      _ref5$callback = _ref5.callback,
-      callback = _ref5$callback === void 0 ? function (acc) {
+  var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref7$source = _ref7.source,
+      source = _ref7$source === void 0 ? [[]] : _ref7$source,
+      _ref7$accumulator = _ref7.accumulator,
+      accumulator = _ref7$accumulator === void 0 ? 0 : _ref7$accumulator,
+      _ref7$callback = _ref7.callback,
+      callback = _ref7$callback === void 0 ? function (acc) {
     return acc += 1;
-  } : _ref5$callback,
-      _ref5$overColumn = _ref5.overColumn,
-      overColumn = _ref5$overColumn === void 0 ? 0 : _ref5$overColumn,
-      _ref5$matching = _ref5.matching,
-      matching = _ref5$matching === void 0 ? function () {
+  } : _ref7$callback,
+      _ref7$overColumn = _ref7.overColumn,
+      overColumn = _ref7$overColumn === void 0 ? 0 : _ref7$overColumn,
+      _ref7$matching = _ref7.matching,
+      matching = _ref7$matching === void 0 ? function () {
     return true;
-  } : _ref5$matching,
-      _ref5$onError = _ref5.onError,
-      onError = _ref5$onError === void 0 ? function (err) {
+  } : _ref7$matching,
+      _ref7$onError = _ref7.onError,
+      onError = _ref7$onError === void 0 ? function (err) {
     return console.warn(err);
-  } : _ref5$onError;
+  } : _ref7$onError;
 
   try {
     var column = source.map(function (row) {
@@ -1019,17 +1088,6 @@ var foldGrid = function foldGrid() {
   } catch (error) {
     onError(error);
   }
-};
-/**
- * 
- */
-
-
-exports.foldGrid = foldGrid;
-
-var insertInGrid = function insertInGrid() {
-  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      source = _ref6.source;
 };
 /**
  * @typedef {object} ShrinkGridOptions
@@ -1052,30 +1110,32 @@ var insertInGrid = function insertInGrid() {
  */
 
 
+exports.foldGrid = foldGrid;
+
 var shrinkGrid = function shrinkGrid() {
-  var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref7$vertically = _ref7.vertically,
-      vertically = _ref7$vertically === void 0 ? 0 : _ref7$vertically,
-      source = _ref7.source,
-      _ref7$top = _ref7.top,
-      top = _ref7$top === void 0 ? 0 : _ref7$top,
-      _ref7$right = _ref7.right,
-      right = _ref7$right === void 0 ? 0 : _ref7$right,
-      _ref7$left = _ref7.left,
-      left = _ref7$left === void 0 ? 0 : _ref7$left,
-      _ref7$leave = _ref7.leave,
-      leave = _ref7$leave === void 0 ? {
+  var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref8$vertically = _ref8.vertically,
+      vertically = _ref8$vertically === void 0 ? 0 : _ref8$vertically,
+      source = _ref8.source,
+      _ref8$top = _ref8.top,
+      top = _ref8$top === void 0 ? 0 : _ref8$top,
+      _ref8$right = _ref8.right,
+      right = _ref8$right === void 0 ? 0 : _ref8$right,
+      _ref8$left = _ref8.left,
+      left = _ref8$left === void 0 ? 0 : _ref8$left,
+      _ref8$leave = _ref8.leave,
+      leave = _ref8$leave === void 0 ? {
     top: 0,
     right: 0,
     bottom: 0,
     left: 0
-  } : _ref7$leave,
-      _ref7$horizontally = _ref7.horizontally,
-      horizontally = _ref7$horizontally === void 0 ? 0 : _ref7$horizontally,
-      _ref7$bottom = _ref7.bottom,
-      bottom = _ref7$bottom === void 0 ? 0 : _ref7$bottom,
-      _ref7$all = _ref7.all,
-      all = _ref7$all === void 0 ? 0 : _ref7$all;
+  } : _ref8$leave,
+      _ref8$horizontally = _ref8.horizontally,
+      horizontally = _ref8$horizontally === void 0 ? 0 : _ref8$horizontally,
+      _ref8$bottom = _ref8.bottom,
+      bottom = _ref8$bottom === void 0 ? 0 : _ref8$bottom,
+      _ref8$all = _ref8.all,
+      all = _ref8$all === void 0 ? 0 : _ref8$all;
 
   if (!source || !source.length) {
     return [[]];
@@ -1195,10 +1255,10 @@ var splitIntoConseq = function splitIntoConseq() {
 exports.splitIntoConseq = splitIntoConseq;
 
 var countObjects = function countObjects() {
-  var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref8$source = _ref8.source,
-      source = _ref8$source === void 0 ? [] : _ref8$source,
-      onKey = _ref8.onKey;
+  var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref9$source = _ref9.source,
+      source = _ref9$source === void 0 ? [] : _ref9$source,
+      onKey = _ref9.onKey;
 
   var validObjects = source.filter(Boolean);
   var length = validObjects.length;
@@ -1238,13 +1298,13 @@ var countObjects = function countObjects() {
 exports.countObjects = countObjects;
 
 var deduplicate = function deduplicate() {
-  var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref9$ignore = _ref9.ignore,
-      ignore = _ref9$ignore === void 0 ? {} : _ref9$ignore,
-      _ref9$source = _ref9.source,
-      source = _ref9$source === void 0 ? [] : _ref9$source,
-      _ref9$type = _ref9.type,
-      type = _ref9$type === void 0 ? "entries" : _ref9$type;
+  var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref10$ignore = _ref10.ignore,
+      ignore = _ref10$ignore === void 0 ? {} : _ref10$ignore,
+      _ref10$source = _ref10.source,
+      source = _ref10$source === void 0 ? [] : _ref10$source,
+      _ref10$type = _ref10.type,
+      type = _ref10$type === void 0 ? "entries" : _ref10$type;
 
   var toDedupe = source.map(function (obj) {
     return obj;
@@ -1253,16 +1313,16 @@ var deduplicate = function deduplicate() {
   var _ignore$keys = ignore.keys,
       keys = _ignore$keys === void 0 ? [] : _ignore$keys;
   return source.filter(function (srcObj, srcIdx) {
-    var srcEntries = Object.entries(srcObj).filter(function (_ref10) {
-      var _ref11 = _slicedToArray(_ref10, 1),
-          k = _ref11[0];
+    var srcEntries = Object.entries(srcObj).filter(function (_ref11) {
+      var _ref12 = _slicedToArray(_ref11, 1),
+          k = _ref12[0];
 
       return !keys.includes(k);
     });
     var lastIdx = toDedupe.findIndex(function (tgtObj) {
-      var tgtEntries = Object.entries(tgtObj).filter(function (_ref12) {
-        var _ref13 = _slicedToArray(_ref12, 1),
-            k = _ref13[0];
+      var tgtEntries = Object.entries(tgtObj).filter(function (_ref13) {
+        var _ref14 = _slicedToArray(_ref13, 1),
+            k = _ref14[0];
 
         return !keys.includes(k);
       });
@@ -1271,24 +1331,24 @@ var deduplicate = function deduplicate() {
         return false;
       }
 
-      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref14) {
-        var _ref15 = _slicedToArray(_ref14, 2),
-            key = _ref15[0],
-            val = _ref15[1];
+      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref15) {
+        var _ref16 = _slicedToArray(_ref15, 2),
+            key = _ref16[0],
+            val = _ref16[1];
 
         return srcObj[key] === val;
       });
-      var sameOnValues = type === "values" && tgtEntries.map(function (_ref16) {
-        var _ref17 = _slicedToArray(_ref16, 2),
-            v = _ref17[1];
+      var sameOnValues = type === "values" && tgtEntries.map(function (_ref17) {
+        var _ref18 = _slicedToArray(_ref17, 2),
+            v = _ref18[1];
 
         return v;
       }).every(function (tgtVal) {
         return Object.values(srcObj).includes(tgtVal);
       });
-      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref18) {
-        var _ref19 = _slicedToArray(_ref18, 1),
-            k = _ref19[0];
+      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref19) {
+        var _ref20 = _slicedToArray(_ref19, 1),
+            k = _ref20[0];
 
         return k;
       }).every(function (tgtKey) {
@@ -1379,20 +1439,20 @@ var removeElements = function removeElements(arr) {
 exports.removeElements = removeElements;
 
 var validateGrid = function validateGrid() {
-  var _ref20 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref20$grid = _ref20.grid,
-      grid = _ref20$grid === void 0 ? [[]] : _ref20$grid,
-      has = _ref20.has,
-      without = _ref20.without,
-      blank = _ref20.blank,
-      _ref20$notBlank = _ref20.notBlank,
-      notBlank = _ref20$notBlank === void 0 ? false : _ref20$notBlank,
-      _ref20$notEmpty = _ref20.notEmpty,
-      notEmpty = _ref20$notEmpty === void 0 ? false : _ref20$notEmpty,
-      _ref20$notFilled = _ref20.notFilled,
-      notFilled = _ref20$notFilled === void 0 ? false : _ref20$notFilled,
-      minCols = _ref20.minCols,
-      minRows = _ref20.minRows;
+  var _ref21 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref21$grid = _ref21.grid,
+      grid = _ref21$grid === void 0 ? [[]] : _ref21$grid,
+      has = _ref21.has,
+      without = _ref21.without,
+      blank = _ref21.blank,
+      _ref21$notBlank = _ref21.notBlank,
+      notBlank = _ref21$notBlank === void 0 ? false : _ref21$notBlank,
+      _ref21$notEmpty = _ref21.notEmpty,
+      notEmpty = _ref21$notEmpty === void 0 ? false : _ref21$notEmpty,
+      _ref21$notFilled = _ref21.notFilled,
+      notFilled = _ref21$notFilled === void 0 ? false : _ref21$notFilled,
+      minCols = _ref21.minCols,
+      minRows = _ref21.minRows;
 
   var length = grid.length;
 
@@ -1448,8 +1508,8 @@ var validateGrid = function validateGrid() {
 exports.validateGrid = validateGrid;
 
 var longest = function longest(grid) {
-  return Math.max.apply(Math, _toConsumableArray(grid.map(function (_ref21) {
-    var length = _ref21.length;
+  return Math.max.apply(Math, _toConsumableArray(grid.map(function (_ref22) {
+    var length = _ref22.length;
     return length;
   })));
 };
@@ -1621,7 +1681,7 @@ var forEachAwait = /*#__PURE__*/function () {
 /**
  * @typedef {{
  *  interval? : number,
- *  callback : function : Promise,
+ *  callback : function () : Promise,
  *  stopIf? : boolean,
  *  times? : number
  * }} IntervalConfig
@@ -1878,104 +1938,97 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 });
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.makeEnum = exports.defineConstant = void 0;
+
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define([], factory);
-  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && module.exports) {
-    module.exports = factory();
-  } else {
-    root.returnExports = factory();
-  }
-})(typeof self !== 'undefined' ? self : void 0, function () {
-  /**
-   * @summary defines a non-changeable property
-   * @param {object} obj 
-   * @param {string} key 
-   * @param {any} val 
-   * @param {boolean} [enumerable=true]
-   * @returns {object}
-   */
-  var defineConstant = function defineConstant(obj, key, val) {
-    var enumerable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-    return Object.defineProperty(obj, key, {
-      enumerable: enumerable,
-      configurable: false,
-      writable: false,
-      value: val
-    });
-  };
-  /**
-   * @summary makes a Enum
-   * @param {string[]} choices
-   * @returns {object}
-   */
+/**
+ * @summary defines a non-changeable property
+ * @param {object} obj 
+ * @param {string} key 
+ * @param {any} val 
+ * @param {boolean} [enumerable=true]
+ * @returns {object}
+ */
+var defineConstant = function defineConstant(obj, key, val) {
+  var enumerable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+  return Object.defineProperty(obj, key, {
+    enumerable: enumerable,
+    configurable: false,
+    writable: false,
+    value: val
+  });
+};
+/**
+ * @summary makes a Enum
+ * @param {string[]} choices
+ * @returns {object}
+ */
 
 
-  var makeEnum = function makeEnum(choices) {
-    var length = choices.length;
-    var enumerator = Object.create(null);
-    var increment = 1,
-        index = 0;
+exports.defineConstant = defineConstant;
 
-    var _iterator = _createForOfIteratorHelper(choices),
-        _step;
+var makeEnum = function makeEnum(choices) {
+  var length = choices.length;
+  var enumerator = Object.create(null);
+  var increment = 1,
+      index = 0;
 
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var choice = _step.value;
-        defineConstant(enumerator, index, choice, false);
-        defineConstant(enumerator, choice, increment);
-        increment = increment << 1;
-        index++;
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
+  var _iterator = _createForOfIteratorHelper(choices),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var choice = _step.value;
+      defineConstant(enumerator, index, choice, false);
+      defineConstant(enumerator, choice, increment);
+      increment = increment << 1;
+      index++;
     }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
 
-    defineConstant(enumerator, "length", length, false);
-    defineConstant(enumerator, "toString", function () {
-      return "[object Enum]";
-    }, false);
+  defineConstant(enumerator, "length", length, false);
+  defineConstant(enumerator, "toString", function () {
+    return "[object Enum]";
+  }, false);
 
-    enumerator[Symbol.iterator] = function () {
-      var i = 0;
-      return {
-        next: function next() {
-          return {
-            done: i >= length,
-            value: enumerator[i++]
-          };
-        }
-      };
-    };
-
-    var frozen = Object.freeze(enumerator);
-    return new Proxy(frozen, {
-      get: function get(target, key) {
-        if (!Reflect.has(target, key)) {
-          throw new RangeError("Invalid enum property: ".concat(key));
-        }
-
-        return target[key];
+  enumerator[Symbol.iterator] = function () {
+    var i = 0;
+    return {
+      next: function next() {
+        return {
+          done: i >= length,
+          value: enumerator[i++]
+        };
       }
-    });
+    };
   };
 
-  return {
-    defineConstant: defineConstant,
-    makeEnum: makeEnum
-  };
-});
+  var frozen = Object.freeze(enumerator);
+  return new Proxy(frozen, {
+    get: function get(target, key) {
+      if (!Reflect.has(target, key)) {
+        //always explicityl convert to string as Symbols cannot be coerced
+        throw new RangeError("Invalid enum property: ".concat(key.toString()));
+      }
+
+      return target[key];
+    }
+  });
+};
+
+exports.makeEnum = makeEnum;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3588,7 +3641,10 @@ var fromPath = function fromPath() {
 };
 /**
  * @typedef {{
- *  
+ *  source  ?: any[],
+ *  keys    ?: string,
+ *  values  ?: string,
+ *  onError ?: (err : Error) => void
  * }} ArrayToDictoptions
  * 
  * @param {ArrayToDictoptions}
