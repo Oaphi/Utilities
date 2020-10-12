@@ -55,7 +55,42 @@ const chunkify = (source, { limits = [], size } = {}) => {
 };
 
 /**
- * Combines filter() and map() in O(n)
+ * @summary partitions an array
+ * @param {{ source: any[], parts?: number }}
+ * @returns {any[]}
+ */
+const partify = ({ source, parts = 2 }) => {
+    const size = Math.ceil(source.length / parts) || 1;
+
+    const output = [];
+
+    let chunk = 0;
+    while (chunk < parts) {
+        const offset = chunk * size;
+
+        const chnk = source.slice(offset, size + offset);
+
+        if (!chnk.length) { return output; }
+
+        output.push(chnk);
+        chunk++;
+    }
+
+    return output;
+};
+
+/**
+ * @typedef {{
+ *  source : any[][]
+ * }} TransposeOptions
+ * 
+ * @summary transposes a grid
+ * @param {TransposeOptions}
+ */
+const transposeGrid = ({ source = [[]] } = {}) => source[0].map((col,ci) => source.map((row) => row[ci] ));
+
+/**
+ * @summary Combines filter() and map() in O(n)
  * @param {any[]} [array]
  * @returns {function(function):function(function):any[]}
  */
@@ -668,11 +703,13 @@ export {
     longest,
     mapUntil,
     mergeOnto,
+    partify,
     reduceWithStep,
     removeElements,
     shrinkGrid,
     spliceInto,
     splitIntoConseq,
+    transposeGrid,
     validateGrid,
     unionGrids,
     uniqify

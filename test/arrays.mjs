@@ -24,6 +24,7 @@ import {
     shrinkGrid,
     spliceInto,
     splitIntoConseq,
+    transposeGrid,
     uniqify,
     validateGrid
 } from "../src/arrays.mjs";
@@ -33,6 +34,19 @@ describe('Arrays', function () {
     const fillGrid = ({ val = "", rows = 1, cells = 1 }) =>
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
+
+    describe('transposeGrid', function () {
+
+        it('should correctly transpose', function () {
+
+            const source = [[1, 2], [4, 5], [7, 8]];
+
+            const output = transposeGrid({ source });
+
+            expect(output).to.be.deep.equal([[1, 4, 7], [2, 5, 8]]);
+        });
+
+    });
 
     describe('mapUntil', function () {
 
