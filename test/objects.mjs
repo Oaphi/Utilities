@@ -138,7 +138,7 @@ describe('Objects', function () {
            
             const updates = [{ update: { list: [ 4,5 ] } }];
 
-            deepAssign({ source, updates });
+            deepAssign({ source, updates, replaceArrays: true });
 
             expect(source).to.deep.equal({
                 update: { list: [4, 5] }

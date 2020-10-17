@@ -631,7 +631,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.uniqify = exports.unionGrids = exports.validateGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.uniqify = exports.unionGrids = exports.validateGrid = exports.transposeGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.partify = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -711,13 +711,67 @@ var chunkify = function chunkify(source) {
   return output;
 };
 /**
- * Combines filter() and map() in O(n)
+ * @summary partitions an array
+ * @param {{ source: any[], parts?: number }}
+ * @returns {any[]}
+ */
+
+
+exports.chunkify = chunkify;
+
+var partify = function partify(_ref2) {
+  var source = _ref2.source,
+      _ref2$parts = _ref2.parts,
+      parts = _ref2$parts === void 0 ? 2 : _ref2$parts;
+  var size = Math.ceil(source.length / parts) || 1;
+  var output = [];
+  var chunk = 0;
+
+  while (chunk < parts) {
+    var offset = chunk * size;
+    var chnk = source.slice(offset, size + offset);
+
+    if (!chnk.length) {
+      return output;
+    }
+
+    output.push(chnk);
+    chunk++;
+  }
+
+  return output;
+};
+/**
+ * @typedef {{
+ *  source : any[][]
+ * }} TransposeOptions
+ * 
+ * @summary transposes a grid
+ * @param {TransposeOptions}
+ */
+
+
+exports.partify = partify;
+
+var transposeGrid = function transposeGrid() {
+  var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref3$source = _ref3.source,
+      source = _ref3$source === void 0 ? [[]] : _ref3$source;
+
+  return source[0].map(function (col, ci) {
+    return source.map(function (row) {
+      return row[ci];
+    });
+  });
+};
+/**
+ * @summary Combines filter() and map() in O(n)
  * @param {any[]} [array]
  * @returns {function(function):function(function):any[]}
  */
 
 
-exports.chunkify = chunkify;
+exports.transposeGrid = transposeGrid;
 
 var filterMap = function filterMap() {
   var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -810,19 +864,19 @@ var filterMapped = function filterMapped() {
 exports.filterMapped = filterMapped;
 
 var mapUntil = function mapUntil() {
-  var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      upToMatching = _ref2.upToMatching,
-      upToIndex = _ref2.upToIndex,
-      _ref2$source = _ref2.source,
-      source = _ref2$source === void 0 ? [] : _ref2$source,
-      _ref2$mapper = _ref2.mapper,
-      mapper = _ref2$mapper === void 0 ? function (v) {
+  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      upToMatching = _ref4.upToMatching,
+      upToIndex = _ref4.upToIndex,
+      _ref4$source = _ref4.source,
+      source = _ref4$source === void 0 ? [] : _ref4$source,
+      _ref4$mapper = _ref4.mapper,
+      mapper = _ref4$mapper === void 0 ? function (v) {
     return v;
-  } : _ref2$mapper,
-      _ref2$onError = _ref2.onError,
-      onError = _ref2$onError === void 0 ? function (err) {
+  } : _ref4$mapper,
+      _ref4$onError = _ref4.onError,
+      onError = _ref4$onError === void 0 ? function (err) {
     return console.warn(err);
-  } : _ref2$onError;
+  } : _ref4$onError;
 
   try {
     var mapped = [];
@@ -964,13 +1018,13 @@ var mergeOnto = function mergeOnto(source) {
 
 exports.mergeOnto = mergeOnto;
 
-var reduceWithStep = function reduceWithStep(_ref3) {
-  var _ref3$source = _ref3.source,
-      source = _ref3$source === void 0 ? [] : _ref3$source,
-      callback = _ref3.callback,
-      _ref3$step = _ref3.step,
-      step = _ref3$step === void 0 ? 1 : _ref3$step,
-      initial = _ref3.initial;
+var reduceWithStep = function reduceWithStep(_ref5) {
+  var _ref5$source = _ref5.source,
+      source = _ref5$source === void 0 ? [] : _ref5$source,
+      callback = _ref5.callback,
+      _ref5$step = _ref5.step,
+      step = _ref5$step === void 0 ? 1 : _ref5$step,
+      initial = _ref5.initial;
   return source.reduce(function (acc, curr, i) {
     return i % step ? acc : callback(acc, curr, i + step - 1, source);
   }, initial || source[0]);
@@ -979,13 +1033,13 @@ var reduceWithStep = function reduceWithStep(_ref3) {
 exports.reduceWithStep = reduceWithStep;
 
 var unionGrids = function unionGrids() {
-  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref4$sources = _ref4.sources,
-      sources = _ref4$sources === void 0 ? [] : _ref4$sources,
-      _ref4$hasher = _ref4.hasher,
-      hasher = _ref4$hasher === void 0 ? function (v) {
+  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref6$sources = _ref6.sources,
+      sources = _ref6$sources === void 0 ? [] : _ref6$sources,
+      _ref6$hasher = _ref6.hasher,
+      hasher = _ref6$hasher === void 0 ? function (v) {
     return v === "" ? "" : JSON.stringify(v);
-  } : _ref4$hasher;
+  } : _ref6$hasher;
 
   var hashes = new Set();
   var output = sources.reduce(function (acc, cur) {
@@ -1023,13 +1077,13 @@ exports.unionGrids = unionGrids;
 
 var expandGrid = function expandGrid() {//TODO: add utility
 
-  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      source = _ref5.source,
-      _ref5$vertically = _ref5.vertically,
-      vertically = _ref5$vertically === void 0 ? 0 : _ref5$vertically,
-      _ref5$horizontally = _ref5.horizontally,
-      horizontally = _ref5$horizontally === void 0 ? 0 : _ref5$horizontally,
-      fill = _ref5.fill;
+  var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref7.source,
+      _ref7$vertically = _ref7.vertically,
+      vertically = _ref7$vertically === void 0 ? 0 : _ref7$vertically,
+      _ref7$horizontally = _ref7.horizontally,
+      horizontally = _ref7$horizontally === void 0 ? 0 : _ref7$horizontally,
+      fill = _ref7.fill;
 };
 /**
  * @typedef {} InsertInGridOptions
@@ -1038,8 +1092,8 @@ var expandGrid = function expandGrid() {//TODO: add utility
 
 var insertInGrid = function insertInGrid() {//TODO: add utility
 
-  var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      source = _ref6.source;
+  var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      source = _ref8.source;
 };
 /**
  * @typedef {{
@@ -1054,25 +1108,25 @@ var insertInGrid = function insertInGrid() {//TODO: add utility
 
 
 var foldGrid = function foldGrid() {
-  var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref7$source = _ref7.source,
-      source = _ref7$source === void 0 ? [[]] : _ref7$source,
-      _ref7$accumulator = _ref7.accumulator,
-      accumulator = _ref7$accumulator === void 0 ? 0 : _ref7$accumulator,
-      _ref7$callback = _ref7.callback,
-      callback = _ref7$callback === void 0 ? function (acc) {
+  var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref9$source = _ref9.source,
+      source = _ref9$source === void 0 ? [[]] : _ref9$source,
+      _ref9$accumulator = _ref9.accumulator,
+      accumulator = _ref9$accumulator === void 0 ? 0 : _ref9$accumulator,
+      _ref9$callback = _ref9.callback,
+      callback = _ref9$callback === void 0 ? function (acc) {
     return acc += 1;
-  } : _ref7$callback,
-      _ref7$overColumn = _ref7.overColumn,
-      overColumn = _ref7$overColumn === void 0 ? 0 : _ref7$overColumn,
-      _ref7$matching = _ref7.matching,
-      matching = _ref7$matching === void 0 ? function () {
+  } : _ref9$callback,
+      _ref9$overColumn = _ref9.overColumn,
+      overColumn = _ref9$overColumn === void 0 ? 0 : _ref9$overColumn,
+      _ref9$matching = _ref9.matching,
+      matching = _ref9$matching === void 0 ? function () {
     return true;
-  } : _ref7$matching,
-      _ref7$onError = _ref7.onError,
-      onError = _ref7$onError === void 0 ? function (err) {
+  } : _ref9$matching,
+      _ref9$onError = _ref9.onError,
+      onError = _ref9$onError === void 0 ? function (err) {
     return console.warn(err);
-  } : _ref7$onError;
+  } : _ref9$onError;
 
   try {
     var column = source.map(function (row) {
@@ -1113,29 +1167,29 @@ var foldGrid = function foldGrid() {
 exports.foldGrid = foldGrid;
 
 var shrinkGrid = function shrinkGrid() {
-  var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref8$vertically = _ref8.vertically,
-      vertically = _ref8$vertically === void 0 ? 0 : _ref8$vertically,
-      source = _ref8.source,
-      _ref8$top = _ref8.top,
-      top = _ref8$top === void 0 ? 0 : _ref8$top,
-      _ref8$right = _ref8.right,
-      right = _ref8$right === void 0 ? 0 : _ref8$right,
-      _ref8$left = _ref8.left,
-      left = _ref8$left === void 0 ? 0 : _ref8$left,
-      _ref8$leave = _ref8.leave,
-      leave = _ref8$leave === void 0 ? {
+  var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref10$vertically = _ref10.vertically,
+      vertically = _ref10$vertically === void 0 ? 0 : _ref10$vertically,
+      source = _ref10.source,
+      _ref10$top = _ref10.top,
+      top = _ref10$top === void 0 ? 0 : _ref10$top,
+      _ref10$right = _ref10.right,
+      right = _ref10$right === void 0 ? 0 : _ref10$right,
+      _ref10$left = _ref10.left,
+      left = _ref10$left === void 0 ? 0 : _ref10$left,
+      _ref10$leave = _ref10.leave,
+      leave = _ref10$leave === void 0 ? {
     top: 0,
     right: 0,
     bottom: 0,
     left: 0
-  } : _ref8$leave,
-      _ref8$horizontally = _ref8.horizontally,
-      horizontally = _ref8$horizontally === void 0 ? 0 : _ref8$horizontally,
-      _ref8$bottom = _ref8.bottom,
-      bottom = _ref8$bottom === void 0 ? 0 : _ref8$bottom,
-      _ref8$all = _ref8.all,
-      all = _ref8$all === void 0 ? 0 : _ref8$all;
+  } : _ref10$leave,
+      _ref10$horizontally = _ref10.horizontally,
+      horizontally = _ref10$horizontally === void 0 ? 0 : _ref10$horizontally,
+      _ref10$bottom = _ref10.bottom,
+      bottom = _ref10$bottom === void 0 ? 0 : _ref10$bottom,
+      _ref10$all = _ref10.all,
+      all = _ref10$all === void 0 ? 0 : _ref10$all;
 
   if (!source || !source.length) {
     return [[]];
@@ -1255,10 +1309,10 @@ var splitIntoConseq = function splitIntoConseq() {
 exports.splitIntoConseq = splitIntoConseq;
 
 var countObjects = function countObjects() {
-  var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref9$source = _ref9.source,
-      source = _ref9$source === void 0 ? [] : _ref9$source,
-      onKey = _ref9.onKey;
+  var _ref11 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref11$source = _ref11.source,
+      source = _ref11$source === void 0 ? [] : _ref11$source,
+      onKey = _ref11.onKey;
 
   var validObjects = source.filter(Boolean);
   var length = validObjects.length;
@@ -1298,13 +1352,13 @@ var countObjects = function countObjects() {
 exports.countObjects = countObjects;
 
 var deduplicate = function deduplicate() {
-  var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref10$ignore = _ref10.ignore,
-      ignore = _ref10$ignore === void 0 ? {} : _ref10$ignore,
-      _ref10$source = _ref10.source,
-      source = _ref10$source === void 0 ? [] : _ref10$source,
-      _ref10$type = _ref10.type,
-      type = _ref10$type === void 0 ? "entries" : _ref10$type;
+  var _ref12 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref12$ignore = _ref12.ignore,
+      ignore = _ref12$ignore === void 0 ? {} : _ref12$ignore,
+      _ref12$source = _ref12.source,
+      source = _ref12$source === void 0 ? [] : _ref12$source,
+      _ref12$type = _ref12.type,
+      type = _ref12$type === void 0 ? "entries" : _ref12$type;
 
   var toDedupe = source.map(function (obj) {
     return obj;
@@ -1313,16 +1367,16 @@ var deduplicate = function deduplicate() {
   var _ignore$keys = ignore.keys,
       keys = _ignore$keys === void 0 ? [] : _ignore$keys;
   return source.filter(function (srcObj, srcIdx) {
-    var srcEntries = Object.entries(srcObj).filter(function (_ref11) {
-      var _ref12 = _slicedToArray(_ref11, 1),
-          k = _ref12[0];
+    var srcEntries = Object.entries(srcObj).filter(function (_ref13) {
+      var _ref14 = _slicedToArray(_ref13, 1),
+          k = _ref14[0];
 
       return !keys.includes(k);
     });
     var lastIdx = toDedupe.findIndex(function (tgtObj) {
-      var tgtEntries = Object.entries(tgtObj).filter(function (_ref13) {
-        var _ref14 = _slicedToArray(_ref13, 1),
-            k = _ref14[0];
+      var tgtEntries = Object.entries(tgtObj).filter(function (_ref15) {
+        var _ref16 = _slicedToArray(_ref15, 1),
+            k = _ref16[0];
 
         return !keys.includes(k);
       });
@@ -1331,24 +1385,24 @@ var deduplicate = function deduplicate() {
         return false;
       }
 
-      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref15) {
-        var _ref16 = _slicedToArray(_ref15, 2),
-            key = _ref16[0],
-            val = _ref16[1];
+      var sameOnEntries = type === "entries" && tgtEntries.every(function (_ref17) {
+        var _ref18 = _slicedToArray(_ref17, 2),
+            key = _ref18[0],
+            val = _ref18[1];
 
         return srcObj[key] === val;
       });
-      var sameOnValues = type === "values" && tgtEntries.map(function (_ref17) {
-        var _ref18 = _slicedToArray(_ref17, 2),
-            v = _ref18[1];
+      var sameOnValues = type === "values" && tgtEntries.map(function (_ref19) {
+        var _ref20 = _slicedToArray(_ref19, 2),
+            v = _ref20[1];
 
         return v;
       }).every(function (tgtVal) {
         return Object.values(srcObj).includes(tgtVal);
       });
-      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref19) {
-        var _ref20 = _slicedToArray(_ref19, 1),
-            k = _ref20[0];
+      var sameOnKeys = type === "keys" && tgtEntries.map(function (_ref21) {
+        var _ref22 = _slicedToArray(_ref21, 1),
+            k = _ref22[0];
 
         return k;
       }).every(function (tgtKey) {
@@ -1439,20 +1493,20 @@ var removeElements = function removeElements(arr) {
 exports.removeElements = removeElements;
 
 var validateGrid = function validateGrid() {
-  var _ref21 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref21$grid = _ref21.grid,
-      grid = _ref21$grid === void 0 ? [[]] : _ref21$grid,
-      has = _ref21.has,
-      without = _ref21.without,
-      blank = _ref21.blank,
-      _ref21$notBlank = _ref21.notBlank,
-      notBlank = _ref21$notBlank === void 0 ? false : _ref21$notBlank,
-      _ref21$notEmpty = _ref21.notEmpty,
-      notEmpty = _ref21$notEmpty === void 0 ? false : _ref21$notEmpty,
-      _ref21$notFilled = _ref21.notFilled,
-      notFilled = _ref21$notFilled === void 0 ? false : _ref21$notFilled,
-      minCols = _ref21.minCols,
-      minRows = _ref21.minRows;
+  var _ref23 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref23$grid = _ref23.grid,
+      grid = _ref23$grid === void 0 ? [[]] : _ref23$grid,
+      has = _ref23.has,
+      without = _ref23.without,
+      blank = _ref23.blank,
+      _ref23$notBlank = _ref23.notBlank,
+      notBlank = _ref23$notBlank === void 0 ? false : _ref23$notBlank,
+      _ref23$notEmpty = _ref23.notEmpty,
+      notEmpty = _ref23$notEmpty === void 0 ? false : _ref23$notEmpty,
+      _ref23$notFilled = _ref23.notFilled,
+      notFilled = _ref23$notFilled === void 0 ? false : _ref23$notFilled,
+      minCols = _ref23.minCols,
+      minRows = _ref23.minRows;
 
   var length = grid.length;
 
@@ -1508,8 +1562,8 @@ var validateGrid = function validateGrid() {
 exports.validateGrid = validateGrid;
 
 var longest = function longest(grid) {
-  return Math.max.apply(Math, _toConsumableArray(grid.map(function (_ref22) {
-    var length = _ref22.length;
+  return Math.max.apply(Math, _toConsumableArray(grid.map(function (_ref24) {
+    var length = _ref24.length;
     return length;
   })));
 };

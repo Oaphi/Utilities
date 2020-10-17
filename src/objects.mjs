@@ -566,6 +566,7 @@ const deepAssign = ({
             Object.assign(source, Object.fromEntries(restEntries));
 
             objEntries.reduce((a, [k, v]) => a[k] = deepAssign({
+                replaceArrays,
                 source: a[k] || {},
                 updates: [v]
             }), ac);
