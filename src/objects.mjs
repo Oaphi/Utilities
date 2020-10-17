@@ -534,21 +534,27 @@ const deepCopy = ({ source = {}, skip = [] } = {}) => {
 /**
  * @summary deep assigns object props
  * @param {{
- *  source?   : object,
- *  updates?  : object[],
- *  objGuard? : (any) => boolean,
- *  onError?  : console.warn
+ *  source       ?: object,
+ *  updates      ?: object[],
+ *  replaceArrays : boolean,
+ *  objGuard     ?: (any) => boolean,
+ *  onError      ?: (err: Error) => void
  * }} 
  * @returns {object}
  */
-const deepAssign = ({ 
-    source = {}, 
+const deepAssign = ({
+    replaceArrays = false,
+    source = {},
     updates = [],
     objGuard = (obj) => typeof obj === "object" && obj,
     onError = console.warn
 } = {}) => {
 
     try {
+
+        if (Array.isArray(source) && replaceArrays) {
+            source.length = 0;
+        }
 
         return updates.reduce((ac, up) => {
 
@@ -617,19 +623,43 @@ const objectArrayToDict = ({
 
     try {
         source.forEach((elem) => {
-            const [ defaultKey, defaultVal ] = Object.entries(elem)[0];
+            const [defaultKey, defaultVal] = Object.entries(elem)[0];
 
-            const key = elem[ keys || defaultKey ];
+            const key = elem[keys || defaultKey];
             const val = values ? elem[values] : defaultVal;
 
             output[key] = val;
         });
     }
-    catch(error) {
+    catch (error) {
         onError(error);
     }
 
     return output;
+};
+
+/**
+ * @typedef {{
+ *  source ?: Object.<string, string>,
+ *  onError ?: (err : Error) => void
+ * }} InvertObjectOptions
+ * 
+ * @summary inverts keys and values in a dict
+ * @param {InvertObjectOptions}
+ */
+const invertObject = ({
+    source = {},
+    onError = (err) => console.warn(err)
+} = {}) => {
+    try {
+
+        return Object.fromEntries(Object.entries(source).map(([k, v]) => [v.toString(), k]));
+
+    }
+    catch (error) {
+        onError(error);
+        return {};
+    }
 };
 
 export {
@@ -644,6 +674,7 @@ export {
     fromPath,
     getGetterDescriptors,
     getOrInitProp,
+    invertObject,
     isObj,
     isObject,
     pushOrInitProp,

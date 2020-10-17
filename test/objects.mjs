@@ -133,6 +133,18 @@ describe('Objects', function () {
             });
         });
 
+        it('should correctly save arrays', function () {
+           const source = { update: { list: [ 1,2,3 ] } };
+           
+            const updates = [{ update: { list: [ 4,5 ] } }];
+
+            deepAssign({ source, updates });
+
+            expect(source).to.deep.equal({
+                update: { list: [4, 5] }
+            });
+        });
+
     });
 
     describe('deepCopy', function () {
