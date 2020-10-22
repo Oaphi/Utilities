@@ -652,7 +652,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.uniqify = exports.unionGrids = exports.validateGrid = exports.transposeGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.partify = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.uniqify = exports.unionGrids = exports.validateGrid = exports.transposeGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.partify = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.indexGrid = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -1603,6 +1603,30 @@ var uniqify = function uniqify() {
 };
 
 exports.uniqify = uniqify;
+
+var safeRemove = function safeRemove(r, i) {
+  return [].concat(_toConsumableArray(r.slice(0, i)), _toConsumableArray(r.slice(i + 1)));
+};
+/**
+ * @param {any[][]} grid
+ * @param {number} [col]
+ * @returns {{ [x: string] : any[][] }}
+ */
+
+
+var indexGrid = function indexGrid(grid) {
+  var col = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var dict = {};
+  grid.forEach(function (row) {
+    var key = row[col];
+    var record = dict[key] || [];
+    record.push(row);
+    dict[key] = record;
+  });
+  return dict;
+};
+
+exports.indexGrid = indexGrid;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
