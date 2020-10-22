@@ -47,10 +47,11 @@ const forEachAwait = async (source, callback) => {
 
 /**
  * @typedef {{
- *  interval? : number,
- *  callback : function () : Promise,
- *  stopIf? : boolean,
- *  times? : number
+ *  interval ?: number,
+ *  callback  : function () : Promise,
+ *  delay    ?: number,
+ *  stopIf   ?: boolean,
+ *  times    ?: number
  * }} IntervalConfig
  * 
  * @param {IntervalConfig}

@@ -13,7 +13,7 @@ describe('withInterval', function () {
         await withInterval({ delay: 5e2 });
 
         const end = Date.now();
-        expect(end - start).to.be.above(4e2);
+        expect(end - start).to.be.at.least(4e2);
     });
 
     it('should add initial delay if specified', async function () {
@@ -23,7 +23,7 @@ describe('withInterval', function () {
         await withInterval({ interval: 1e2, delay: 3e2 });
 
         const end = Date.now();
-        expect(end - start).to.be.above(3e2);
+        expect(end - start).to.be.at.least(3e2);
     });
 
     it('should delay execution correctly', async function () {
@@ -51,7 +51,7 @@ describe('withInterval', function () {
 
         const now = Date.now();
 
-        expect(now - init).to.be.above(3e3);
+        expect(now - init).to.be.at.least(3e3);
         expect(i).to.equal(3);
     });
 
