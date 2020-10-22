@@ -3004,7 +3004,7 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.isObj = exports.getOrInitProp = exports.getGetterDescriptors = exports.fromPath = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.deepAssign = exports.complement = exports.objectArrayToDict = void 0;
+exports.whichKeysAreSet = exports.whichKeyIsSet = exports.union = exports.switchIfDiffProp = exports.smartGetter = exports.shallowFilter = exports.setIf = exports.pushOrInitProp = exports.isObject = exports.isObj = exports.invertObject = exports.getOrInitProp = exports.getGetterDescriptors = exports.fromPath = exports.deepParseByPath = exports.deepMap = exports.deepGetByType = exports.deepFilter = exports.deepCopy = exports.deepAssign = exports.complement = exports.objectArrayToDict = void 0;
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -3610,10 +3610,11 @@ var deepCopy = function deepCopy() {
 /**
  * @summary deep assigns object props
  * @param {{
- *  source?   : object,
- *  updates?  : object[],
- *  objGuard? : (any) => boolean,
- *  onError?  : console.warn
+ *  source       ?: object,
+ *  updates      ?: object[],
+ *  replaceArrays : boolean,
+ *  objGuard     ?: (any) => boolean,
+ *  onError      ?: (err: Error) => void
  * }} 
  * @returns {object}
  */
@@ -3623,6 +3624,8 @@ exports.deepCopy = deepCopy;
 
 var deepAssign = function deepAssign() {
   var _ref16 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref16$replaceArrays = _ref16.replaceArrays,
+      replaceArrays = _ref16$replaceArrays === void 0 ? false : _ref16$replaceArrays,
       _ref16$source = _ref16.source,
       source = _ref16$source === void 0 ? {} : _ref16$source,
       _ref16$updates = _ref16.updates,
@@ -3635,6 +3638,10 @@ var deepAssign = function deepAssign() {
       onError = _ref16$onError === void 0 ? console.warn : _ref16$onError;
 
   try {
+    if (Array.isArray(source) && replaceArrays) {
+      source.length = 0;
+    }
+
     return updates.reduce(function (ac, up) {
       var entries = Object.entries(up);
       var objEntries = entries.filter(function (_ref17) {
@@ -3658,6 +3665,7 @@ var deepAssign = function deepAssign() {
             v = _ref22[1];
 
         return a[k] = deepAssign({
+          replaceArrays: replaceArrays,
           source: a[k] || {},
           updates: [v]
         });
@@ -3736,8 +3744,43 @@ var objectArrayToDict = function objectArrayToDict() {
 
   return output;
 };
+/**
+ * @typedef {{
+ *  source ?: Object.<string, string>,
+ *  onError ?: (err : Error) => void
+ * }} InvertObjectOptions
+ * 
+ * @summary inverts keys and values in a dict
+ * @param {InvertObjectOptions}
+ */
+
 
 exports.objectArrayToDict = objectArrayToDict;
+
+var invertObject = function invertObject() {
+  var _ref24 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref24$source = _ref24.source,
+      source = _ref24$source === void 0 ? {} : _ref24$source,
+      _ref24$onError = _ref24.onError,
+      onError = _ref24$onError === void 0 ? function (err) {
+    return console.warn(err);
+  } : _ref24$onError;
+
+  try {
+    return Object.fromEntries(Object.entries(source).map(function (_ref25) {
+      var _ref26 = _slicedToArray(_ref25, 2),
+          k = _ref26[0],
+          v = _ref26[1];
+
+      return [v.toString(), k];
+    }));
+  } catch (error) {
+    onError(error);
+    return {};
+  }
+};
+
+exports.invertObject = invertObject;
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
