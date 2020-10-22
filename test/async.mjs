@@ -35,7 +35,7 @@ describe('withInterval', function () {
 
         const now = Date.now();
 
-        expect(now - init).to.be.above(1e2);
+        expect(now - init).to.be.at.least(1e2);
         expect(i).to.equal(1);
     });
 

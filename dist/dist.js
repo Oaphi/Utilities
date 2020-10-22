@@ -325,6 +325,27 @@ exports.removeLastChild = removeLastChild;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getSelectVals = void 0;
+
+/**
+ * @summary extracts values from select
+ * @param {HTMLSelectElement} sel
+ * @returns {string[]}
+ */
+var getSelectVals = function getSelectVals(_ref) {
+  var options = _ref.options;
+  return Array.from(options).map(function (_ref2) {
+    var value = _ref2.value;
+    return value;
+  });
+};
+
+exports.getSelectVals = getSelectVals;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.JSONtoQuery = JSONtoQuery;
 exports.objectToQuery = void 0;
 
@@ -758,7 +779,7 @@ var transposeGrid = function transposeGrid() {
       _ref3$source = _ref3.source,
       source = _ref3$source === void 0 ? [[]] : _ref3$source;
 
-  return source[0].map(function (col, ci) {
+  return source[0].map(function (_, ci) {
     return source.map(function (row) {
       return row[ci];
     });
@@ -1742,10 +1763,11 @@ var forEachAwait = /*#__PURE__*/function () {
 }();
 /**
  * @typedef {{
- *  interval? : number,
- *  callback : function () : Promise,
- *  stopIf? : boolean,
- *  times? : number
+ *  interval ?: number,
+ *  callback  : function () : Promise,
+ *  delay    ?: number,
+ *  stopIf   ?: boolean,
+ *  times    ?: number
  * }} IntervalConfig
  * 
  * @param {IntervalConfig}
