@@ -1593,6 +1593,14 @@ var _utilities = _interopRequireDefault(require("./utilities.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -1748,13 +1756,13 @@ exports.forEachAwait = forEachAwait;
 
 var withInterval = /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(_ref4) {
-    var _ref4$interval, interval, callback, _ref4$times, times, _ref4$stopIf, stopIf, result;
+    var _ref4$delay, delay, _ref4$interval, interval, callback, _ref4$times, times, _ref4$stopIf, stopIf, result;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _ref4$interval = _ref4.interval, interval = _ref4$interval === void 0 ? 4 : _ref4$interval, callback = _ref4.callback, _ref4$times = _ref4.times, times = _ref4$times === void 0 ? 1 : _ref4$times, _ref4$stopIf = _ref4.stopIf, stopIf = _ref4$stopIf === void 0 ? function () {
+            _ref4$delay = _ref4.delay, delay = _ref4$delay === void 0 ? 0 : _ref4$delay, _ref4$interval = _ref4.interval, interval = _ref4$interval === void 0 ? 4 : _ref4$interval, callback = _ref4.callback, _ref4$times = _ref4.times, times = _ref4$times === void 0 ? 1 : _ref4$times, _ref4$stopIf = _ref4.stopIf, stopIf = _ref4$stopIf === void 0 ? function () {
               return false;
             } : _ref4$stopIf;
 
@@ -1766,24 +1774,44 @@ var withInterval = /*#__PURE__*/function () {
             return _context3.abrupt("return");
 
           case 3:
-            _context3.next = 5;
+            if (!delay) {
+              _context3.next = 6;
+              break;
+            }
+
+            _context3.next = 6;
+            return new Promise(function (res) {
+              return setTimeout(res, delay);
+            });
+
+          case 6:
+            if (!(typeof callback !== "function")) {
+              _context3.next = 8;
+              break;
+            }
+
+            return _context3.abrupt("return");
+
+          case 8:
+            _context3.next = 10;
             return callback();
 
-          case 5:
+          case 10:
             result = _context3.sent;
 
             if (!stopIf(result)) {
-              _context3.next = 8;
+              _context3.next = 13;
               break;
             }
 
             return _context3.abrupt("return", result);
 
-          case 8:
+          case 13:
             return _context3.abrupt("return", new Promise(function (res, rej) {
               var timesLeft = times - 1;
               setTimeout(function () {
                 return withInterval({
+                  delay: delay,
                   interval: interval,
                   callback: callback,
                   times: timesLeft,
@@ -1792,7 +1820,7 @@ var withInterval = /*#__PURE__*/function () {
               }, interval);
             }));
 
-          case 9:
+          case 14:
           case "end":
             return _context3.stop();
         }
@@ -1806,6 +1834,18 @@ var withInterval = /*#__PURE__*/function () {
 }();
 
 exports.withInterval = withInterval;
+
+var schedule = function schedule(_ref6) {
+  var _ref6$delay = _ref6.delay,
+      delay = _ref6$delay === void 0 ? 4 : _ref6$delay,
+      callback = _ref6.callback,
+      _ref6$params = _ref6.params,
+      params = _ref6$params === void 0 ? [] : _ref6$params;
+  var validDelay = delay < 4 ? 4 : delay;
+  setTimeout.apply(void 0, [function () {
+    callback.apply(void 0, arguments);
+  }, validDelay].concat(_toConsumableArray(params)));
+};
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
