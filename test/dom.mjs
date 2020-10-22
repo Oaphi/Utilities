@@ -10,6 +10,8 @@ const { JSDOM } = jsdom;
 import utils from "../src/utilities.js";
 const { jsonToDOMString, jsonToFormatString } = utils;
 
+import { getSelectVals } from "../src/DOM/forms/inputs.mjs";
+
 import {
     emphasizeSelectedText,
     elementsLeftUntil,
@@ -28,6 +30,25 @@ function getMockDom(html) {
 }
 
 describe('DOM Utilities', function () {
+
+    describe('getSelectVals', function () {
+
+        it('should find all options', function () {
+            const { document } = getMockDom();
+
+            const sel = document.createElement("select");
+            sel.innerHTML = [
+                `<option value="1">1</option>`,
+                `<option value="2">2</option>`,
+                `<option value="3">3</option>`
+            ].join("");
+
+            const vals = getSelectVals(sel);
+
+            expect(vals).to.deep.equal(["1", "2", "3"]);
+        });
+
+    });
 
     describe('emphasizeSelectedText', function () {
 
