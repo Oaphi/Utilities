@@ -689,6 +689,27 @@ const longest = (grid) => Math.max(...grid.map(({ length }) => length));
  */
 const uniqify = (arr = []) => [...new Set(arr).values()];
 
+const safeRemove = (r, i) => [...r.slice(0, i), ...r.slice(i + 1)];
+
+/**
+ * @param {any[][]} grid
+ * @param {number} [col]
+ * @returns {{ [x: string] : any[][] }}
+ */
+const indexGrid = (grid, col = 0) => {
+
+    const dict = {};
+
+    grid.forEach((row) => {
+        const key = row[col];
+        const record = dict[ key ] || [];
+        record.push(row);
+        dict[key] = record;
+    });
+
+    return dict;
+};
+
 export {
     chunkify,
     closestValue,
@@ -698,6 +719,7 @@ export {
     filterMapped,
     foldGrid,
     forAll,
+    indexGrid,
     keyMap,
     last,
     longest,

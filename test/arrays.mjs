@@ -10,6 +10,7 @@ import {
     closestValue,
     countObjects,
     deduplicate,
+    indexGrid,
     filterMap,
     filterMapped,
     foldGrid,
@@ -34,6 +35,25 @@ describe('Arrays', function () {
     const fillGrid = ({ val = "", rows = 1, cells = 1 }) =>
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
+
+    describe('indexGrid', function () {
+
+        it('should index grid on column', function () {
+            const keyCol = 1;
+            const grid = fillGrid({ val: 42, rows: 2, cells: 2 });
+            grid.forEach(row => row[keyCol] = 24);
+
+            const indexed = indexGrid(grid, keyCol);
+
+            expect(indexed).to.deep.equal({
+                "24": [
+                    [42, 24],
+                    [42, 24]
+                ]
+            });
+        });
+
+    });
 
     describe('transposeGrid', function () {
 
