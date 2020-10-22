@@ -87,7 +87,7 @@ const partify = ({ source, parts = 2 }) => {
  * @summary transposes a grid
  * @param {TransposeOptions}
  */
-const transposeGrid = ({ source = [[]] } = {}) => source[0].map((col,ci) => source.map((row) => row[ci] ));
+const transposeGrid = ({ source = [[]] } = {}) => source[0].map((_,ci) => source.map((row) => row[ci] ));
 
 /**
  * @summary Combines filter() and map() in O(n)

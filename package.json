@@ -27,7 +27,8 @@
     "dist": "babel src --out-file dist/dist.js",
     "document": "jsdoc -c configs/jsdoc.js",
     "test": "mocha --reporter min --watch",
-    "test-ci": "mocha"
+    "test-ci": "mocha",
+    "cycle": "git pull && git push"
   },
   "repository": {
     "type": "git",
