@@ -6,16 +6,36 @@ const { waitAsync, forEachAwait, forAwait, withInterval } = asynchronous;
 
 describe('withInterval', function () {
 
+    it('should behave as delayed promise on no callback', async function () {
+       
+        const start = Date.now();
+
+        await withInterval({ delay: 5e2 });
+
+        const end = Date.now();
+        expect(end - start).to.be.above(4e2);
+    });
+
+    it('should add initial delay if specified', async function () {
+        
+        const start = Date.now();
+
+        await withInterval({ interval: 1e2, delay: 3e2 });
+
+        const end = Date.now();
+        expect(end - start).to.be.above(3e2);
+    });
+
     it('should delay execution correctly', async function () {
         let i = 0;
 
         const init = Date.now();
 
-        await withInterval({ interval: 1e3, callback: () => i++ });
+        await withInterval({ interval: 1e2, callback: () => i++ });
 
         const now = Date.now();
 
-        expect(now - init).to.be.above(1e3);
+        expect(now - init).to.be.above(1e2);
         expect(i).to.equal(1);
     });
 

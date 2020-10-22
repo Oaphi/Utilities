@@ -56,6 +56,7 @@ const forEachAwait = async (source, callback) => {
  * @param {IntervalConfig}
  */
 const withInterval = async ({
+    delay = 0,
     interval = 4,
     callback,
     times = 1,
@@ -64,6 +65,12 @@ const withInterval = async ({
     if (!times) {
         return;
     }
+
+    if(delay) {
+        await new Promise((res) => setTimeout(res, delay));
+    }
+
+    if(typeof callback !== "function") { return; }
 
     const result = await callback();
 
@@ -77,6 +84,7 @@ const withInterval = async ({
 
         setTimeout(
             () => withInterval({
+                delay,
                 interval,
                 callback,
                 times: timesLeft,
@@ -84,6 +92,22 @@ const withInterval = async ({
             }).then(res).catch(rej),
             interval);
     });
+};
+
+const schedule = ({
+    delay = 4,
+    callback,
+    params = []
+}) => {
+
+    const validDelay = delay < 4 ? 4 : delay;
+
+    setTimeout((...params) => {
+
+        callback(...params);
+
+    }, validDelay, ...params);
+
 };
 
 export {
