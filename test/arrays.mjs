@@ -22,6 +22,7 @@ import {
     mergeOnto,
     reduceWithStep,
     removeElements,
+    shiftToIndex,
     shrinkGrid,
     spliceInto,
     splitIntoConseq,
@@ -35,6 +36,22 @@ describe('Arrays', function () {
     const fillGrid = ({ val = "", rows = 1, cells = 1 }) =>
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
+
+    describe('shiftToIndex', function () {
+        
+        it('should correctly reorder array', function () {
+            const source = [0,1,2,3,4];
+            const output = shiftToIndex({ source, index: 2 });
+            expect(output).to.deep.equal([2,3,4,0,1]);
+        });
+
+        it('should discard the rest if "keep" opt is false', function () {
+            const source = ["active", "active", "deprecated", "deprecated"];
+            const output = shiftToIndex({ source, index: 2, keep: false });
+            expect(output).to.deep.equal(["deprecated", "deprecated"]);
+        });
+
+    });
 
     describe('indexGrid', function () {
 

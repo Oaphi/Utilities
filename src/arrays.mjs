@@ -710,6 +710,16 @@ const indexGrid = (grid, col = 0) => {
     return dict;
 };
 
+const shiftToIndex = ({
+    source = [],
+    index = 0,
+    keep = true
+}) => {
+    const before = source.slice(0, index);
+    const after = source.slice(index);
+    return keep ? [...after, ...before ] : after;
+};
+
 export {
     chunkify,
     closestValue,
@@ -728,6 +738,7 @@ export {
     partify,
     reduceWithStep,
     removeElements,
+    shiftToIndex,
     shrinkGrid,
     spliceInto,
     splitIntoConseq,
