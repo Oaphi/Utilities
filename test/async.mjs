@@ -41,17 +41,15 @@ describe('withInterval', function () {
 
     it('should repeat specified number of times', async function () {
 
-        this.timeout(4e3);
-
         let i = 0;
 
         const init = Date.now();
 
-        await withInterval({ interval: 1001, callback: () => i++, times : 3 });
+        await withInterval({ interval: 1e2 + 1, callback: () => i++, times : 3 });
 
         const now = Date.now();
 
-        expect(now - init).to.be.at.least(3e3);
+        expect(now - init).to.be.at.least(3e2);
         expect(i).to.equal(3);
     });
 
