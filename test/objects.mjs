@@ -135,13 +135,21 @@ describe('Objects', function () {
 
         it('should correctly save arrays', function () {
            const source = { update: { list: [ 1,2,3 ] } };
-           
             const updates = [{ update: { list: [ 4,5 ] } }];
-
             deepAssign({ source, updates, replaceArrays: true });
 
             expect(source).to.deep.equal({
                 update: { list: [4, 5] }
+            });
+        });
+
+        it('should chnage to object on mismatch', function () {
+            const source = { prop : "test" };
+            const updates = [{ prop: { subprop: 1 } }];
+            deepAssign({ source, updates });
+
+            expect(source).to.deep.eq({
+                prop: { subprop: 1 }
             });
         });
 

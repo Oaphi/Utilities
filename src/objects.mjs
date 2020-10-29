@@ -556,6 +556,8 @@ const deepAssign = ({
             source.length = 0;
         }
 
+        const sameType = (a,b) => typeof a === typeof b;
+
         return updates.reduce((ac, up) => {
 
             const entries = Object.entries(up);
@@ -567,7 +569,7 @@ const deepAssign = ({
 
             objEntries.reduce((a, [k, v]) => a[k] = deepAssign({
                 replaceArrays,
-                source: a[k] || {},
+                source: sameType(a[k], v) ? (a[k] || {}) : v,
                 updates: [v]
             }), ac);
 
