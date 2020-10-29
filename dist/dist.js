@@ -652,7 +652,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.uniqify = exports.unionGrids = exports.validateGrid = exports.transposeGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.removeElements = exports.reduceWithStep = exports.partify = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.indexGrid = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.uniqify = exports.unionGrids = exports.validateGrid = exports.transposeGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.shiftToIndex = exports.removeElements = exports.reduceWithStep = exports.partify = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.indexGrid = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -1627,6 +1627,20 @@ var indexGrid = function indexGrid(grid) {
 };
 
 exports.indexGrid = indexGrid;
+
+var shiftToIndex = function shiftToIndex(_ref25) {
+  var _ref25$source = _ref25.source,
+      source = _ref25$source === void 0 ? [] : _ref25$source,
+      _ref25$index = _ref25.index,
+      index = _ref25$index === void 0 ? 0 : _ref25$index,
+      _ref25$keep = _ref25.keep,
+      keep = _ref25$keep === void 0 ? true : _ref25$keep;
+  var before = source.slice(0, index);
+  var after = source.slice(index);
+  return keep ? [].concat(_toConsumableArray(after), _toConsumableArray(before)) : after;
+};
+
+exports.shiftToIndex = shiftToIndex;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
