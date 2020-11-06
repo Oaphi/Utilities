@@ -3742,6 +3742,10 @@ var deepAssign = function deepAssign() {
       source.length = 0;
     }
 
+    var sameType = function sameType(a, b) {
+      return _typeof(a) === _typeof(b);
+    };
+
     return updates.reduce(function (ac, up) {
       var entries = Object.entries(up);
       var objEntries = entries.filter(function (_ref17) {
@@ -3766,7 +3770,7 @@ var deepAssign = function deepAssign() {
 
         return a[k] = deepAssign({
           replaceArrays: replaceArrays,
-          source: a[k] || {},
+          source: sameType(a[k], v) ? a[k] || {} : v,
           updates: [v]
         });
       }, ac);
