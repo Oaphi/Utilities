@@ -81,26 +81,29 @@ const offset = ({
     period = "days",
     onError = (err) => console.warn(err)
 } = {}) => {
-
     try {
         const parsed = new Date(date);
 
-        const MIL_IN_DAY = 864e5;
+        const offsetDays = (date, n) =>
+            new Date(date.getFullYear(), date.getMonth(), date.getDate() - n);
 
-        /** @type {Map<string,(d : Date, n : number) => Date>} */
+        const offsetMonths = (date, n) =>
+            new Date(date.getFullYear(), date.getMonth() - n, date.getDate());
+
+        const offsetYears = (date, n) =>
+            new Date(date.getFullYear() - n, date.getMonth(), date.getDate());
+
         const periodMap = new Map([
-            ["days", (date, n) => new Date(date.valueOf() - MIL_IN_DAY * n)],
-            ["months", (date, n) => new Date(date.getFullYear(), date.getMonth() - n, date.getDate())],
-            ["years", (date, n) => new Date(date.getFullYear() - n, date.getMonth(), date.getDate())]
+            ["days", offsetDays],
+            ["months", offsetMonths],
+            ["years", offsetYears],
         ]);
 
         return periodMap.get(period)(parsed, numberOf);
-    }
-    catch (error) {
+    } catch (error) {
         onError(error);
         return new Date(date);
     }
-
 };
 
 export {
