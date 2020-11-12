@@ -20,6 +20,7 @@ import {
     last,
     mapUntil,
     mergeOnto,
+    mixinColumn,
     reduceWithStep,
     removeElements,
     shiftToIndex,
@@ -37,18 +38,36 @@ describe('Arrays', function () {
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
 
+    describe("mixinColumn", function () {
+        const grid = fillGrid({ rows: 5, cells: 5 });
+
+        const values = [1, 2, 3, 4, 5];
+
+        const mixed = mixinColumn({ col: 1, values, grid });
+
+        console.log(mixed);
+
+        expect(mixed.map((row) => row[1])).to.deep.equal([1, 2, 3, 4, 5]);
+    });
+
     describe('shiftToIndex', function () {
-        
+
         it('should correctly reorder array', function () {
-            const source = [0,1,2,3,4];
+            const source = [0, 1, 2, 3, 4];
             const output = shiftToIndex({ source, index: 2 });
-            expect(output).to.deep.equal([2,3,4,0,1]);
+            expect(output).to.deep.equal([2, 3, 4, 0, 1]);
         });
 
         it('should discard the rest if "keep" opt is false', function () {
             const source = ["active", "active", "deprecated", "deprecated"];
             const output = shiftToIndex({ source, index: 2, keep: false });
             expect(output).to.deep.equal(["deprecated", "deprecated"]);
+        });
+
+        it('should handle negative indices', function () {
+            const source = [1, 2, 3, 4, 5];
+            const output = shiftToIndex({ source, index: -2 });
+            expect(output).to.deep.equal([4, 5, 1, 2, 3]);
         });
 
     });

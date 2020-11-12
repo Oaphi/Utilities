@@ -87,7 +87,7 @@ const partify = ({ source, parts = 2 }) => {
  * @summary transposes a grid
  * @param {TransposeOptions}
  */
-const transposeGrid = ({ source = [[]] } = {}) => source[0].map((_,ci) => source.map((row) => row[ci] ));
+const transposeGrid = ({ source = [[]] } = {}) => source[0].map((_, ci) => source.map((row) => row[ci]));
 
 /**
  * @summary Combines filter() and map() in O(n)
@@ -164,6 +164,20 @@ const mapUntil = ({
         return source;
     }
 };
+
+/**
+ * @typedef {{
+ *  col?: number,
+ *  grid: any[][],
+ *  values: any[]
+ * }} ColumnMixinOpts
+ * 
+ * @param {ColumnMixinOpts} options
+ */
+const mixinColumn = ({ col = 0, grid, values }) => grid.map((row, ri) => { 
+    row[col] = row[col] || values[ri]; 
+    return row; 
+});
 
 /**
  * @summary returns last element of array
@@ -691,6 +705,23 @@ const uniqify = (arr = []) => [...new Set(arr).values()];
 
 const safeRemove = (r, i) => [...r.slice(0, i), ...r.slice(i + 1)];
 
+class Sorter {
+
+    constructor(arr = []) {
+        this.arr = arr;
+    }
+
+    alphabetical() {
+        const { arr } = this;
+        return arr.slice().sort((a, b) => a === b ? 0 : a > b ? 1 : -1);
+    }
+
+    invert() {
+        const { arr } = this;
+        return arr.slice().reverse();
+    }
+}
+
 /**
  * @param {any[][]} grid
  * @param {number} [col]
@@ -702,7 +733,7 @@ const indexGrid = (grid, col = 0) => {
 
     grid.forEach((row) => {
         const key = row[col];
-        const record = dict[ key ] || [];
+        const record = dict[key] || [];
         record.push(row);
         dict[key] = record;
     });
@@ -717,7 +748,7 @@ const shiftToIndex = ({
 }) => {
     const before = source.slice(0, index);
     const after = source.slice(index);
-    return keep ? [...after, ...before ] : after;
+    return keep ? [...after, ...before] : after;
 };
 
 export {
@@ -735,9 +766,11 @@ export {
     longest,
     mapUntil,
     mergeOnto,
+    mixinColumn,
     partify,
     reduceWithStep,
     removeElements,
+    safeRemove,
     shiftToIndex,
     shrinkGrid,
     spliceInto,
