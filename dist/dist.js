@@ -2015,16 +2015,20 @@ var offset = function offset() {
 
   try {
     var parsed = new Date(date);
-    var MIL_IN_DAY = 864e5;
-    /** @type {Map<string,(d : Date, n : number) => Date>} */
 
-    var periodMap = new Map([["days", function (date, n) {
-      return new Date(date.valueOf() - MIL_IN_DAY * n);
-    }], ["months", function (date, n) {
+    var offsetDays = function offsetDays(date, n) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate() - n);
+    };
+
+    var offsetMonths = function offsetMonths(date, n) {
       return new Date(date.getFullYear(), date.getMonth() - n, date.getDate());
-    }], ["years", function (date, n) {
+    };
+
+    var offsetYears = function offsetYears(date, n) {
       return new Date(date.getFullYear() - n, date.getMonth(), date.getDate());
-    }]]);
+    };
+
+    var periodMap = new Map([["days", offsetDays], ["months", offsetMonths], ["years", offsetYears]]);
     return periodMap.get(period)(parsed, numberOf);
   } catch (error) {
     onError(error);
