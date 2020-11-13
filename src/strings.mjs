@@ -227,11 +227,30 @@ const parToSentenceCase = ({ text = "", exempt = [] } = {}) => {
     return normalized.join(" ");
 };
 
+/**
+ * @summary joins a list of entities ("a,b, and c")
+ * @param {string[]} entities 
+ */
+const getJoinedEntityList = (entities) => {
+    const { length } = entities;
+
+    const addComma = length > 2;
+
+    const [ first ] = entities;
+
+    if(length === 1) {
+        return first;
+    }
+
+    return `${entities.slice(0, -1).join(", ")}${addComma ? "," : ""} and ${entities.slice(-1)[0]}`;
+};
+
 export {
     isLcase,
     isUcase,
     parToSentenceCase,
     pluralizeCountable,
+    getJoinedEntityList,
     sentenceCase,
     splitIntoSentences,
     trimAndRemoveSep

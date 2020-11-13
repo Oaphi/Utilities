@@ -7,8 +7,31 @@ import {
     parToSentenceCase,
     pluralizeCountable,
     sentenceCase,
-    splitIntoSentences
+    splitIntoSentences,
+    getJoinedEntityList
 } from "../src/strings.mjs";
+
+describe('getJoinedEntityList', function () {
+    
+    it('should correctly return one item', function () {
+        const input = ["apple"];
+        const output = getJoinedEntityList(input);
+        expect(output).to.equal(input[0]);
+    });
+
+    it('should correctly return 2 items (and, no comma)', function () {
+        const input = ["orange", "melon"];
+        const output = getJoinedEntityList(input);
+        expect(output).to.equal(`${input[0]} and ${input[1]}`);
+    });
+
+    it('should correctly return >2 items ("a, b, and c")', function () {
+        const input = ["watermelon", "grapefruit", "grapes"];
+        const output = getJoinedEntityList(input);
+        expect(output).to.equal(`${input[0]}, ${input[1]}, and ${input[2]}`);
+    });
+
+});
 
 describe('parToSentenceCase', function () {
 
