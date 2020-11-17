@@ -174,9 +174,9 @@ const mapUntil = ({
  * 
  * @param {ColumnMixinOpts} options
  */
-const mixinColumn = ({ col = 0, grid, values }) => grid.map((row, ri) => { 
-    row[col] = row[col] || values[ri]; 
-    return row; 
+const mixinColumn = ({ col = 0, grid, values }) => grid.map((row, ri) => {
+    row[col] = row[col] || values[ri];
+    return row;
 });
 
 /**
@@ -357,6 +357,13 @@ const foldGrid = ({
         onError(error);
     }
 };
+
+/**
+ * @summary mixes grids into one
+ * @param {(a: any,b: any) => any} operation
+ * @param {...any[][]} grids
+ */
+const foldGrids = (operation, ...grids) => grids.reduce((acc, cur) => acc.map((row, ri) => row.map((cell, ci) => operation(cell, cur[ri][ci]))));
 
 /**
  * @typedef {object} ShrinkGridOptions
@@ -759,6 +766,7 @@ export {
     filterMap,
     filterMapped,
     foldGrid,
+    foldGrids,
     forAll,
     indexGrid,
     keyMap,

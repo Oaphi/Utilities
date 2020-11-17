@@ -14,6 +14,7 @@ import {
     filterMap,
     filterMapped,
     foldGrid,
+    foldGrids,
     forAll,
     unionGrids,
     keyMap,
@@ -38,14 +39,29 @@ describe('Arrays', function () {
         new Array(rows).fill(val)
             .map((val) => new Array(cells).fill(val));
 
+    describe('foldGrids', function () {
+
+        it('should correctly apply operation', function () {
+
+            const a = fillGrid({ rows: 2, cells: 2, val: 1 });
+            const b = fillGrid({ rows: 2, cells: 2, val: 2 });
+
+            const folded = foldGrids((a, b) => a + b, a, b);
+
+            expect(folded).to.deep.equal([
+                [3, 3],
+                [3, 3]
+            ]);
+        });
+
+    });
+
     describe("mixinColumn", function () {
         const grid = fillGrid({ rows: 5, cells: 5 });
 
         const values = [1, 2, 3, 4, 5];
 
         const mixed = mixinColumn({ col: 1, values, grid });
-
-        console.log(mixed);
 
         expect(mixed.map((row) => row[1])).to.deep.equal([1, 2, 3, 4, 5]);
     });
