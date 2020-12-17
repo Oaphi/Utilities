@@ -8,9 +8,9 @@
  * @typedef {object} ChunkifyConfig
  * @property {number} [size]
  * @property {number[]} [limits]
- * 
+ *
  * @summary splits an array into chunks
- * @param {any[]} source 
+ * @param {any[]} source
  * @param {ChunkifyConfig}
  * @returns {any[][]}
  */
@@ -83,7 +83,7 @@ const partify = ({ source, parts = 2 }) => {
  * @typedef {{
  *  source : any[][]
  * }} TransposeOptions
- * 
+ *
  * @summary transposes a grid
  * @param {TransposeOptions}
  */
@@ -109,7 +109,7 @@ const filterMap = (array = []) => (filter = () => true) => (mapper = e => e) => 
 
 /**
  * Combines filter() and map() in reverse in O(n)
- * @param {any[]} [array] 
+ * @param {any[]} [array]
  * @returns {function(function):function(function):any[]}
  */
 const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) => {
@@ -135,7 +135,7 @@ const filterMapped = (array = []) => (mapper = e => e) => (filter = e => true) =
  *  mapper       ?: function,
  *  onError      ?: (err : Error) => void
  * }} MapUntilOptions
- * 
+ *
  * @param {MapUntilOptions}
  * @returns {any[]}
  */
@@ -171,7 +171,7 @@ const mapUntil = ({
  *  grid: any[][],
  *  values: any[]
  * }} ColumnMixinOpts
- * 
+ *
  * @param {ColumnMixinOpts} options
  */
 const mixinColumn = ({ col = 0, grid, values }) => grid.map((row, ri) => {
@@ -182,7 +182,7 @@ const mixinColumn = ({ col = 0, grid, values }) => grid.map((row, ri) => {
 /**
  * @summary returns last element of array
  * @param {any[]} array
- * @returns {any} 
+ * @returns {any}
  */
 const last = (array) => array[array.length - 1];
 
@@ -190,7 +190,7 @@ const last = (array) => array[array.length - 1];
  * Executes a callback for each element
  * (same as forEach, but in FP style + faster)
  * @param {any[]} [array]
- * @returns {function(function):void} 
+ * @returns {function(function):void}
  */
 const forAll = (array = []) => (callback) => {
 
@@ -204,9 +204,9 @@ const forAll = (array = []) => (callback) => {
 };
 
 /**
- * Maps array to values of 
+ * Maps array to values of
  * property by key
- * @param {any[]} [array] 
+ * @param {any[]} [array]
  * @returns {function(string):any[]}
  */
 const keyMap = (array = []) => (key) => {
@@ -215,7 +215,7 @@ const keyMap = (array = []) => (key) => {
 
 /**
  * @summary merges arrays
- * @param {any[]} source 
+ * @param {any[]} source
  * @param  {...any[]} [targets]
  * @returns {any[]}
  */
@@ -250,7 +250,7 @@ const mergeOnto = (source, ...targets) => {
  * @property {function(any,any,number?,any[]?) : any} callback
  * @property {number} [step]
  * @property {any} [initial]
- * 
+ *
  * @param {StepReduceConfig}
  */
 const reduceWithStep = ({
@@ -303,7 +303,7 @@ const unionGrids = ({
  * @property {number|string|boolean|undefined|null} fill
  * @property {number} [horizontally]
  * @property {number} [vertically]
- * 
+ *
  * @param {ExpandGridOptions}
  */
 const expandGrid = ({
@@ -331,7 +331,7 @@ const insertInGrid = ({
  *  callback ?: (acc : any, cur : any) => any,
  *  overColumn ?: number
  * }} FoldGridOptions
- * 
+ *
  * @param {FoldGridOptions}
  */
 const foldGrid = ({
@@ -358,6 +358,20 @@ const foldGrid = ({
     }
 };
 
+const padGrid = (grid = [[]], { rows = 1, cells = 1, value = "" } = {}) => {
+
+    for (let ri = 0; ri < rows; ri++) {
+        for (let ci = 0; ci < cells; ci++) {
+            const row = grid[ri] || (grid[ri] = []);
+            if (row[ci] === void 0) {
+                row[ci] = value;
+            }
+        }
+    }
+
+    return grid;
+};
+
 /**
  * @summary mixes grids into one
  * @param {(a: any,b: any) => any} operation
@@ -368,11 +382,11 @@ const foldGrids = (operation, ...grids) => grids.reduce((acc, cur) => acc.map((r
 /**
  * @typedef {object} ShrinkGridOptions
  * @property {any[][]} [source]
- * @property {{ 
- *  top : number, 
- *  right : number, 
- *  bottom : number, 
- *  left : number 
+ * @property {{
+ *  top : number,
+ *  right : number,
+ *  bottom : number,
+ *  left : number
  * }} [leave]
  * @property {number} [left]
  * @property {number} [right]
@@ -380,7 +394,7 @@ const foldGrids = (operation, ...grids) => grids.reduce((acc, cur) => acc.map((r
  * @property {number} [horizontally]
  * @property {number} [top]
  * @property {number} [vertically]
- * 
+ *
  * @summary shirnks a grid
  * @param {ShrinkGridOptions} [source]
  */
@@ -438,8 +452,8 @@ const shrinkGrid = ({
 };
 
 /**
- * 
- * @param {any[]} source 
+ *
+ * @param {any[]} source
  * @param {...any[]} targets
  * @returns {any[]}
  */
@@ -460,7 +474,7 @@ const spliceInto = (source, ...targets) => {
 
 /**
  * @summary splits array in consequitive subsequences
- * @param {any[]} [source] 
+ * @param {any[]} [source]
  * @returns {any[][]}
  */
 const splitIntoConseq = (source = []) => {
@@ -538,13 +552,13 @@ const countObjects = ({ source = [], onKey } = {}) => {
  * @typedef {{
  *  keys : string[]
  * }} DedupeIgnore
- * 
+ *
  * @typedef {{
  *  ignore : DedupeIgnore,
  *  source : object[],
  *  type : ("entries"|"keys"|"values")
  * }} DedupeConfig
- * 
+ *
  * @summary deduplicates an array of objects
  * @param {DedupeConfig}
  * @returns {object[]}
@@ -592,7 +606,7 @@ const deduplicate = ({
  *  value : any,
  *  values : any[]
  * }} ClosestConfig
- * 
+ *
  * @summary finds closest value in the array
  * @param {ClosestConfig} [config]
  */
@@ -624,7 +638,7 @@ const closestValue = (config = {}) => {
 
 /**
  * @summary removes elements from an array
- * @param {any[]} arr 
+ * @param {any[]} arr
  * @param {...any} elems
  * @returns {any[]}
  */
@@ -632,7 +646,7 @@ const removeElements = (arr, ...elems) => arr.filter((elem) => !elems.includes(e
 
 /**
  * @summary validates a grid of value
- * 
+ *
  * @param {{
  *  without : (any|undefined),
  *  grid : any[][],
@@ -642,8 +656,8 @@ const removeElements = (arr, ...elems) => arr.filter((elem) => !elems.includes(e
  *  notBlank : (boolean|false),
  *  notEmpty : (boolean|false),
  *  notFull : (boolean|false)
- * }} 
- * 
+ * }}
+ *
  * @returns {boolean}
  */
 const validateGrid = ({
@@ -775,6 +789,7 @@ export {
     mapUntil,
     mergeOnto,
     mixinColumn,
+    padGrid,
     partify,
     reduceWithStep,
     removeElements,

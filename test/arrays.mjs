@@ -22,6 +22,7 @@ import {
     mapUntil,
     mergeOnto,
     mixinColumn,
+    padGrid,
     reduceWithStep,
     removeElements,
     shiftToIndex,
