@@ -652,7 +652,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.uniqify = exports.unionGrids = exports.validateGrid = exports.transposeGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.shiftToIndex = exports.safeRemove = exports.removeElements = exports.reduceWithStep = exports.partify = exports.mixinColumn = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.indexGrid = exports.forAll = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
+exports.uniqify = exports.unionGrids = exports.validateGrid = exports.transposeGrid = exports.splitIntoConseq = exports.spliceInto = exports.shrinkGrid = exports.shiftToIndex = exports.safeRemove = exports.removeElements = exports.reduceWithStep = exports.partify = exports.mixinColumn = exports.mergeOnto = exports.mapUntil = exports.longest = exports.last = exports.keyMap = exports.indexGrid = exports.forAll = exports.foldGrids = exports.foldGrid = exports.filterMapped = exports.filterMap = exports.deduplicate = exports.countObjects = exports.closestValue = exports.chunkify = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1194,6 +1194,28 @@ var foldGrid = function foldGrid() {
   }
 };
 /**
+ * @summary mixes grids into one
+ * @param {(a: any,b: any) => any} operation
+ * @param {...any[][]} grids
+ */
+
+
+exports.foldGrid = foldGrid;
+
+var foldGrids = function foldGrids(operation) {
+  for (var _len2 = arguments.length, grids = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+    grids[_key2 - 1] = arguments[_key2];
+  }
+
+  return grids.reduce(function (acc, cur) {
+    return acc.map(function (row, ri) {
+      return row.map(function (cell, ci) {
+        return operation(cell, cur[ri][ci]);
+      });
+    });
+  });
+};
+/**
  * @typedef {object} ShrinkGridOptions
  * @property {any[][]} [source]
  * @property {{ 
@@ -1214,7 +1236,7 @@ var foldGrid = function foldGrid() {
  */
 
 
-exports.foldGrid = foldGrid;
+exports.foldGrids = foldGrids;
 
 var shrinkGrid = function shrinkGrid() {
   var _ref11 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -1287,8 +1309,8 @@ var spliceInto = function spliceInto(source) {
     return item;
   }); //shallow copy;
 
-  for (var _len2 = arguments.length, targets = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-    targets[_key2 - 1] = arguments[_key2];
+  for (var _len3 = arguments.length, targets = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+    targets[_key3 - 1] = arguments[_key3];
   }
 
   for (var _i = 0, _targets = targets; _i < _targets.length; _i++) {
@@ -1514,8 +1536,8 @@ var closestValue = function closestValue() {
 exports.closestValue = closestValue;
 
 var removeElements = function removeElements(arr) {
-  for (var _len3 = arguments.length, elems = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-    elems[_key3 - 1] = arguments[_key3];
+  for (var _len4 = arguments.length, elems = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+    elems[_key4 - 1] = arguments[_key4];
   }
 
   return arr.filter(function (elem) {
