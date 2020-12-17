@@ -5,9 +5,9 @@ const { noop } = utilities;
  * @typedef {object} WaitConfig
  * @property {number} [ms = 1]
  * @property {function(number) : any} [callback]
- * 
+ *
  * @summary runs a callback after specified number of milliseconds and resolves
- * @param {WaitConfig} param0 
+ * @param {WaitConfig} param0
  * @returns {Promise<any>}
  */
 const waitAsync = ({ ms = 1, callback = noop }) =>
@@ -23,7 +23,7 @@ const waitAsync = ({ ms = 1, callback = noop }) =>
 
 /**
  * @summary promise-based forEach preserving value and execution order
- * @param {any[]} source 
+ * @param {any[]} source
  * @param {function(any,number, any[]) : Promise<void>} asyncCallback
  * @returns {Promise<void>}
  */
@@ -53,10 +53,11 @@ const forEachAwait = async (source, callback) => {
  *  stopIf   ?: boolean,
  *  times    ?: number
  * }} IntervalConfig
- * 
+ *
  * @param {IntervalConfig}
  */
 const withInterval = async ({
+    timeouts = [],
     delay = 0,
     interval = 4,
     callback,
@@ -67,11 +68,11 @@ const withInterval = async ({
         return;
     }
 
-    if(delay) {
+    if (delay) {
         await new Promise((res) => setTimeout(res, delay));
     }
 
-    if(typeof callback !== "function") { return; }
+    if (typeof callback !== "function") { return; }
 
     const result = await callback();
 
@@ -83,32 +84,48 @@ const withInterval = async ({
 
         const timesLeft = times - 1;
 
-        setTimeout(
+        const newId = setTimeout(
             () => withInterval({
+                timeouts,
                 delay,
                 interval,
                 callback,
                 times: timesLeft,
                 stopIf
-            }).then(res).catch(rej),
+            }).then((output) => {
+                timeouts.splice(timeouts.indexOf(newId), 1);
+                res(output);
+            }).catch(rej),
             interval);
+
+        timeouts.push(newId);
     });
 };
 
-const schedule = ({
-    delay = 4,
-    callback,
-    params = []
-}) => {
+/**
+ * @summary debounces a function
+ * @param {(...args) => any} callback
+ * @param {{ period ?: number, immediate ?: boolean }} [opts]
+ */
+const debounce = (callback, { period = 50, immediate = false } = {}) => {
+    let timeout = null;
 
-    const validDelay = delay < 4 ? 4 : delay;
+    return (...params) => {
 
-    setTimeout((...params) => {
+        if (timeout === null && immediate) {
+            callback(...params);
+        }
 
-        callback(...params);
+        if (timeout !== null) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
 
-    }, validDelay, ...params);
-
+        timeout = setTimeout(() => {
+            immediate || callback(...params);
+            timeout = null;
+        }, period);
+    };
 };
 
 export {
@@ -117,3 +134,7 @@ export {
     waitAsync,
     withInterval
 };
+export {
+    debounce
+};
+
