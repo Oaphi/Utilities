@@ -1753,19 +1753,11 @@ exports.shiftToIndex = shiftToIndex;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withInterval = exports.waitAsync = exports.forEachAwait = exports.forAwait = void 0;
+exports.debounce = exports.withInterval = exports.waitAsync = exports.forEachAwait = exports.forAwait = void 0;
 
 var _utilities = _interopRequireDefault(require("./utilities.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -1782,9 +1774,9 @@ var noop = _utilities["default"].noop;
  * @typedef {object} WaitConfig
  * @property {number} [ms = 1]
  * @property {function(number) : any} [callback]
- * 
+ *
  * @summary runs a callback after specified number of milliseconds and resolves
- * @param {WaitConfig} param0 
+ * @param {WaitConfig} param0
  * @returns {Promise<any>}
  */
 
@@ -1803,7 +1795,7 @@ var waitAsync = function waitAsync(_ref) {
 };
 /**
  * @summary promise-based forEach preserving value and execution order
- * @param {any[]} source 
+ * @param {any[]} source
  * @param {function(any,number, any[]) : Promise<void>} asyncCallback
  * @returns {Promise<void>}
  */
@@ -1914,7 +1906,7 @@ var forEachAwait = /*#__PURE__*/function () {
  *  stopIf   ?: boolean,
  *  times    ?: number
  * }} IntervalConfig
- * 
+ *
  * @param {IntervalConfig}
  */
 
@@ -1923,13 +1915,13 @@ exports.forEachAwait = forEachAwait;
 
 var withInterval = /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(_ref4) {
-    var _ref4$delay, delay, _ref4$interval, interval, callback, _ref4$times, times, _ref4$stopIf, stopIf, result;
+    var _ref4$timeouts, timeouts, _ref4$delay, delay, _ref4$interval, interval, callback, _ref4$times, times, _ref4$stopIf, stopIf, result;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _ref4$delay = _ref4.delay, delay = _ref4$delay === void 0 ? 0 : _ref4$delay, _ref4$interval = _ref4.interval, interval = _ref4$interval === void 0 ? 4 : _ref4$interval, callback = _ref4.callback, _ref4$times = _ref4.times, times = _ref4$times === void 0 ? 1 : _ref4$times, _ref4$stopIf = _ref4.stopIf, stopIf = _ref4$stopIf === void 0 ? function () {
+            _ref4$timeouts = _ref4.timeouts, timeouts = _ref4$timeouts === void 0 ? [] : _ref4$timeouts, _ref4$delay = _ref4.delay, delay = _ref4$delay === void 0 ? 0 : _ref4$delay, _ref4$interval = _ref4.interval, interval = _ref4$interval === void 0 ? 4 : _ref4$interval, callback = _ref4.callback, _ref4$times = _ref4.times, times = _ref4$times === void 0 ? 1 : _ref4$times, _ref4$stopIf = _ref4.stopIf, stopIf = _ref4$stopIf === void 0 ? function () {
               return false;
             } : _ref4$stopIf;
 
@@ -1976,15 +1968,20 @@ var withInterval = /*#__PURE__*/function () {
           case 13:
             return _context3.abrupt("return", new Promise(function (res, rej) {
               var timesLeft = times - 1;
-              setTimeout(function () {
+              var newId = setTimeout(function () {
                 return withInterval({
+                  timeouts: timeouts,
                   delay: delay,
                   interval: interval,
                   callback: callback,
                   times: timesLeft,
                   stopIf: stopIf
-                }).then(res)["catch"](rej);
+                }).then(function (output) {
+                  timeouts.splice(timeouts.indexOf(newId), 1);
+                  res(output);
+                })["catch"](rej);
               }, interval);
+              timeouts.push(newId);
             }));
 
           case 14:
@@ -1999,20 +1996,45 @@ var withInterval = /*#__PURE__*/function () {
     return _ref5.apply(this, arguments);
   };
 }();
+/**
+ * @summary debounces a function
+ * @param {(...args) => any} callback
+ * @param {{ period ?: number, immediate ?: boolean }} [opts]
+ */
+
 
 exports.withInterval = withInterval;
 
-var schedule = function schedule(_ref6) {
-  var _ref6$delay = _ref6.delay,
-      delay = _ref6$delay === void 0 ? 4 : _ref6$delay,
-      callback = _ref6.callback,
-      _ref6$params = _ref6.params,
-      params = _ref6$params === void 0 ? [] : _ref6$params;
-  var validDelay = delay < 4 ? 4 : delay;
-  setTimeout.apply(void 0, [function () {
-    callback.apply(void 0, arguments);
-  }, validDelay].concat(_toConsumableArray(params)));
+var debounce = function debounce(callback) {
+  var _ref6 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref6$period = _ref6.period,
+      period = _ref6$period === void 0 ? 50 : _ref6$period,
+      _ref6$immediate = _ref6.immediate,
+      immediate = _ref6$immediate === void 0 ? false : _ref6$immediate;
+
+  var timeout = null;
+  return function () {
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    if (timeout === null && immediate) {
+      callback.apply(void 0, params);
+    }
+
+    if (timeout !== null) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+
+    timeout = setTimeout(function () {
+      immediate || callback.apply(void 0, params);
+      timeout = null;
+    }, period);
+  };
 };
+
+exports.debounce = debounce;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
