@@ -2040,6 +2040,135 @@ exports.debounce = debounce;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.totalBackoff = exports.backoffAsync = exports.backoffSync = void 0;
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+var backoffSync = function backoffSync(callback, _ref) {
+  var comparator = _ref.comparator,
+      scheduler = _ref.scheduler,
+      _ref$retries = _ref.retries,
+      retries = _ref$retries === void 0 ? 3 : _ref$retries,
+      _ref$threshold = _ref.threshold,
+      threshold = _ref$threshold === void 0 ? 50 : _ref$threshold,
+      _ref$thisObj = _ref.thisObj,
+      thisObj = _ref$thisObj === void 0 ? null : _ref$thisObj;
+  return function () {
+    var exponent = 0;
+
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    do {
+      var response = callback.apply(thisObj, params);
+
+      if (comparator(response) === true) {
+        return response;
+      }
+
+      retries -= 1;
+      scheduler(Math.pow(2, exponent) * threshold);
+      exponent += 1;
+    } while (retries);
+  };
+};
+/**
+ *
+ * @param {function} callback
+ * @param {{
+ *  comparator : (res: any) => boolean,
+ *  scheduler : (t: number) => Promise<void>,
+ *  retries ?: number,
+ *  threshold ?: number,
+ *  thisObj ?: any
+ * }} options
+ */
+
+
+exports.backoffSync = backoffSync;
+
+var backoffAsync = function backoffAsync(callback, _ref2) {
+  var comparator = _ref2.comparator,
+      scheduler = _ref2.scheduler,
+      _ref2$retries = _ref2.retries,
+      retries = _ref2$retries === void 0 ? 3 : _ref2$retries,
+      _ref2$threshold = _ref2.threshold,
+      threshold = _ref2$threshold === void 0 ? 50 : _ref2$threshold,
+      _ref2$thisObj = _ref2.thisObj,
+      thisObj = _ref2$thisObj === void 0 ? null : _ref2$thisObj;
+  return /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    var exp,
+        _len2,
+        params,
+        _key2,
+        res,
+        _args = arguments;
+
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            exp = 0;
+
+            for (_len2 = _args.length, params = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+              params[_key2] = _args[_key2];
+            }
+
+          case 2:
+            _context.next = 4;
+            return callback.apply(thisObj, params);
+
+          case 4:
+            res = _context.sent;
+
+            if (!(comparator(res) === true)) {
+              _context.next = 7;
+              break;
+            }
+
+            return _context.abrupt("return", res);
+
+          case 7:
+            retries -= 1;
+            _context.next = 10;
+            return scheduler(Math.pow(2, exp) * threshold);
+
+          case 10:
+            exp += 1;
+
+          case 11:
+            if (retries) {
+              _context.next = 2;
+              break;
+            }
+
+          case 12:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+};
+
+exports.backoffAsync = backoffAsync;
+
+var totalBackoff = function totalBackoff(threshold, calls) {
+  var start = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+  return new Array(calls).fill(threshold).reduce(function (a, c, i) {
+    return a + Math.pow(2, i + start) * c;
+  }, 0);
+};
+
+exports.totalBackoff = totalBackoff;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.yesterday = exports.toISO8601Timestamp = exports.offset = exports.dateDiff = exports.buildTime = void 0;
 
 /**
