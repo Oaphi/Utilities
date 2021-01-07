@@ -1,24 +1,48 @@
 const backoffSync = (
   callback,
-  { comparator, scheduler, retries = 3, threshold = 50, thisObj = null }
+  {
+    comparator,
+    scheduler,
+    retries = 3,
+    threshold = 50,
+    retryOnError = false,
+    thisObj = null,
+    onBeforeBackoff,
+    onError = console.warn
+  }
 ) => {
   return (...params) => {
-    let exponent = 0;
+    let exp = 0, errRetries = retries + 1;
 
     do {
-      const response = callback.apply(thisObj, params);
 
-      if (comparator(response) === true) {
-        return response;
+      try {
+
+        const response = callback.apply(thisObj, params);
+
+        if (comparator(response) === true) {
+          return response;
+        }
+
+        onBeforeBackoff && onBeforeBackoff(retries, exp, threshold);
+
+        retries -= 1;
+
+        scheduler(2 ** exp * threshold);
+
+        exp += 1;
+
+      } catch (error) {
+        onError(error);
+
+        errRetries -= 1;
+
+        if (!retryOnError || errRetries < 1) {
+          throw error;
+        }
       }
 
-      retries -= 1;
-
-      scheduler(2 ** exponent * threshold);
-
-      exponent += 1;
-
-    } while (retries);
+    } while (retries > 0);
   };
 };
 
@@ -28,6 +52,7 @@ const backoffSync = (
  * @param {{
  *  comparator : (res: any) => boolean,
  *  scheduler : (t: number) => Promise<void>,
+ *  onBeforeBackoff ?: (r: number, exp: number, t: number) => any,
  *  retries ?: number,
  *  threshold ?: number,
  *  thisObj ?: any
@@ -35,7 +60,7 @@ const backoffSync = (
  */
 const backoffAsync = (
   callback,
-  { comparator, scheduler, retries = 3, threshold = 50, thisObj = null }
+  { comparator, scheduler, retries = 3, threshold = 50, thisObj = null, onBeforeBackoff }
 ) => {
   return async (...params) => {
     let exp = 0;
@@ -47,6 +72,8 @@ const backoffAsync = (
       if (comparator(res) === true) {
         return res;
       }
+
+      onBeforeBackoff && onBeforeBackoff(retries, exp, threshold);
 
       retries -= 1;
 

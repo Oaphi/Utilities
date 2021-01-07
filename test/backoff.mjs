@@ -1,6 +1,6 @@
 import chai from "chai";
 import sinon from "sinon";
-import { backoffAsync, totalBackoff } from "../src/backoff.mjs";
+import { backoffAsync, backoffSync, totalBackoff } from "../src/backoff.mjs";
 const { expect } = chai;
 
 describe('totalBackoff', function () {
@@ -17,6 +17,33 @@ describe('totalBackoff', function () {
         const total = totalBackoff(100, 5, 3);
 
         expect(total).to.eq(24800);
+    });
+
+});
+
+describe('backoffSync', function () {
+
+    it('should retry backoff if retryOnError specified', function () {
+        const testErrMsg = "just throw it";
+
+        const func = sinon.stub().throwsException(new Error(testErrMsg));
+
+        const errHandler = sinon.fake();
+
+        try {
+            const backoffable = backoffSync(func, {
+                comparator: () => true,
+                retryOnError: true,
+                retries: 1,
+                onError: errHandler
+            });
+
+            backoffable();
+        } catch (error) {
+            expect(errHandler.calledTwice).to.be.true;
+            expect(func.calledTwice).to.be.true;
+            expect(errHandler.args[0][0]).to.be.an.instanceof(Error).and.property("message", testErrMsg);
+        }
     });
 
 });
@@ -52,6 +79,21 @@ describe('backoffAsync', function () {
         await backoffable();
 
         expect(obj.count).to.eq(1);
+    });
+
+    it('should fire backoff hook before each retry', async function () {
+
+        const cbk = sinon.stub().resolves(false);
+        const hook = sinon.fake();
+
+        const backoffable = backoffAsync(cbk, {
+            comparator: () => false,
+            scheduler: sinon.stub().resolves(),
+            onBeforeBackoff: hook
+        });
+
+        await backoffable();
+
     });
 
     it('should return immediately on success', async function () {
@@ -104,8 +146,5 @@ describe('backoffAsync', function () {
         expect(scheduler.calledWith(config.threshold)).to.be.true;
         expect(scheduler.callCount).to.equal(calls);
         expect(clock.now).to.equal(wait * calls + totalBackoff(config.threshold, calls));
-
-
     });
-
 });
