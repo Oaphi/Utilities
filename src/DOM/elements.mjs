@@ -3,16 +3,19 @@
  * @property {HTMLInputElement} element
  * @property {string} [link]
  * @property {string} [target]
- * @property {("bold"|"italic"|"link"|"strike"|"underline")} type
- * 
+ * @property {("bold"|"italic"|"link"|"strike"|"underline"|"highlight")} type
+ * @property {string} [color]
+ *
  * @param {EmphasisConfig}
  * @returns {HTMLInputElement}
  */
-const emphasizeSelectedText = ({ 
-    element, 
-    type = "italic", 
-    target = "_self", 
-    link 
+const emphasizeSelectedText = ({
+    element,
+    color = "#000000",
+    padding = 4,
+    type = "italic",
+    target = "_self",
+    link
 }) => {
 
     const emphasis = new Map([
@@ -20,34 +23,37 @@ const emphasizeSelectedText = ({
         ["bold", "strong"],
         ["link", "a"],
         ["underline", "u"],
-        ["strike", "s"]
+        ["strike", "s"],
+        ["highlight", "span"]
     ]);
 
     const tag = emphasis.get(type);
 
-    if (!tag) {
+    if (!tag) return element;
+
+    const { selectionStart, selectionEnd, value } = element;
+    const selected = value.slice(selectionStart, selectionEnd);
+
+    if (type === "highlight") {
+        element.value = value.replace(selected, `<${tag} style="background-color: ${color}; padding: ${padding}px;">${selected}</${tag}>`);
         return element;
     }
 
     const linkAttrs = type === "link" ? ` target="${target}" href="${link}"` : "";
 
-    const { selectionStart, selectionEnd, value } = element;
-
-    const selected = value.slice(selectionStart, selectionEnd);
-
     element.value = value.replace(selected, `<${tag}${linkAttrs}>${selected}</${tag}>`);
-    
+
     return element;
 };
 
 /**
  * @description traverses children left to right, calling comparator on each one
- * until it evaluates to true, then calls the callback with first element passing 
+ * until it evaluates to true, then calls the callback with first element passing
  * the condition or with root itself if none
- * @param {HTMLElement} root 
+ * @param {HTMLElement} root
  * @param {number} [offset]
- * @param {function(HTMLElement): boolean} comparator 
- * @param {function(HTMLElement)} [callback] 
+ * @param {function(HTMLElement): boolean} comparator
+ * @param {function(HTMLElement)} [callback]
  * @param {function(HTMLElement)} [fallback]
  * @param {boolean} [strict]
  */
@@ -90,7 +96,7 @@ const elementsRightUntil = (root, offset, comparator, callback, fallback, strict
 
     const use = matchedOnce ? callback : fallback;
     return use ? use(current, index) : current;
-}
+};
 
 /**
  * @summary inverse of elementsRightUntil
@@ -144,7 +150,7 @@ const elementsLeftUntil = (root, offset, comparator, callback, fallback, strict 
 
     const use = matchedOnce ? callback : fallback;
     return use ? use(current, index) : current;
-}
+};
 
 /**
  * @summary checks if some tokens are contained
@@ -175,3 +181,4 @@ export {
     listContainsSome,
     removeLastChild
 };
+
