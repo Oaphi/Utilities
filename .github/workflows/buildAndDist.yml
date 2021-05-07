@@ -5,43 +5,43 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install @oaphi/distributor
-      run: |
-        npm i chalk@^4.0.0 lodash@^4.17.15 yargs@^15.3.1
-        echo //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }} > .npmrc
-        npm i @oaphi/distributor -D --registry="https://npm.pkg.github.com"
-        unlink .npmrc
+      - name: Install @oaphi/distributor
+        run: |
+          npm i chalk@^4.0.0 lodash@^4.17.15 yargs@^15.3.1
+          echo //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }} > .npmrc
+          npm i @oaphi/distributor -D --registry="https://npm.pkg.github.com"
+          unlink .npmrc
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm run test-ci
-  
-    - name: Creating dist file
-      run: npm run dist
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm run test-ci
 
-    - name: Configure git for push
-      run: |
-        git config --local user.email dist@repo.org
-        git config --local user.name "Distribute Action"
+      - name: Creating dist file
+        if: ${{ github.event_name == "push" }}
+        run: npm run dist
 
-        [[ -n $(git status -s) ]] && git add *dist* && git commit -m "GitHub Action: distribute"
-        
-        git push --repo="https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
+      - name: Configure git for push
+        if: ${{ github.event_name == "push" }}
+        run: |
+          git config --local user.email dist@repo.org
+          git config --local user.name "Distribute Action"
 
+          [[ -n $(git status -s) ]] && git add *dist* && git commit -m "GitHub Action: distribute"
+
+          git push --repo="https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
