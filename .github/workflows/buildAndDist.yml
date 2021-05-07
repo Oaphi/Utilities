@@ -33,11 +33,11 @@ jobs:
       - run: npm run test-ci
 
       - name: Creating dist file
-        if: ${{ github.event_name == "push" }}
+        if: ${{ github.event_name == 'push' }}
         run: npm run dist
 
       - name: Configure git for push
-        if: ${{ github.event_name == "push" }}
+        if: ${{ github.event_name == 'push' }}
         run: |
           git config --local user.email dist@repo.org
           git config --local user.name "Distribute Action"

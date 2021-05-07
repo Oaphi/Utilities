@@ -134,7 +134,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   return AsyncAppendQueue;
 });
 "use strict";
-"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -146,41 +145,48 @@ exports.removeLastChild = exports.listContainsSome = exports.elementsLeftUntil =
  * @property {HTMLInputElement} element
  * @property {string} [link]
  * @property {string} [target]
- * @property {("bold"|"italic"|"link"|"strike"|"underline")} type
- * 
+ * @property {("bold"|"italic"|"link"|"strike"|"underline"|"highlight")} type
+ * @property {string} [color]
+ *
  * @param {EmphasisConfig}
  * @returns {HTMLInputElement}
  */
 var emphasizeSelectedText = function emphasizeSelectedText(_ref) {
   var element = _ref.element,
+      _ref$color = _ref.color,
+      color = _ref$color === void 0 ? "#000000" : _ref$color,
+      _ref$padding = _ref.padding,
+      padding = _ref$padding === void 0 ? 4 : _ref$padding,
       _ref$type = _ref.type,
       type = _ref$type === void 0 ? "italic" : _ref$type,
       _ref$target = _ref.target,
       target = _ref$target === void 0 ? "_self" : _ref$target,
       link = _ref.link;
-  var emphasis = new Map([["italic", "em"], ["bold", "strong"], ["link", "a"], ["underline", "u"], ["strike", "s"]]);
+  var emphasis = new Map([["italic", "em"], ["bold", "strong"], ["link", "a"], ["underline", "u"], ["strike", "s"], ["highlight", "span"]]);
   var tag = emphasis.get(type);
-
-  if (!tag) {
-    return element;
-  }
-
-  var linkAttrs = type === "link" ? " target=\"".concat(target, "\" href=\"").concat(link, "\"") : "";
+  if (!tag) return element;
   var selectionStart = element.selectionStart,
       selectionEnd = element.selectionEnd,
       value = element.value;
   var selected = value.slice(selectionStart, selectionEnd);
+
+  if (type === "highlight") {
+    element.value = value.replace(selected, "<".concat(tag, " style=\"background-color: ").concat(color, "; padding: ").concat(padding, "px;\">").concat(selected, "</").concat(tag, ">"));
+    return element;
+  }
+
+  var linkAttrs = type === "link" ? " target=\"".concat(target, "\" href=\"").concat(link, "\"") : "";
   element.value = value.replace(selected, "<".concat(tag).concat(linkAttrs, ">").concat(selected, "</").concat(tag, ">"));
   return element;
 };
 /**
  * @description traverses children left to right, calling comparator on each one
- * until it evaluates to true, then calls the callback with first element passing 
+ * until it evaluates to true, then calls the callback with first element passing
  * the condition or with root itself if none
- * @param {HTMLElement} root 
+ * @param {HTMLElement} root
  * @param {number} [offset]
- * @param {function(HTMLElement): boolean} comparator 
- * @param {function(HTMLElement)} [callback] 
+ * @param {function(HTMLElement): boolean} comparator
+ * @param {function(HTMLElement)} [callback]
  * @param {function(HTMLElement)} [fallback]
  * @param {boolean} [strict]
  */
@@ -2183,6 +2189,31 @@ var totalBackoff = function totalBackoff(threshold, calls) {
 };
 
 exports.totalBackoff = totalBackoff;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.cache = void 0;
+
+var cache = function cache(callback) {
+  var cache = Object.create(null);
+  return function (thisObj) {
+    var name = callback.name;
+
+    if (name in cache) {
+      return cache[name];
+    }
+
+    for (var _len = arguments.length, params = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      params[_key - 1] = arguments[_key];
+    }
+
+    return callback.apply(thisObj, params);
+  };
+};
+
+exports.cache = cache;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
