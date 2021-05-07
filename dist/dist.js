@@ -2053,26 +2053,42 @@ var backoffSync = function backoffSync(callback, _ref) {
       retries = _ref$retries === void 0 ? 3 : _ref$retries,
       _ref$threshold = _ref.threshold,
       threshold = _ref$threshold === void 0 ? 50 : _ref$threshold,
+      _ref$retryOnError = _ref.retryOnError,
+      retryOnError = _ref$retryOnError === void 0 ? false : _ref$retryOnError,
       _ref$thisObj = _ref.thisObj,
-      thisObj = _ref$thisObj === void 0 ? null : _ref$thisObj;
+      thisObj = _ref$thisObj === void 0 ? null : _ref$thisObj,
+      onBeforeBackoff = _ref.onBeforeBackoff,
+      _ref$onError = _ref.onError,
+      onError = _ref$onError === void 0 ? console.warn : _ref$onError;
   return function () {
-    var exponent = 0;
+    var exp = 0,
+        errRetries = retries + 1;
 
     for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
       params[_key] = arguments[_key];
     }
 
     do {
-      var response = callback.apply(thisObj, params);
+      try {
+        var response = callback.apply(thisObj, params);
 
-      if (comparator(response) === true) {
-        return response;
+        if (comparator(response) === true) {
+          return response;
+        }
+
+        onBeforeBackoff && onBeforeBackoff(retries, exp, threshold);
+        retries -= 1;
+        scheduler(Math.pow(2, exp) * threshold);
+        exp += 1;
+      } catch (error) {
+        onError(error);
+        errRetries -= 1;
+
+        if (!retryOnError || errRetries < 1) {
+          throw error;
+        }
       }
-
-      retries -= 1;
-      scheduler(Math.pow(2, exponent) * threshold);
-      exponent += 1;
-    } while (retries);
+    } while (retries > 0);
   };
 };
 /**
@@ -2081,6 +2097,7 @@ var backoffSync = function backoffSync(callback, _ref) {
  * @param {{
  *  comparator : (res: any) => boolean,
  *  scheduler : (t: number) => Promise<void>,
+ *  onBeforeBackoff ?: (r: number, exp: number, t: number) => any,
  *  retries ?: number,
  *  threshold ?: number,
  *  thisObj ?: any
@@ -2098,7 +2115,8 @@ var backoffAsync = function backoffAsync(callback, _ref2) {
       _ref2$threshold = _ref2.threshold,
       threshold = _ref2$threshold === void 0 ? 50 : _ref2$threshold,
       _ref2$thisObj = _ref2.thisObj,
-      thisObj = _ref2$thisObj === void 0 ? null : _ref2$thisObj;
+      thisObj = _ref2$thisObj === void 0 ? null : _ref2$thisObj,
+      onBeforeBackoff = _ref2.onBeforeBackoff;
   return /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
     var exp,
         _len2,
@@ -2132,20 +2150,21 @@ var backoffAsync = function backoffAsync(callback, _ref2) {
             return _context.abrupt("return", res);
 
           case 7:
+            onBeforeBackoff && onBeforeBackoff(retries, exp, threshold);
             retries -= 1;
-            _context.next = 10;
+            _context.next = 11;
             return scheduler(Math.pow(2, exp) * threshold);
 
-          case 10:
+          case 11:
             exp += 1;
 
-          case 11:
+          case 12:
             if (retries) {
               _context.next = 2;
               break;
             }
 
-          case 12:
+          case 13:
           case "end":
             return _context.stop();
         }
